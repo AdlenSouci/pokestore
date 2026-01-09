@@ -1,0 +1,53 @@
+/* src/pages/Home/HomePage.css */
+
+/* Import de la police Pixel */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+/* Classe utilitaire pour la police */
+.pixel-font {
+  font-family: 'Press Start 2P', cursive;
+  line-height: 1.5;
+}
+
+/* --- ANIMATIONS --- */
+
+/* Rebond lent pour le logo */
+@keyframes bounce-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+.animate-bounce-slow {
+  animation: bounce-slow 3s ease-in-out infinite;
+}
+
+/* Rotation lente pour la Pokéball */
+@keyframes spin-slow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+
+/* Scintillement des étoiles */
+@keyframes twinkle {
+  0% { opacity: 0.2; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+  100% { opacity: 0.2; transform: scale(0.8); }
+}
+.star-twinkle {
+  animation: twinkle infinite ease-in-out;
+}
+
+/* --- EFFETS DE TEXTE POKÉMON --- */
+
+/* Contour sombre épais pour le titre */
+.text-stroke-title {
+  -webkit-text-stroke: 2px #2d3561;
+  text-shadow: 4px 4px 0px #2d3561, 8px 8px 0px rgba(0,0,0,0.3);
+}
+
+/* Contour plus fin pour les sous-titres */
+.text-stroke-subtitle {
+  text-shadow: 2px 2px 0px #2d3561;
+}

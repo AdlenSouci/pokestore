@@ -1,0 +1,30 @@
+/* src/index.css */
+
+/* 1. On charge la police Google Font ici pour tout le site */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+/* 2. On charge Tailwind (OBLIGATOIRE) */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 3. Styles globaux de base */
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: #2d3561; /* La couleur de fond bleu nuit */
+  color: white;
+}
+
+/* 4. On rend la classe pixel-font disponible partout */
+.pixel-font {
+  font-family: 'Press Start 2P', cursive;
+}

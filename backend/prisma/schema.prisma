@@ -1,0 +1,101 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+ 
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  googleId  String?  @unique
+  createdAt DateTime @default(now())
+
+  carts     Cart[]
+  favorites Favorite[]
+  orders    Order[]
+}
+
+model Cart {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  status    String   // ACTIVE | CONVERTED | ABANDONED
+  updatedAt DateTime @updatedAt
+
+  user  User       @relation(fields: [userId], references: [id])
+  items CartItem[]
+}
+
+model CartItem {
+  id       Int @id @default(autoincrement())
+  cartId   Int
+  cardId   Int
+  quantity Int @default(1)
+
+  cart Cart         @relation(fields: [cartId], references: [id])
+  card PokemonCard @relation(fields: [cardId], references: [id])
+
+  @@unique([cartId, cardId])
+}
+
+model PokemonCard {
+  id        Int      @id @default(autoincrement())
+  pokemonId String   @unique
+  name      String
+  type      String
+  rarity    String
+  imageUrl  String
+  price     Int
+  favorites  Favorite[]
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+}
+
+model Favorite {
+  id     Int @id @default(autoincrement())
+  userId Int
+  cardId Int
+
+  user User        @relation(fields: [userId], references: [id])
+  card PokemonCard @relation(fields: [cardId], references: [id])
+
+  @@unique([userId, cardId])
+}
+
+model Order {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  total     Float
+  status    String   // PENDING | PAID | CANCELLED
+  createdAt DateTime @default(now())
+
+  user  User         @relation(fields: [userId], references: [id])
+  items OrderItem[]
+}
+
+model OrderItem {
+  id       Int @id @default(autoincrement())
+  orderId  Int
+  cardId   Int
+  quantity Int
+  price    Float
+
+  order Order        @relation(fields: [orderId], references: [id])
+  card  PokemonCard @relation(fields: [cardId], references: [id])
+}
+
+
+
+
+
