@@ -10,6 +10,8 @@ interface HomePageProps {
   onSignupClick: () => void;
   user: { name: string; email: string } | null;
   onLogout: () => void;
+  onNavigateToHome: () => void;
+  onNavigateToShop: () => void;
 }
 
 export function HomePage({ 
@@ -19,7 +21,9 @@ export function HomePage({
   onLoginClick,
   onSignupClick,
   user,
-  onLogout
+  onLogout,
+  onNavigateToHome,
+  onNavigateToShop
 }: HomePageProps) {
   const [showPressStart, setShowPressStart] = useState(true);
 
@@ -38,6 +42,8 @@ export function HomePage({
       onSignupClick={onSignupClick}
       user={user}
       onLogout={onLogout}
+      onNavigateToHome={onNavigateToHome}
+      onNavigateToShop={onNavigateToShop}
     >
       <div className="min-h-[calc(100vh-64px)] flex items-center justify-center relative overflow-hidden">
         
@@ -97,14 +103,7 @@ export function HomePage({
             </div>
           </div>
 
-          <div className="mt-16 flex justify-center gap-8 text-white opacity-80">
-            <div className="px-4 py-2 bg-[#2d3561] rounded-lg border-2 border-[#7ec8a3]">
-              <p className="text-xs pixel-font">VERSION GBA</p>
-            </div>
-            <div className="px-4 py-2 bg-[#2d3561] rounded-lg border-2 border-[#7ec8a3]">
-              <p className="text-xs pixel-font">© 2025</p>
-            </div>
-          </div>
+          
         </div>
       </div>
     </Layout>

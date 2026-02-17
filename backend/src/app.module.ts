@@ -1,10 +1,14 @@
 import { Module } from '@nestjs/common';
-import { PrismaModule } from '../prisma/prisma.module';
+import { UsersModule } from './users/users.module';
 import { CardsModule } from './cards/cards.module';
-
-
+// 👇 Import propre depuis le module d'infrastructure
+import { PrismaModule } from './database/prisma.module'; 
 
 @Module({
-  imports: [PrismaModule, CardsModule],
+  imports: [
+    PrismaModule, 
+    UsersModule,
+    CardsModule
+  ],
 })
 export class AppModule {}

@@ -7,6 +7,8 @@ interface NavbarProps {
   onSignupClick: () => void;
   user: { name: string; email: string } | null;
   onLogout: () => void;
+  onNavigateToHome: () => void;
+  onNavigateToShop: () => void;
 }
 
 export function Navbar({
@@ -16,18 +18,27 @@ export function Navbar({
   onSignupClick,
   user,
   onLogout,
+  onNavigateToHome,
+  onNavigateToShop
 }: NavbarProps) {
   return (
     <nav className="bg-gradient-to-r from-[#5a4f99] via-[#8b7ec8] to-[#2d3561] text-white shadow-2xl sticky top-0 z-50 border-b-4 border-[#2d3561]">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-8">
-            <h1 className="text-xl md:text-2xl pixel-font tracking-tighter cursor-pointer hover:scale-105 transition-transform">
+            <h1 
+              onClick={onNavigateToHome}
+              className="text-xl md:text-2xl pixel-font tracking-tighter cursor-pointer hover:scale-105 transition-transform"
+            >
               ⚡ PokéCard
             </h1>
             <div className="hidden md:flex gap-6 font-bold text-sm">
-              <a href="#" className="hover:text-[#7ec8a3] transition-colors uppercase">Boutique</a>
-              <a href="#" className="hover:text-[#7ec8a3] transition-colors uppercase">Collections</a>
+              <button onClick={onNavigateToShop} className="hover:text-[#7ec8a3] transition-colors uppercase">
+                Boutique
+              </button>
+              <button className="hover:text-[#7ec8a3] transition-colors uppercase cursor-not-allowed opacity-50">
+                Collections
+              </button>
             </div>
           </div>
 
