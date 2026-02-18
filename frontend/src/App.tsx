@@ -4,8 +4,12 @@ import { Shop } from './Pages/Shop';
 import { Layout } from './components/Layout';
 import { CardDetailModal } from './components/CardDetailModal';
 import { AuthModal } from './components/AuthModal';
+import { ProfilePage } from './components/ProfilePage';
+import { CartPage } from './components/CartPage';
+import { OrdersPage } from './components/OrdersPage';
 import { type Product } from './types/product';
-import { supabase } from './lib/supabase';
+import { authService } from './services/auth.service';
+import { cartService } from './services/cart.service';
 
 type Page = 'home' | 'shop';
 
@@ -15,72 +19,165 @@ function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [authModalType, setAuthModalType] = useState<'login' | 'signup' | null>(null);
-
-  // Synchronisation silencieuse (utile pour Google Login ou reload)
-  const syncUserWithBackend = async (email: string, name: string) => {
-    try {
-      await fetch('http://localhost:3000/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, name }),
-      });
-      // Pas de console.log ni d'alert, on reste discret
-    } catch (err) {
-      console.error("Erreur sync backend (silencieux):", err);
-    }
-  };
+  const [googleError, setGoogleError] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        const name = session.user.user_metadata.full_name || 'Dresseur';
-        const email = session.user.email || '';
-        setUser({ name, email });
-        syncUserWithBackend(email, name);
-      }
-    });
+    const initAuth = async () => {
+      // Vérifier si on revient du callback Google OAuth
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
+      const error = urlParams.get('error');
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        const name = session.user.user_metadata.full_name || 'Dresseur';
-        const email = session.user.email || '';
-        setUser({ name, email });
-        // On synchronise aussi ici pour être sûr (Upsert gère les doublons)
-        syncUserWithBackend(email, name);
-      } else {
-        setUser(null);
+      if (error) {
+        setGoogleError(decodeURIComponent(error));
+        setAuthModalType('login');
+        // Nettoyer l'URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } else if (token) {
+        try {
+          console.log('🔐 Google callback - Token reçu:', token.substring(0, 20) + '...');
+          const user = await authService.handleGoogleCallback(token);
+          console.log('👤 Utilisateur récupéré:', user);
+          console.log('💾 Token dans localStorage après callback:', localStorage.getItem('token') ? 'OUI ✅' : 'NON ❌');
+          // Mettre à jour immédiatement l'état utilisateur
+          setUser({ name: user.name, email: user.email });
+          // Nettoyer l'URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+        } catch (err) {
+          console.error('Erreur lors de la connexion Google:', err);
+        }
+        return; // Ne pas charger depuis localStorage si on vient de Google
       }
-    });
 
-    return () => subscription.unsubscribe();
+      // Charger l'utilisateur depuis le localStorage
+      const currentUser = authService.getUser();
+      if (currentUser) {
+        setUser({ name: currentUser.name, email: currentUser.email });
+      }
+    };
+
+    initAuth();
   }, []);
 
-  const handleLogout = async () => { await supabase.auth.signOut(); setUser(null); setCurrentPage('home'); };
+  const handleLogout = () => {
+    authService.logout();
+    setUser(null);
+    setCurrentPage('home');
+  };
   const handleLoginClick = () => setAuthModalType('login');
   const handleSignupClick = () => setAuthModalType('signup');
-  const handleCloseAuthModal = () => setAuthModalType(null);
-  const handleCartClick = () => setCartCount(prev => prev + 1);
+  const handleCloseAuthModal = () => {
+    setAuthModalType(null);
+    setGoogleError(null);
+  };
+  const handleAuthSuccess = () => {
+    const currentUser = authService.getUser();
+    if (currentUser) {
+      setUser({ name: currentUser.name, email: currentUser.email });
+    }
+    setAuthModalType(null);
+  };
+  const [showProfile, setShowProfile] = useState(false);
+  const [showCart, setShowCart] = useState(false);
+  const [showOrders, setShowOrders] = useState(false);
+  const handleProfileClick = () => setShowProfile(true);
+  const handleCloseProfile = () => setShowProfile(false);
+  const handleCartClick = () => setShowCart(true);
+  const handleCloseCart = () => setShowCart(false);
+  const handleOrdersClick = () => setShowOrders(true);
+  const handleCloseOrders = () => setShowOrders(false);
+  const handleProfileUpdate = () => {
+    const currentUser = authService.getUser();
+    if (currentUser) {
+      setUser({ name: currentUser.name, email: currentUser.email });
+    }
+  };
   const handleNavigateToHome = () => setCurrentPage('home');
   const handleNavigateToShop = () => setCurrentPage('shop');
-  const handleAddToCart = (product: Product) => { setCartCount(prev => prev + 1); };
+  const handleAddToCart = async (product: Product) => {
+    console.log('🛒 Tentative d\'ajout au panier:', product.name);
+    console.log('👤 Utilisateur connecté:', user);
+    console.log('🔑 Token dans localStorage:', localStorage.getItem('access_token') ? 'OUI' : 'NON');
+
+    // Vérifier si l'utilisateur est connecté
+    if (!user) {
+      console.log('❌ Utilisateur non connecté, ouverture du modal');
+      setAuthModalType('login');
+      return;
+    }
+
+    try {
+      // Convertir l'ID en nombre si c'est une chaîne
+      const cardId = typeof product.id === 'string' ? parseInt(product.id) : product.id;
+      console.log('📦 Ajout de la carte ID:', cardId);
+
+      await cartService.addToCart(cardId, 1);
+      console.log('✅ Article ajouté au panier');
+
+      await loadCartCount();
+      console.log('✅ Compteur mis à jour');
+    } catch (err: any) {
+      console.error('❌ Erreur lors de l\'ajout au panier:', err);
+      console.error('Message d\'erreur:', err.message);
+
+      // Si erreur d'authentification, demander de se connecter
+      if (err.message.includes('401') || err.message.includes('Unauthorized') || err.message.includes('panier')) {
+        console.log('🔐 Erreur d\'authentification détectée');
+        setAuthModalType('login');
+      } else {
+        // Afficher l'erreur à l'utilisateur
+        alert(`Erreur: ${err.message}`);
+      }
+    }
+  };
+  const loadCartCount = async () => {
+    try {
+      const cart = await cartService.getCart();
+      setCartCount(cart.items.length);
+    } catch (err) {
+      console.error('Erreur lors du chargement du panier:', err);
+    }
+  };
+  const handleCheckoutSuccess = () => {
+    setShowCart(false);
+    setShowOrders(true);
+    loadCartCount();
+  };
   const handleViewCard = (product: Product) => { setSelectedProduct(product); };
   const handleCloseModal = () => { setSelectedProduct(null); };
 
+  // Charger le nombre d'articles au démarrage si connecté
+  useEffect(() => {
+    if (user) {
+      loadCartCount();
+    }
+  }, [user]);
+
   return (
     <>
-      <AuthModal type={authModalType} onClose={handleCloseAuthModal} onSuccess={() => setAuthModalType(null)} />
+      <AuthModal
+        type={authModalType}
+        onClose={handleCloseAuthModal}
+        onSuccess={handleAuthSuccess}
+        googleError={googleError}
+      />
+      {showProfile && <ProfilePage onClose={handleCloseProfile} onUpdate={handleProfileUpdate} />}
+      {showCart && <CartPage onClose={handleCloseCart} onCheckout={handleCheckoutSuccess} />}
+      {showOrders && <OrdersPage onClose={handleCloseOrders} />}
 
       {currentPage === 'home' ? (
-        <HomePage 
+        <HomePage
           onStartGame={handleNavigateToShop} cartItemsCount={cartCount} onCartClick={handleCartClick}
           onLoginClick={handleLoginClick} onSignupClick={handleSignupClick} user={user}
           onLogout={handleLogout} onNavigateToHome={handleNavigateToHome} onNavigateToShop={handleNavigateToShop}
+          onProfileClick={handleProfileClick} onOrdersClick={handleOrdersClick}
         />
       ) : (
         <Layout
           cartItemsCount={cartCount} onCartClick={handleCartClick} onLoginClick={handleLoginClick}
           onSignupClick={handleSignupClick} user={user} onLogout={handleLogout}
           onNavigateToHome={handleNavigateToHome} onNavigateToShop={handleNavigateToShop}
+          onProfileClick={handleProfileClick} onOrdersClick={handleOrdersClick}
         >
           <Shop onAddToCart={handleAddToCart} onViewCard={handleViewCard} />
         </Layout>

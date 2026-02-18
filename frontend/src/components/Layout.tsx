@@ -9,6 +9,8 @@ interface LayoutProps {
   onCartClick: () => void;
   onLoginClick: () => void;
   onSignupClick: () => void;
+  onProfileClick?: () => void;
+  onOrdersClick?: () => void;
   user: { name: string; email: string } | null;
   onLogout: () => void;
   onNavigateToHome: () => void;
@@ -21,6 +23,8 @@ export function Layout({
   onCartClick,
   onLoginClick,
   onSignupClick,
+  onProfileClick,
+  onOrdersClick,
   user,
   onLogout,
   onNavigateToHome,
@@ -31,8 +35,10 @@ export function Layout({
       <Navbar
         cartItemsCount={cartItemsCount}
         onCartClick={onCartClick}
+        onOrdersClick={onOrdersClick}
         onLoginClick={onLoginClick}
         onSignupClick={onSignupClick}
+        onProfileClick={onProfileClick}
         user={user}
         onLogout={onLogout}
         onNavigateToHome={onNavigateToHome}

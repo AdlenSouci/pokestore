@@ -1,17 +1,24 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Mail, Lock, User, Loader2 } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { authService } from '../services/auth.service';
 
 interface AuthModalProps {
   type: 'login' | 'signup' | null;
   onClose: () => void;
   onSuccess: () => void;
+  googleError?: string | null;
 }
 
-export function AuthModal({ type, onClose, onSuccess }: AuthModalProps) {
+export function AuthModal({ type, onClose, onSuccess, googleError }: AuthModalProps) {
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (googleError) {
+      setError(googleError);
+    }
+  }, [googleError]);
 
   if (!type) return null;
 
@@ -22,38 +29,12 @@ export function AuthModal({ type, onClose, onSuccess }: AuthModalProps) {
 
     try {
       if (type === 'signup') {
-        // 1. Inscription Supabase
-        const { data, error: authError } = await supabase.auth.signUp({
-          email: formData.email,
-          password: formData.password,
-          options: { data: { full_name: formData.name } },
-        });
-        if (authError) throw authError;
-
-        // 2. Sauvegarde dans ta Base de données (Backend)
-        await fetch('http://localhost:3000/users', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            email: formData.email, 
-            name: formData.name 
-          }),
-        });
-
-        // 3. CONFIRMATION VISUELLE (Je l'ai remise ici)
+        await authService.register(formData.email, formData.password, formData.name);
         alert("✅ Compte créé avec succès ! Bienvenue " + formData.name);
-
-        // 4. On force la connexion visuelle
         onSuccess();
         onClose();
-
       } else {
-        // Connexion normale
-        const { error } = await supabase.auth.signInWithPassword({
-          email: formData.email,
-          password: formData.password,
-        });
-        if (error) throw error;
+        await authService.login(formData.email, formData.password);
         onSuccess();
         onClose();
       }
@@ -64,17 +45,8 @@ export function AuthModal({ type, onClose, onSuccess }: AuthModalProps) {
     }
   };
 
-  // ... (Le reste du code pour Google Login ne change pas) ...
-  const handleGoogleLogin = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: window.location.origin }
-      });
-      if (error) throw error;
-    } catch (err: any) {
-      setError(err.message);
-    }
+  const handleGoogleLogin = () => {
+    authService.loginWithGoogle();
   };
 
   return (
@@ -104,7 +76,7 @@ export function AuthModal({ type, onClose, onSuccess }: AuthModalProps) {
           <button type="submit" disabled={loading} className="w-full py-3 bg-[#2d3561] text-white font-bold rounded-xl hover:bg-[#3d4571] disabled:opacity-50 transition-transform active:scale-95 shadow-lg">
             {loading ? <Loader2 className="animate-spin mx-auto" /> : (type === 'login' ? 'SE CONNECTER' : "S'INSCRIRE")}
           </button>
-           <div className="relative my-4">
+          <div className="relative my-4">
             <div className="absolute inset-0 flex items-center"><div className="w-full border-t-2 border-[#2d3561] opacity-20"></div></div>
             <div className="relative flex justify-center text-xs uppercase"><span className="bg-[#a8b5c8] px-2 text-[#2d3561] font-bold rounded">Ou continuer avec</span></div>
           </div>

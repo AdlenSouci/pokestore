@@ -1,10 +1,12 @@
-import { ShoppingCart, LogOut } from 'lucide-react';
+import { ShoppingCart, LogOut, UserCircle, Package } from 'lucide-react';
 
 interface NavbarProps {
   cartItemsCount: number;
   onCartClick: () => void;
+  onOrdersClick?: () => void;
   onLoginClick: () => void;
   onSignupClick: () => void;
+  onProfileClick?: () => void;
   user: { name: string; email: string } | null;
   onLogout: () => void;
   onNavigateToHome: () => void;
@@ -14,8 +16,10 @@ interface NavbarProps {
 export function Navbar({
   cartItemsCount,
   onCartClick,
+  onOrdersClick,
   onLoginClick,
   onSignupClick,
+  onProfileClick,
   user,
   onLogout,
   onNavigateToHome,
@@ -26,7 +30,7 @@ export function Navbar({
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-8">
-            <h1 
+            <h1
               onClick={onNavigateToHome}
               className="text-xl md:text-2xl pixel-font tracking-tighter cursor-pointer hover:scale-105 transition-transform"
             >
@@ -49,13 +53,23 @@ export function Navbar({
                   <p className="text-[10px] uppercase opacity-80">Dresseur</p>
                   <p className="text-sm font-bold">{user.name}</p>
                 </div>
-                <button onClick={onLogout} className="p-2 hover:bg-[#7b6eb8] rounded-xl transition-all">
+                {onProfileClick && (
+                  <button onClick={onProfileClick} className="p-2 hover:bg-[#7b6eb8] rounded-xl transition-all" title="Mon profil">
+                    <UserCircle className="w-5 h-5" />
+                  </button>
+                )}
+                {onOrdersClick && (
+                  <button onClick={onOrdersClick} className="p-2 hover:bg-[#7b6eb8] rounded-xl transition-all" title="Mes commandes">
+                    <Package className="w-5 h-5" />
+                  </button>
+                )}
+                <button onClick={onLogout} className="p-2 hover:bg-[#7b6eb8] rounded-xl transition-all" title="Déconnexion">
                   <LogOut className="w-5 h-5" />
                 </button>
               </div>
             ) : (
               <div className="flex gap-2">
-                 <button onClick={onLoginClick} className="px-3 py-1 bg-[#2d3561] hover:bg-[#3d4571] rounded-lg border-2 border-[#1d2551] text-xs font-bold uppercase transition-all hover:scale-105">
+                <button onClick={onLoginClick} className="px-3 py-1 bg-[#2d3561] hover:bg-[#3d4571] rounded-lg border-2 border-[#1d2551] text-xs font-bold uppercase transition-all hover:scale-105">
                   Connexion
                 </button>
                 <button onClick={onSignupClick} className="px-3 py-1 bg-[#7ec8a3] text-[#2d3561] rounded-lg border-2 border-[#2d3561] text-xs font-bold uppercase hover:bg-[#6eb893] transition-all hover:scale-105">

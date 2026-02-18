@@ -8,18 +8,22 @@ interface HomePageProps {
   onCartClick: () => void;
   onLoginClick: () => void;
   onSignupClick: () => void;
+  onProfileClick?: () => void;
+  onOrdersClick?: () => void;
   user: { name: string; email: string } | null;
   onLogout: () => void;
   onNavigateToHome: () => void;
   onNavigateToShop: () => void;
 }
 
-export function HomePage({ 
+export function HomePage({
   onStartGame,
   cartItemsCount,
   onCartClick,
   onLoginClick,
   onSignupClick,
+  onProfileClick,
+  onOrdersClick,
   user,
   onLogout,
   onNavigateToHome,
@@ -40,13 +44,15 @@ export function HomePage({
       onCartClick={onCartClick}
       onLoginClick={onLoginClick}
       onSignupClick={onSignupClick}
+      onProfileClick={onProfileClick}
+      onOrdersClick={onOrdersClick}
       user={user}
       onLogout={onLogout}
       onNavigateToHome={onNavigateToHome}
       onNavigateToShop={onNavigateToShop}
     >
       <div className="min-h-[calc(100vh-64px)] flex items-center justify-center relative overflow-hidden">
-        
+
         <div className="absolute inset-0 pointer-events-none">
           {[...Array(50)].map((_, i) => (
             <div
@@ -63,7 +69,7 @@ export function HomePage({
         </div>
 
         <div className="relative z-10 text-center px-4 w-full max-w-4xl mx-auto flex flex-col items-center">
-          
+
           <div className="mb-12 animate-bounce-slow">
             <h1 className="text-5xl md:text-8xl text-[#7ec8a3] mb-4 pixel-font text-stroke-title">
               ⚡ POKÉCARD ⚡
@@ -103,7 +109,7 @@ export function HomePage({
             </div>
           </div>
 
-          
+
         </div>
       </div>
     </Layout>
