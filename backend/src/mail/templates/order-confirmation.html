@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Confirmation de commande — PokéStore</title>
+</head>
+<body style="margin:0;padding:0;background:#0a0a1a;font-family:'Segoe UI',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a1a;padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+
+          <!-- HEADER -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#1a1a3e 0%,#2d2d6e 100%);border-radius:16px 16px 0 0;padding:40px;text-align:center;">
+              <div style="font-size:48px;margin-bottom:12px;">🎴</div>
+              <h1 style="color:#f9d342;margin:0;font-size:32px;font-weight:800;letter-spacing:-0.5px;">PokéStore</h1>
+              <p style="color:#a0a0c0;margin:8px 0 0;font-size:15px;">Ta boutique de cartes virtuelles</p>
+            </td>
+          </tr>
+
+          <!-- BODY -->
+          <tr>
+            <td style="background:#12122a;padding:40px;">
+              <h2 style="color:#ffffff;margin:0 0 8px;font-size:24px;">
+                Commande confirmée ! ✅
+              </h2>
+              <p style="color:#c0c0d8;font-size:16px;line-height:1.7;margin:0 0 24px;">
+                Merci <strong style="color:#f9d342;">{{userName}}</strong> pour ta commande. 
+                Ta commande <strong style="color:#ffffff;">#{{orderId}}</strong> a bien été prise en compte !
+              </p>
+
+              <!-- ORDER SUMMARY -->
+              <h3 style="color:#f9d342;font-size:16px;margin:0 0 12px;text-transform:uppercase;letter-spacing:1px;">
+                Récapitulatif de ta commande
+              </h3>
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#1a1a3e;border-radius:12px;overflow:hidden;">
+                <!-- Table head -->
+                <tr style="background:#2d2d6e;">
+                  <td style="padding:12px 16px;color:#a0a0c0;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Carte</td>
+                  <td style="padding:12px 16px;color:#a0a0c0;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;text-align:center;">Qté</td>
+                  <td style="padding:12px 16px;color:#a0a0c0;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;text-align:right;">Prix</td>
+                </tr>
+                <!-- Items injected dynamically -->
+                {{itemsRows}}
+              </table>
+
+              <!-- TOTAL -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:16px;">
+                <tr>
+                  <td style="text-align:right;">
+                    <span style="color:#a0a0c0;font-size:15px;">Total : </span>
+                    <span style="color:#f9d342;font-size:24px;font-weight:800;">{{total}} €</span>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- CTA -->
+              <table cellpadding="0" cellspacing="0" style="margin:32px 0 0;">
+                <tr>
+                  <td style="background:linear-gradient(135deg,#f9d342,#f0a020);border-radius:10px;padding:14px 32px;text-align:center;">
+                    <a href="http://localhost:5173/orders" style="color:#0a0a1a;font-weight:700;font-size:16px;text-decoration:none;">
+                      📦 Voir mes commandes
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- FOOTER -->
+          <tr>
+            <td style="background:#0d0d22;border-radius:0 0 16px 16px;padding:24px 40px;text-align:center;">
+              <p style="color:#4a4a6a;font-size:13px;margin:0;">
+                © 2025 PokéStore · Commande #{{orderId}}
+              </p>
+              <p style="color:#4a4a6a;font-size:12px;margin:8px 0 0;">
+                Merci de ta confiance, Dresseur ! ⚡
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

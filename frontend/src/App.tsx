@@ -21,17 +21,30 @@ function App() {
   const [authModalType, setAuthModalType] = useState<'login' | 'signup' | null>(null);
   const [googleError, setGoogleError] = useState<string | null>(null);
 
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [paymentSessionId, setPaymentSessionId] = useState<string | null>(null);
+
   useEffect(() => {
     const initAuth = async () => {
-      // Vérifier si on revient du callback Google OAuth
       const urlParams = new URLSearchParams(window.location.search);
       const token = urlParams.get('token');
       const error = urlParams.get('error');
+      const payment = urlParams.get('payment');
+      const sessionId = urlParams.get('session_id');
+
+      // Retour depuis Stripe
+      if (payment === 'success') {
+        setShowOrders(true);
+        setPaymentSuccess(true);
+        setPaymentSessionId(sessionId);
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } else if (payment === 'cancelled') {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
 
       if (error) {
         setGoogleError(decodeURIComponent(error));
         setAuthModalType('login');
-        // Nettoyer l'URL
         window.history.replaceState({}, document.title, window.location.pathname);
       } else if (token) {
         try {
@@ -39,17 +52,14 @@ function App() {
           const user = await authService.handleGoogleCallback(token);
           console.log('👤 Utilisateur récupéré:', user);
           console.log('💾 Token dans localStorage après callback:', localStorage.getItem('token') ? 'OUI ✅' : 'NON ❌');
-          // Mettre à jour immédiatement l'état utilisateur
           setUser({ name: user.name, email: user.email });
-          // Nettoyer l'URL
           window.history.replaceState({}, document.title, window.location.pathname);
         } catch (err) {
           console.error('Erreur lors de la connexion Google:', err);
         }
-        return; // Ne pas charger depuis localStorage si on vient de Google
+        return;
       }
 
-      // Charger l'utilisateur depuis le localStorage
       const currentUser = authService.getUser();
       if (currentUser) {
         setUser({ name: currentUser.name, email: currentUser.email });
@@ -60,7 +70,9 @@ function App() {
   }, []);
 
   const handleLogout = () => {
+    console.log('🚪 LOGOUT appelé - Token avant:', localStorage.getItem('access_token') ? 'OUI' : 'NON');
     authService.logout();
+    console.log('🚪 LOGOUT terminé - Token après:', localStorage.getItem('access_token') ? 'OUI' : 'NON');
     setUser(null);
     setCurrentPage('home');
   };
@@ -82,7 +94,10 @@ function App() {
   const [showOrders, setShowOrders] = useState(false);
   const handleProfileClick = () => setShowProfile(true);
   const handleCloseProfile = () => setShowProfile(false);
-  const handleCartClick = () => setShowCart(true);
+  const handleCartClick = () => {
+    console.log('🛒 Ouverture du panier - Token:', localStorage.getItem('access_token') ? 'OUI ✅' : 'NON ❌');
+    setShowCart(true);
+  };
   const handleCloseCart = () => setShowCart(false);
   const handleOrdersClick = () => setShowOrders(true);
   const handleCloseOrders = () => setShowOrders(false);
@@ -163,7 +178,13 @@ function App() {
       />
       {showProfile && <ProfilePage onClose={handleCloseProfile} onUpdate={handleProfileUpdate} />}
       {showCart && <CartPage onClose={handleCloseCart} onCheckout={handleCheckoutSuccess} />}
-      {showOrders && <OrdersPage onClose={handleCloseOrders} />}
+      {showOrders && (
+        <OrdersPage
+          onClose={handleCloseOrders}
+          paymentSuccess={paymentSuccess}
+          paymentSessionId={paymentSessionId}
+        />
+      )}
 
       {currentPage === 'home' ? (
         <HomePage

@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+import { API_URL } from '../lib/api';
 
 export interface OrderItem {
     id: number;
@@ -46,6 +46,20 @@ class OrderService {
         return response.json();
     }
 
+    async createCheckoutSession(): Promise<{ url: string }> {
+        const response = await fetch(`${API_URL}/orders/checkout-session`, {
+            method: 'POST',
+            headers: this.getAuthHeader(),
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Erreur lors de la création de la session de paiement');
+        }
+
+        return response.json();
+    }
+
     async getOrders(): Promise<Order[]> {
         const response = await fetch(`${API_URL}/orders`, {
             headers: this.getAuthHeader(),
@@ -65,6 +79,24 @@ class OrderService {
 
         if (!response.ok) {
             throw new Error('Erreur lors de la récupération de la commande');
+        }
+
+        return response.json();
+    }
+
+    async confirmPayment(sessionId: string): Promise<Order> {
+        const response = await fetch(`${API_URL}/orders/confirm-payment`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                ...this.getAuthHeader(),
+            },
+            body: JSON.stringify({ sessionId }),
+        });
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            throw new Error(error.message || 'Erreur lors de la confirmation du paiement');
         }
 
         return response.json();

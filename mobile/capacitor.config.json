@@ -1,0 +1,5 @@
+{
+  "appId": "com.pokemon.app",
+  "appName": "PokemonApp",
+  "webDir": "../frontend/dist"
+}

@@ -5,15 +5,18 @@ import { CardsModule } from './cards/cards.module';
 import { AuthModule } from './auth/auth.module';
 import { CartModule } from './cart/cart.module';
 import { OrdersModule } from './orders/orders.module';
-// 👇 Import propre depuis le module d'infrastructure
 import { PrismaModule } from './database/prisma.module';
+import { MailModule } from './mail/mail.module';
+import { StripeModule } from './stripe/stripe.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true, // Rend les variables d'environnement disponibles partout
+      isGlobal: true,
     }),
     PrismaModule,
+    MailModule,
+    StripeModule,
     AuthModule,
     UsersModule,
     CardsModule,
@@ -21,4 +24,4 @@ import { PrismaModule } from './database/prisma.module';
     OrdersModule,
   ],
 })
-export class AppModule { }
+export class AppModule { }

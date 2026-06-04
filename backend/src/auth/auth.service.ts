@@ -4,12 +4,14 @@ import { PrismaService } from '../database/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { RegisterDto, LoginDto } from './dto/auth.dto';
 import { UpdateProfileDto, ChangePasswordDto } from './dto/update-profile.dto';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class AuthService {
     constructor(
         private prisma: PrismaService,
         private jwtService: JwtService,
+        private mailService: MailService,
     ) { }
 
     async register(registerDto: RegisterDto) {
@@ -35,6 +37,9 @@ export class AuthService {
                 name,
             },
         });
+
+        // Envoyer l'email de bienvenue
+        await this.mailService.sendWelcomeEmail(user.email, user.name ?? 'Dresseur');
 
         // Générer le token JWT
         return this.generateToken(user);

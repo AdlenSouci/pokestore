@@ -1,0 +1,64 @@
+# Dependencies (all packages)
+node_modules/
+
+# Build outputs
+dist/
+dist-ssr/
+build/
+out/
+*.tsbuildinfo
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Prisma generated
+backend/generated/
+
+# Android / Capacitor (mobile/)
+mobile/android/.gradle/
+mobile/android/**/build/
+mobile/android/local.properties
+mobile/android/capacitor-cordova-android-plugins/
+mobile/android/app/src/main/assets/public/
+mobile/android/.idea/
+*.apk
+*.aab
+*.dex
+*.class
+
+# Expo (mobile-rn/)
+mobile-rn/.expo/
+mobile-rn/web-build/
+mobile-rn/ios/
+mobile-rn/android/
+
+# Misc
+*.local
+.temp/
+.tmp/
+coverage/
+.nyc_output/

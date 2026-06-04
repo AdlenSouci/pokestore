@@ -1,0 +1,49 @@
+# Grille de Validation : Projet Pokémon App (Ynov B3 DEV)
+
+Ce document liste toutes les fonctionnalités attendues par l'école.
+Coche les cases (`[x]`) au fur et à mesure que nous avançons !
+
+## ✅ Déjà Réalisé (Validé)
+
+- [x] **Concevoir une application web avec un framework moderne**
+  - *Fait : Utilisation de React & Vite.*
+- [x] **Développer des interfaces utilisateurs compatibles avec plusieurs supports**
+  - *Fait : TailwindCSS utilisé pour le responsive.*
+- [x] **Implémenter une architecture backend orientée services**
+  - *Fait : NestJS (Controllers/Services/Modules).*
+- [x] **Gérer les appels vers une base de données relationnelles**
+  - *Fait : Prisma + PostgreSQL.*
+- [x] **Implémenter des mécanismes d'authentification et d'autorisation sécurisés**
+  - *Fait : Auth bcrypt + Google OAuth + Token JWT.*
+- [x] **Concevoir un modèle de données pour gérer les différentes entités**
+  - *Fait : Schéma Prisma avec relations Users, Cards, Carts, Orders, Favorites.*
+- [x] **Écrire des requêtes SQL pour interagir entre les API et la BDD**
+  - *Fait : Via Prisma Client (CRUD complet).*
+- [x] **Versionner son code**
+  - *Fait : Dépôt Git existant.*
+
+---
+
+## 🚀 À Faire (Pour avoir 20/20)
+
+### 1. Sécurité de l'API (Backend)
+- [ ] Restreindre le CORS dans main.ts (uniquement le port 5173 du frontend).
+- [ ] Installer et configurer helmet pour les headers de sécurité HTTP.
+- [ ] Ajouter un @nestjs/throttler (Rate Limiting) pour protéger les routes de login contre le spam.
+
+### 2. Expérience Utilisateur & Feedbacks (Frontend)
+- [ ] Remplacer les alertes basiques JavaScript par des Toasts (ex: react-hot-toast).
+- [ ] Ajouter des états de chargement (loaders/spinners) visuels pendant les appels API (ex: ajout au panier, connexion).
+- [ ] Gérer les messages d'erreur de façon claire dans l'UI (ex: "Mot de passe incorrect" direct sur le modal).
+
+### 3. Accessibilité & Performances (Frontend)
+- [ ] Lancer un audit Lighthouse (Chrome) et corriger les contrastes de couleurs si besoin.
+- [ ] Ajouter des attributs aria-label sur les icônes (ex: panier, profil, fermeture de modal).
+- [ ] Utiliser le lazy-loading pour les images des cartes Pokémon (loading="lazy").
+
+### 4. Documentation & Qualité (Global)
+- [ ] Installer Swagger (@nestjs/swagger) sur le backend pour générer une doc API interactive pour les profs.
+- [ ] Rédiger la suite de ce README.md complet (Installation, lancement de la BDD, scripts).
+
+### 5. Application Mobile (Bonus obligatoire)
+- [ ] Développer l'application "Ma Collection" en Flutter (ou Capacitor) connectée à l'API NestJS existante.

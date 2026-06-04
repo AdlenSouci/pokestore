@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bienvenue sur PokéStore</title>
+</head>
+<body style="margin:0;padding:0;background:#0a0a1a;font-family:'Segoe UI',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a1a;padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+
+          <!-- HEADER -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#1a1a3e 0%,#2d2d6e 100%);border-radius:16px 16px 0 0;padding:40px;text-align:center;">
+              <div style="font-size:48px;margin-bottom:12px;">⚡</div>
+              <h1 style="color:#f9d342;margin:0;font-size:32px;font-weight:800;letter-spacing:-0.5px;">PokéStore</h1>
+              <p style="color:#a0a0c0;margin:8px 0 0;font-size:15px;">Ta boutique de cartes virtuelles</p>
+            </td>
+          </tr>
+
+          <!-- BODY -->
+          <tr>
+            <td style="background:#12122a;padding:40px;">
+              <h2 style="color:#ffffff;margin:0 0 16px;font-size:24px;">
+                Bienvenue, <span style="color:#f9d342;">{{userName}}</span> ! 🎴
+              </h2>
+              <p style="color:#c0c0d8;font-size:16px;line-height:1.7;margin:0 0 24px;">
+                Ton compte PokéStore a bien été créé. Tu peux dès maintenant explorer notre catalogue
+                et commencer ta collection de cartes Pokémon virtuelles !
+              </p>
+
+              <!-- CTA -->
+              <table cellpadding="0" cellspacing="0" style="margin:24px 0;">
+                <tr>
+                  <td style="background:linear-gradient(135deg,#f9d342,#f0a020);border-radius:10px;padding:14px 32px;text-align:center;">
+                    <a href="http://localhost:5173" style="color:#0a0a1a;font-weight:700;font-size:16px;text-decoration:none;">
+                      🚀 Découvrir le catalogue
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- INFO -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#1a1a3e;border-radius:12px;padding:20px;margin-top:24px;">
+                <tr>
+                  <td style="padding:8px 0;color:#a0a0c0;font-size:14px;">
+                    📧 <strong style="color:#ffffff;">Email :</strong> {{userEmail}}
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:8px 0;color:#a0a0c0;font-size:14px;">
+                    🔒 Tes données sont protégées et sécurisées.
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- FOOTER -->
+          <tr>
+            <td style="background:#0d0d22;border-radius:0 0 16px 16px;padding:24px 40px;text-align:center;">
+              <p style="color:#4a4a6a;font-size:13px;margin:0;">
+                © 2025 PokéStore · Cet email a été envoyé à {{userEmail}}
+              </p>
+              <p style="color:#4a4a6a;font-size:12px;margin:8px 0 0;">
+                Tu reçois cet email car tu viens de créer un compte sur PokéStore.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

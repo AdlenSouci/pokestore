@@ -73,10 +73,12 @@ export function ProductCard({ product, onAddToCart, onViewCard }: ProductCardPro
       </div>
 
       <div className="text-center w-full max-w-[280px]">
-        <h3 className="text-[#2d3561] mb-1">{product.name}</h3>
-        <p className="text-[#5a4f99] text-sm mb-3">{product.category} - {product.rarity}</p>
-        <div className="text-2xl text-[#2d3561] mb-3">
-          {product.price.toFixed(2)}€
+        <h3 className="text-white font-bold mb-1 drop-shadow-sm">{product.name}</h3>
+        <p className="text-[#e0e7ff] text-sm mb-1 font-medium">
+          {product.category} — {product.rarity}
+        </p>
+        <div className="text-2xl font-bold text-[#7ec8a3] mb-3 tabular-nums">
+          {Number.isFinite(product.price) ? `${product.price.toFixed(2)} €` : '—'}
         </div>
         
         <button

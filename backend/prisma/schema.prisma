@@ -60,9 +60,21 @@ model PokemonCard {
   rarity    String
   imageUrl  String
   price     Int
+  /// Identifiant set Pokémon TCG API (ex: sv1, swsh12)
+  tcgSetId   String?
+  tcgSetName String?
+  /// Série / bloc (ex: Scarlet & Violet, Sword & Shield)
+  series      String?
+  /// Année extraite de la date de sortie du set (API)
+  releaseYear Int?
   favorites  Favorite[]
   cartItems  CartItem[]
   orderItems OrderItem[]
+
+  @@index([price])
+  @@index([releaseYear])
+  @@index([series])
+  @@index([tcgSetId])
 }
 
 model Favorite {

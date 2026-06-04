@@ -4,24 +4,41 @@ import { orderService, type Order } from '../services/order.service';
 
 interface OrdersPageProps {
     onClose: () => void;
+    paymentSuccess?: boolean;
+    paymentSessionId?: string | null;
 }
 
-export function OrdersPage({ onClose }: OrdersPageProps) {
+export function OrdersPage({ onClose, paymentSuccess, paymentSessionId }: OrdersPageProps) {
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
     useEffect(() => {
-        loadOrders();
-    }, []);
+        const bootstrapOrders = async () => {
+            if (paymentSuccess && paymentSessionId) {
+                try {
+                    await orderService.confirmPayment(paymentSessionId);
+                } catch (err: any) {
+                    setError(err.message || 'Impossible de confirmer le paiement');
+                }
+            }
+            await loadOrders();
+        };
+
+        bootstrapOrders();
+    }, [paymentSuccess, paymentSessionId]);
 
     const loadOrders = async () => {
         try {
+            console.log('📦 Chargement des commandes...');
             setLoading(true);
             const data = await orderService.getOrders();
+            console.log('✅ Commandes récupérées:', data.length, 'commande(s)');
+            console.log('📋 Détails:', data);
             setOrders(data);
         } catch (err: any) {
+            console.error('❌ Erreur chargement commandes:', err);
             setError(err.message);
         } finally {
             setLoading(false);
@@ -69,6 +86,13 @@ export function OrdersPage({ onClose }: OrdersPageProps) {
                         <X className="w-6 h-6" />
                     </button>
                 </div>
+
+                {/* Bandeau succès paiement */}
+                {paymentSuccess && (
+                    <div className="bg-green-500 text-white p-4 text-center font-bold border-b-4 border-green-700 flex items-center justify-center gap-2">
+                        🎉 Paiement confirmé ! Ta commande est validée. Un email de confirmation t'a été envoyé.
+                    </div>
+                )}
 
                 {/* Messages */}
                 {error && <div className="bg-red-500 text-white p-3 text-center font-bold border-b-4 border-red-700">{error}</div>}

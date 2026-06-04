@@ -1,4 +1,5 @@
 import { Controller, Post, Body, Get, Put, Patch, UseGuards, Req, Res } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { RegisterDto, LoginDto } from './dto/auth.dto';
 import { UpdateProfileDto, ChangePasswordDto } from './dto/update-profile.dto';
@@ -7,7 +8,17 @@ import type { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
-    constructor(private authService: AuthService) { }
+    constructor(
+        private authService: AuthService,
+        private config: ConfigService,
+    ) { }
+
+    private frontendBaseUrl(): string {
+        return (
+            this.config.get<string>('FRONTEND_URL')?.replace(/\/$/, '') ||
+            'http://localhost:5173'
+        );
+    }
 
     @Post('register')
     async register(@Body() registerDto: RegisterDto) {
@@ -30,15 +41,15 @@ export class AuthController {
     async googleAuthCallback(@Req() req, @Res() res: Response) {
         // Vérifier si une erreur s'est produite
         if (!req.user) {
-            // Rediriger vers le frontend avec un message d'erreur
-            const frontendUrl = `http://localhost:5173/?error=${encodeURIComponent('Jeune dresseur, ton compte existe déjà ! Connecte-toi avec ton email et mot de passe.')}`;
+            const base = this.frontendBaseUrl();
+            const frontendUrl = `${base}/?error=${encodeURIComponent('Jeune dresseur, ton compte existe déjà ! Connecte-toi avec ton email et mot de passe.')}`;
             return res.redirect(frontendUrl);
         }
 
         const result = await this.authService.googleLogin(req.user);
 
-        // Rediriger vers le frontend avec le token
-        const frontendUrl = `http://localhost:5173/auth/callback?token=${result.access_token}`;
+        const base = this.frontendBaseUrl();
+        const frontendUrl = `${base}/auth/callback?token=${result.access_token}`;
         res.redirect(frontendUrl);
     }
 

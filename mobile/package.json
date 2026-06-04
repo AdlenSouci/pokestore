@@ -1,0 +1,24 @@
+{
+  "name": "mobile",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "doctor": "npx cap doctor",
+    "build:web": "npm --prefix ../frontend run build",
+    "copy:android": "npx cap copy android",
+    "sync:android": "npx cap sync android",
+    "sync:android:full": "npm run build:web && npx cap sync android",
+    "open:android": "npm run sync:android && npx cap open android",
+    "run:android": "npm run sync:android && npx cap run android"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@capacitor/android": "^8.3.0",
+    "@capacitor/cli": "^8.3.0",
+    "@capacitor/core": "^8.3.0"
+  }
+}

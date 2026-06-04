@@ -136,8 +136,8 @@ export function CardDetailModal({ product, onClose, onAddToCart }: CardDetailMod
             <p className="text-[#7ec8a3] text-lg mb-4">
               {product.category} - {product.rarity}
             </p>
-            <div className="text-4xl text-white mb-6">
-              {product.price.toFixed(2)}€
+            <div className="text-4xl text-[#7ec8a3] font-bold mb-6 tabular-nums">
+              {Number.isFinite(product.price) ? `${product.price.toFixed(2)} €` : '—'}
             </div>
 
             <button

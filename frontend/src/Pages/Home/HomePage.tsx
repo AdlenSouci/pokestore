@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Layout } from '../../components/Layout';
+import { SEO } from '../../components/SEO';
 import './HomePage.css';
 
 interface HomePageProps {
@@ -51,6 +52,23 @@ export function HomePage({
       onNavigateToHome={onNavigateToHome}
       onNavigateToShop={onNavigateToShop}
     >
+      <SEO
+        title="Accueil"
+        description="PokéCard Store – Achetez et collectionnez les meilleures cartes Pokémon rares en ligne. Livraison rapide, paiement sécurisé."
+        url="https://pokecardstore.com"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'WebSite',
+          name: 'PokéCard Store',
+          url: 'https://pokecardstore.com',
+          description: 'Boutique en ligne de cartes Pokémon rares',
+          potentialAction: {
+            '@type': 'SearchAction',
+            target: 'https://pokecardstore.com/shop?q={search_term_string}',
+            'query-input': 'required name=search_term_string',
+          },
+        }}
+      />
       <div className="min-h-[calc(100vh-64px)] flex items-center justify-center relative overflow-hidden">
 
         <div className="absolute inset-0 pointer-events-none">

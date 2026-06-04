@@ -8,7 +8,7 @@ interface CartPageProps {
     onCheckout?: () => void;
 }
 
-export function CartPage({ onClose, onCheckout }: CartPageProps) {
+export function CartPage({ onClose }: CartPageProps) {
     const [cart, setCart] = useState<CartType | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -53,15 +53,11 @@ export function CartPage({ onClose, onCheckout }: CartPageProps) {
         try {
             setProcessingOrder(true);
             setError(null);
-            await orderService.createOrder();
-            // Recharger le panier (qui sera vide)
-            await loadCart();
-            if (onCheckout) {
-                onCheckout();
-            }
+            // Créer la session Stripe et rediriger vers la page de paiement
+            const { url } = await orderService.createCheckoutSession();
+            window.location.href = url;
         } catch (err: any) {
             setError(err.message);
-        } finally {
             setProcessingOrder(false);
         }
     };
