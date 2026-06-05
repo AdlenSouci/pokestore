@@ -63,7 +63,7 @@ export class CardsService {
             type: card.types?.[0] ?? 'Unknown',
             rarity: card.rarity ?? 'Common',
             imageUrl,
-            price: this.fakePrice(card.rarity),
+            price: this.priceFromRarity(card.rarity),
             ...meta,
           },
           create: {
@@ -72,7 +72,7 @@ export class CardsService {
             type: card.types?.[0] ?? 'Unknown',
             rarity: card.rarity ?? 'Common',
             imageUrl,
-            price: this.fakePrice(card.rarity),
+            price: this.priceFromRarity(card.rarity),
             ...meta,
           },
         });
@@ -220,16 +220,54 @@ export class CardsService {
     return 100;
   }
 
-  private fakePrice(rarity?: string): number {
-    switch (rarity) {
-      case 'Rare':
-        return 500;
-      case 'Ultra Rare':
-        return 1200;
-      case 'Secret Rare':
-        return 2000;
-      default:
-        return 200;
+  /** Prix boutique en euros (entier) selon la rareté Pokémon TCG. */
+  priceFromRarity(rarity?: string): number {
+    const r = (rarity ?? '').toLowerCase();
+
+    if (r.includes('secret') || r.includes('hyper rare')) {
+      return 75;
     }
+    if (r.includes('special illustration')) {
+      return 55;
+    }
+    if (r.includes('illustration rare')) {
+      return 30;
+    }
+    if (r.includes('double rare') || r.includes('ultra rare')) {
+      return 18;
+    }
+    if (r.includes('ace spec')) {
+      return 22;
+    }
+    if (r.includes('rare holo') || r === 'rare') {
+      return 10;
+    }
+    if (r.includes('rare')) {
+      return 12;
+    }
+    if (r.includes('uncommon')) {
+      return 2;
+    }
+    if (r.includes('common') || r.includes('promo')) {
+      return 1;
+    }
+
+    return 3;
+  }
+
+  /** Recalcule les prix en base à partir de la rareté (après changement de grille). */
+  async repriceAllCards(): Promise<{ updated: number }> {
+    const cards = await this.prisma.pokemonCard.findMany({
+      select: { id: true, rarity: true },
+    });
+
+    for (const card of cards) {
+      await this.prisma.pokemonCard.update({
+        where: { id: card.id },
+        data: { price: this.priceFromRarity(card.rarity) },
+      });
+    }
+
+    return { updated: cards.length };
   }
 }

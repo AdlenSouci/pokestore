@@ -29,4 +29,10 @@ export class CardsController {
   async getCards(@Query() query: CardListQuery) {
     return this.cardsService.findCards(query);
   }
+
+  /** Recalcule les prix selon la rareté (à lancer une fois après mise à jour de la grille). */
+  @Get('reprice')
+  async repriceCards() {
+    return this.cardsService.repriceAllCards();
+  }
 }

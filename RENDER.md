@@ -13,9 +13,9 @@
 
 Dans Render → Environment, `DATABASE_URL` **exactement** comme dans Neon (onglet **Connection string**).
 
-**Important** : enlève `&channel_binding=require` à la fin si présent.
+Colle la même `DATABASE_URL` que dans ton `.env` local (Neon pooler, avec `channel_binding` si Neon te la donne comme ça).
 
-Si le deploy échoue encore sur la DB : dans Neon, prends la connexion **Direct** (pas Pooled) et colle-la dans `DATABASE_URL` sur Render.
+Si le deploy échoue encore sur la DB : essaie la connexion **Direct** dans Neon (autre host, sans `-pooler`).
 
 ## Autres variables
 
