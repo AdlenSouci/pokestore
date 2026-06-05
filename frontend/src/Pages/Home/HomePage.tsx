@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import { Layout } from '../../components/Layout';
 import { SEO } from '../../components/SEO';
 import './HomePage.css';
@@ -28,16 +28,18 @@ export function HomePage({
   user,
   onLogout,
   onNavigateToHome,
-  onNavigateToShop
+  onNavigateToShop,
 }: HomePageProps) {
-  const [showPressStart, setShowPressStart] = useState(true);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setShowPressStart((prev) => !prev);
-    }, 800);
-    return () => clearInterval(interval);
-  }, []);
+  const stars = useMemo(
+    () =>
+      Array.from({ length: 24 }, (_, i) => ({
+        top: `${(i * 37 + 11) % 100}%`,
+        left: `${(i * 53 + 7) % 100}%`,
+        delay: `${(i % 6) * 0.7}s`,
+        duration: `${3 + (i % 4)}s`,
+      })),
+    [],
+  );
 
   return (
     <Layout
@@ -54,82 +56,81 @@ export function HomePage({
     >
       <SEO
         title="Accueil"
-        description="PokéCard Store – Achetez et collectionnez les meilleures cartes Pokémon rares en ligne. Livraison rapide, paiement sécurisé."
-        url="https://pokecardstore.com"
+        description="PokéCard Store – Achetez et collectionnez des cartes Pokémon rares. Filtres par série, extension et prix."
+        url="https://pokestore-hazel.vercel.app"
         jsonLd={{
           '@context': 'https://schema.org',
           '@type': 'WebSite',
           name: 'PokéCard Store',
-          url: 'https://pokecardstore.com',
-          description: 'Boutique en ligne de cartes Pokémon rares',
-          potentialAction: {
-            '@type': 'SearchAction',
-            target: 'https://pokecardstore.com/shop?q={search_term_string}',
-            'query-input': 'required name=search_term_string',
-          },
+          url: 'https://pokestore-hazel.vercel.app',
+          description: 'Boutique en ligne de cartes Pokémon',
         }}
       />
-      <div className="min-h-[calc(100vh-64px)] flex items-center justify-center relative overflow-hidden">
 
+      <section className="relative min-h-[calc(100vh-64px)] overflow-hidden bg-gradient-to-b from-[#1a1f3a] via-[#2d3561] to-[#1a1f3a]">
         <div className="absolute inset-0 pointer-events-none">
-          {[...Array(50)].map((_, i) => (
+          {stars.map((s, i) => (
             <div
               key={i}
-              className="absolute w-1 h-1 bg-white rounded-full star-twinkle"
+              className="absolute w-1 h-1 bg-white/60 rounded-full star-twinkle"
               style={{
-                top: `${Math.random() * 100}%`,
-                left: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 5}s`,
-                animationDuration: `${3 + Math.random() * 4}s`,
+                top: s.top,
+                left: s.left,
+                animationDelay: s.delay,
+                animationDuration: s.duration,
               }}
             />
           ))}
         </div>
 
-        <div className="relative z-10 text-center px-4 w-full max-w-4xl mx-auto flex flex-col items-center">
+        <div className="relative z-10 container mx-auto px-4 py-16 md:py-24 flex flex-col items-center text-center max-w-3xl">
+          <p className="text-[#7ec8a3] text-sm md:text-base font-sans font-semibold tracking-widest uppercase mb-4">
+            Boutique officielle de cartes Pokémon
+          </p>
 
-          <div className="mb-12 animate-bounce-slow">
-            <h1 className="text-5xl md:text-8xl text-[#7ec8a3] mb-4 pixel-font text-stroke-title">
-              ⚡ POKÉCARD ⚡
-            </h1>
-            <h2 className="text-3xl md:text-4xl text-white pixel-font text-stroke-subtitle">
-              STORE
-            </h2>
-          </div>
+          <h1 className="text-4xl md:text-6xl text-white mb-4 pixel-font leading-tight">
+            PokéCard Store
+          </h1>
 
-          <div className="mb-12 flex justify-center">
-            <div className="relative w-32 h-32 animate-spin-slow">
-              <div className="absolute inset-0 rounded-full bg-gradient-to-b from-red-500 to-red-600 border-8 border-[#2d3561]" />
-              <div className="absolute bottom-0 left-0 right-0 h-16 rounded-b-full bg-gradient-to-b from-white to-gray-200 border-8 border-t-0 border-[#2d3561]" />
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white border-8 border-[#2d3561] z-10">
-                <div className="absolute inset-2 rounded-full bg-gray-200" />
-              </div>
-              <div className="absolute top-1/2 left-0 right-0 h-2 bg-[#2d3561] -translate-y-1/2" />
-            </div>
-          </div>
+          <p className="text-[#c4b5fd] text-base md:text-lg font-sans mb-10 max-w-xl leading-relaxed">
+            Parcours notre catalogue, filtre par prix, série ou extension, et complète ta collection en
+            quelques clics.
+          </p>
 
-          <div className="space-y-6 flex flex-col items-center w-full">
+          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mb-14">
             <button
+              type="button"
               onClick={onStartGame}
-              className="group relative px-12 py-5 bg-[#7ec8a3] text-[#2d3561] rounded-2xl border-4 border-[#2d3561] hover:bg-[#6eb893] transition-all transform hover:scale-110 active:scale-95 shadow-xl"
+              className="px-10 py-4 bg-[#7ec8a3] text-[#1a1f3a] rounded-xl border-4 border-[#2d3561] font-bold text-lg hover:bg-[#6eb893] transition transform hover:scale-[1.02] active:scale-[0.98] shadow-lg"
             >
-              <span className="text-2xl pixel-font font-bold">
-                ▶ START GAME
-              </span>
+              Voir la boutique
             </button>
-
-            <div className="h-8">
-              {showPressStart && (
-                <p className="text-white text-xl pixel-font tracking-widest uppercase">
-                  Press Start to Begin
-                </p>
-              )}
-            </div>
+            <button
+              type="button"
+              onClick={onNavigateToShop}
+              className="px-10 py-4 bg-transparent text-white rounded-xl border-4 border-[#5a4f99] font-bold text-lg hover:bg-white/10 transition"
+            >
+              Nouveautés
+            </button>
           </div>
 
-
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full text-left">
+            {[
+              { title: 'Catalogue filtré', desc: 'Prix, année, série et extension' },
+              { title: 'Paiement sécurisé', desc: 'Stripe & commandes suivies' },
+              { title: 'Collection mobile', desc: 'Boutique aussi sur téléphone' },
+            ].map((item) => (
+              <div
+                key={item.title}
+                className="rounded-2xl border-2 border-[#5a4f99]/50 bg-white/5 backdrop-blur-sm p-5"
+              >
+                <h3 className="text-[#7ec8a3] font-bold font-sans mb-1">{item.title}</h3>
+                <p className="text-[#a5b4fc] text-sm font-sans">{item.desc}</p>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      </section>
     </Layout>
   );
 }
