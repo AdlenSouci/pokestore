@@ -1,11 +1,5 @@
 import { authTokenRef } from '../auth/tokenRef';
-import { getApiBaseUrl } from '../config/api';
-
-function buildUrl(path: string): string {
-  const base = getApiBaseUrl();
-  if (path.startsWith('http')) return path;
-  return `${base}${path.startsWith('/') ? '' : '/'}${path}`;
-}
+import { buildUrl, fetchWithTimeout, parseApiError } from '../services/fetchHelpers';
 
 export async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
   const url = buildUrl(path);
@@ -17,21 +11,9 @@ export async function fetchJson<T>(path: string, init?: RequestInit): Promise<T>
   if (t) {
     headers.Authorization = `Bearer ${t}`;
   }
-  const res = await fetch(url, { ...init, headers });
+  const res = await fetchWithTimeout(url, { ...init, headers });
   if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    let msg = `HTTP ${res.status}`;
-    try {
-      const j = JSON.parse(text) as { message?: string };
-      if (j?.message && typeof j.message === 'string') {
-        msg = j.message;
-      } else if (text) {
-        msg = text.slice(0, 200);
-      }
-    } catch {
-      if (text) msg = text.slice(0, 200);
-    }
-    throw new Error(msg);
+    throw new Error(await parseApiError(res));
   }
   return res.json() as Promise<T>;
 }

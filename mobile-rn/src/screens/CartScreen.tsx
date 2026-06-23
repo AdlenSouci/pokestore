@@ -17,6 +17,7 @@ import { AppShell } from '../components/AppShell';
 import { useAuth } from '../context/AuthContext';
 import * as cartService from '../services/cart';
 import * as orderService from '../services/order';
+import { getWebReturnUrl } from '../config/api';
 import type { RootStackParamList } from '../types/navigation';
 import type { Cart as CartType } from '../services/cart';
 import { colors } from '../theme/colors';
@@ -81,7 +82,23 @@ export function CartScreen({ navigation }: Props) {
     setCheckoutLoading(true);
     try {
       const { url } = await orderService.createCheckoutSession();
-      await WebBrowser.openBrowserAsync(url);
+      const returnUrl = `${getWebReturnUrl()}/orders`;
+      const result = await WebBrowser.openAuthSessionAsync(url, returnUrl);
+
+      if (result.type === 'success' && result.url) {
+        const parsed = new URL(result.url);
+        const sessionId = parsed.searchParams.get('session_id');
+        const payment = parsed.searchParams.get('payment');
+
+        if (payment === 'success' && sessionId) {
+          await orderService.confirmPayment(sessionId);
+          Alert.alert('Paiement', 'Commande validée ! Un email de confirmation t’a été envoyé.');
+          setCart(null);
+          await refreshCart();
+        } else if (payment === 'cancelled') {
+          Alert.alert('Paiement', 'Paiement annulé.');
+        }
+      }
     } catch (e) {
       Alert.alert('Paiement', e instanceof Error ? e.message : 'Erreur');
     } finally {

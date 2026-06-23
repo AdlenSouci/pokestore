@@ -9,7 +9,8 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://pokestore-api-btz1.onrender.com/api"
+        "EXPO_PUBLIC_API_URL": "https://pokestore-api-btz1.onrender.com/api",
+        "EXPO_PUBLIC_WEB_URL": "https://pokestore-hazel.vercel.app"
       }
     }
   }

@@ -82,8 +82,13 @@ export function OrdersPage({ onClose, paymentSuccess, paymentSessionId }: Orders
                         <Package className="w-8 h-8 text-white" />
                         <h2 className="text-white text-2xl pixel-font">MES COMMANDES</h2>
                     </div>
-                    <button onClick={onClose} className="text-white hover:bg-[#7b6eb8] p-2 rounded-xl transition">
-                        <X className="w-6 h-6" />
+                    <button
+                      type="button"
+                      onClick={onClose}
+                      aria-label="Fermer les commandes"
+                      className="text-white hover:bg-[#7b6eb8] p-2 rounded-xl transition"
+                    >
+                        <X className="w-6 h-6" aria-hidden="true" />
                     </button>
                 </div>
 

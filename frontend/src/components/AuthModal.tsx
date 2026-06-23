@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, Mail, Lock, User, Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { authService } from '../services/auth.service';
 
 interface AuthModalProps {
@@ -30,11 +31,12 @@ export function AuthModal({ type, onClose, onSuccess, googleError }: AuthModalPr
     try {
       if (type === 'signup') {
         await authService.register(formData.email, formData.password, formData.name);
-        alert("✅ Compte créé avec succès ! Bienvenue " + formData.name);
+        toast.success(`Compte créé ! Bienvenue ${formData.name}`);
         onSuccess();
         onClose();
       } else {
         await authService.login(formData.email, formData.password);
+        toast.success('Connexion réussie !');
         onSuccess();
         onClose();
       }
@@ -55,7 +57,14 @@ export function AuthModal({ type, onClose, onSuccess, googleError }: AuthModalPr
       <div className="relative z-10 w-full max-w-md bg-gradient-to-br from-[#a8b5c8] to-[#8b9db5] rounded-2xl shadow-2xl border-4 border-[#2d3561]">
         <div className="flex items-center justify-between p-6 border-b-4 border-[#2d3561] bg-gradient-to-r from-[#5a4f99] to-[#2d3561]">
           <h2 className="text-white text-xl pixel-font">{type === 'login' ? 'CONNEXION' : 'INSCRIPTION'}</h2>
-          <button onClick={onClose} className="text-white hover:bg-[#7b6eb8] p-2 rounded-xl"><X className="w-5 h-5" /></button>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Fermer la fenêtre de connexion"
+            className="text-white hover:bg-[#7b6eb8] p-2 rounded-xl"
+          >
+            <X className="w-5 h-5" aria-hidden="true" />
+          </button>
         </div>
         {error && <div className="bg-red-500 text-white p-3 text-center font-bold border-b-4 border-red-700">{error}</div>}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">

@@ -80,8 +80,13 @@ export function CartPage({ onClose }: CartPageProps) {
                             </span>
                         )}
                     </div>
-                    <button onClick={onClose} className="text-white hover:bg-[#7b6eb8] p-2 rounded-xl transition">
-                        <X className="w-6 h-6" />
+                    <button
+                      type="button"
+                      onClick={onClose}
+                      aria-label="Fermer le panier"
+                      className="text-white hover:bg-[#7b6eb8] p-2 rounded-xl transition"
+                    >
+                        <X className="w-6 h-6" aria-hidden="true" />
                     </button>
                 </div>
 

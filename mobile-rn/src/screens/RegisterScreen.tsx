@@ -6,11 +6,13 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
+import { GoogleSignInButton } from '../components/GoogleSignInButton';
 import { useAuth } from '../context/AuthContext';
 import type { RootStackParamList } from '../types/navigation';
 import { colors } from '../theme/colors';
@@ -26,6 +28,10 @@ export function RegisterScreen({ navigation }: Props) {
   const [loading, setLoading] = useState(false);
 
   const onSubmit = async () => {
+    if (!name.trim() || !email.trim() || !password) {
+      Alert.alert('Inscription', 'Renseigne tous les champs.');
+      return;
+    }
     setLoading(true);
     try {
       await register(name.trim(), email.trim(), password);
@@ -42,8 +48,25 @@ export function RegisterScreen({ navigation }: Props) {
       style={styles.root}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <View style={styles.card}>
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <Text style={styles.title}>Inscription</Text>
+
+        <GoogleSignInButton
+          loading={loading}
+          onLoadingChange={setLoading}
+          onSuccess={() => navigation.goBack()}
+        />
+
+        <View style={styles.dividerRow}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>ou email</Text>
+          <View style={styles.dividerLine} />
+        </View>
+
         <Text style={styles.label}>Nom</Text>
         <TextInput
           style={styles.input}
@@ -85,7 +108,7 @@ export function RegisterScreen({ navigation }: Props) {
         <Pressable onPress={() => navigation.navigate('Login')}>
           <Text style={styles.link}>Déjà un compte ? Connexion</Text>
         </Pressable>
-      </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
@@ -94,17 +117,19 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: colors.bg,
+  },
+  scroll: {
+    flexGrow: 1,
     justifyContent: 'center',
     padding: 24,
-  },
-  card: {
     gap: 12,
   },
   title: {
     fontFamily: font.pixel,
     fontSize: 14,
     color: colors.mint,
-    marginBottom: 16,
+    marginBottom: 8,
+    textAlign: 'center',
   },
   label: {
     fontFamily: font.sansSemi,
@@ -136,6 +161,24 @@ const styles = StyleSheet.create({
     fontFamily: font.sansBold,
     color: colors.inputText,
     fontSize: 16,
+  },
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginVertical: 8,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.border,
+    opacity: 0.35,
+  },
+  dividerText: {
+    fontFamily: font.sansSemi,
+    color: colors.indigoText,
+    fontSize: 12,
+    textTransform: 'uppercase',
   },
   link: {
     color: colors.indigoText,

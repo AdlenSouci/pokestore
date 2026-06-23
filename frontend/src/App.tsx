@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { HomePage } from './Pages/Home/HomePage';
 import { Shop } from './Pages/Shop';
 import { Layout } from './components/Layout';
@@ -32,30 +33,32 @@ function App() {
       const payment = urlParams.get('payment');
       const sessionId = urlParams.get('session_id');
 
+      const cleanUrl = () => {
+        window.history.replaceState({}, document.title, '/');
+      };
+
       // Retour depuis Stripe
       if (payment === 'success') {
         setShowOrders(true);
         setPaymentSuccess(true);
         setPaymentSessionId(sessionId);
-        window.history.replaceState({}, document.title, window.location.pathname);
+        cleanUrl();
       } else if (payment === 'cancelled') {
-        window.history.replaceState({}, document.title, window.location.pathname);
+        cleanUrl();
       }
 
       if (error) {
         setGoogleError(decodeURIComponent(error));
         setAuthModalType('login');
-        window.history.replaceState({}, document.title, window.location.pathname);
+        cleanUrl();
       } else if (token) {
         try {
-          console.log('🔐 Google callback - Token reçu:', token.substring(0, 20) + '...');
-          const user = await authService.handleGoogleCallback(token);
-          console.log('👤 Utilisateur récupéré:', user);
-          console.log('💾 Token dans localStorage après callback:', localStorage.getItem('token') ? 'OUI ✅' : 'NON ❌');
-          setUser({ name: user.name, email: user.email });
-          window.history.replaceState({}, document.title, window.location.pathname);
+          const loggedInUser = await authService.handleGoogleCallback(token);
+          setUser({ name: loggedInUser.name, email: loggedInUser.email });
+          cleanUrl();
         } catch (err) {
           console.error('Erreur lors de la connexion Google:', err);
+          cleanUrl();
         }
         return;
       }
@@ -128,6 +131,7 @@ function App() {
 
       await cartService.addToCart(cardId, 1);
       console.log('✅ Article ajouté au panier');
+      toast.success(`${product.name} ajouté au panier`);
 
       await loadCartCount();
       console.log('✅ Compteur mis à jour');
@@ -141,7 +145,7 @@ function App() {
         setAuthModalType('login');
       } else {
         // Afficher l'erreur à l'utilisateur
-        alert(`Erreur: ${err.message}`);
+        toast.error(err.message || 'Erreur lors de l\'ajout au panier');
       }
     }
   };

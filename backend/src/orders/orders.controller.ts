@@ -8,8 +8,11 @@ export class OrdersController {
     constructor(private ordersService: OrdersService) { }
 
     @Post('checkout-session')
-    async createCheckoutSession(@Req() req) {
-        return this.ordersService.createCheckoutSession(req.user.userId);
+    async createCheckoutSession(
+        @Req() req,
+        @Body('returnBaseUrl') returnBaseUrl?: string,
+    ) {
+        return this.ordersService.createCheckoutSession(req.user.userId, returnBaseUrl);
     }
 
     @Post()

@@ -1,4 +1,4 @@
-import { buildUrl } from './fetchHelpers';
+import { buildUrl, fetchWithTimeout, parseApiError } from './fetchHelpers';
 import { authTokenRef } from '../auth/tokenRef';
 
 export interface User {
@@ -14,24 +14,15 @@ export interface AuthResponse {
   user: User;
 }
 
-async function parseError(res: Response): Promise<string> {
-  try {
-    const j = (await res.json()) as { message?: string };
-    return j.message ?? `HTTP ${res.status}`;
-  } catch {
-    return `HTTP ${res.status}`;
-  }
-}
-
 export async function loginRequest(email: string, password: string): Promise<AuthResponse> {
   const url = buildUrl('/auth/login');
-  const res = await fetch(url, {
+  const res = await fetchWithTimeout(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     body: JSON.stringify({ email, password }),
   });
   if (!res.ok) {
-    throw new Error(await parseError(res));
+    throw new Error(await parseApiError(res));
   }
   return res.json() as Promise<AuthResponse>;
 }
@@ -42,13 +33,13 @@ export async function registerRequest(
   name: string,
 ): Promise<AuthResponse> {
   const url = buildUrl('/auth/register');
-  const res = await fetch(url, {
+  const res = await fetchWithTimeout(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     body: JSON.stringify({ email, password, name }),
   });
   if (!res.ok) {
-    throw new Error(await parseError(res));
+    throw new Error(await parseApiError(res));
   }
   return res.json() as Promise<AuthResponse>;
 }
@@ -59,14 +50,20 @@ export async function fetchProfile(): Promise<User> {
   const t = authTokenRef.current;
   if (!t) throw new Error('Non connecté');
   headers.Authorization = `Bearer ${t}`;
-  const res = await fetch(url, { headers });
+  const res = await fetchWithTimeout(url, { headers });
   if (!res.ok) {
-    throw new Error(await parseError(res));
+    throw new Error(await parseApiError(res));
   }
   return res.json() as Promise<User>;
 }
 
-/** URL OAuth Google — même endpoint que le front (`auth.service.loginWithGoogle`). */
 export function getGoogleAuthUrl(): string {
   return buildUrl('/auth/google');
+}
+
+/** Après OAuth Google : le backend redirige vers le site avec ?token=… */
+export async function authFromGoogleToken(token: string): Promise<AuthResponse> {
+  authTokenRef.current = token;
+  const user = await fetchProfile();
+  return { access_token: token, user };
 }

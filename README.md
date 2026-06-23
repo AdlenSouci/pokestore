@@ -1,59 +1,200 @@
-﻿# Grille de Validation : Projet Pokémon App (Ynov B3 DEV)
+﻿# PokéCard — Projet Ynov B3 DEV
 
-Ce document liste toutes les fonctionnalités attendues par l'école.
-Coche les cases ([x]) au fur et à mesure que nous avançons !
+Plateforme web et mobile de collection et d'achat de cartes Pokémon TCG.
 
-## ✅ Déjà Réalisé (Validé)
+| Brique | Stack | Dossier |
+|--------|-------|---------|
+| Frontend web | React 19, Vite, Tailwind | `frontend/` |
+| API | NestJS 11, Prisma, PostgreSQL | `backend/` |
+| Mobile | React Native, Expo SDK 54 | `mobile-rn/` |
 
-- [x] **Concevoir une application web avec un framework moderne**
-  - *Fait : Utilisation de React & Vite.*
-- [x] **Développer des interfaces utilisateurs compatibles avec plusieurs supports**
-  - *Fait : TailwindCSS utilisé pour le responsive.*
-- [x] **Implémenter une architecture backend orientée services**
-  - *Fait : NestJS (Controllers/Services/Modules).*
-- [x] **Gérer les appels vers une base de données relationnelles**
-  - *Fait : Prisma + PostgreSQL.*
-- [x] **Implémenter des mécanismes d'authentification et d'autorisation sécurisés**
-  - *Fait : Auth bcrypt + Google OAuth + Token JWT.*
-- [x] **Concevoir un modèle de données pour gérer les différentes entités**
-  - *Fait : Schéma Prisma avec relations Users, Cards, Carts, Orders, Favorites.*
-- [x] **Écrire des requêtes SQL pour interagir entre les API et la BDD**
-  - *Fait : Via Prisma Client (CRUD complet).*
-- [x] **Versionner son code**
-  - *Fait : Dépôt Git existant.*
+**Documentation fonctionnelle :** [`docs/cahier-des-charges/CAHIER_DES_CHARGES_POKEMON_APP.md`](docs/cahier-des-charges/CAHIER_DES_CHARGES_POKEMON_APP.md)  
+**Documentation API interactive :** http://localhost:3000/api/docs (Swagger)
 
 ---
 
-## Correction API cartes Pokémon (historique)
+## Prérequis
 
-Au départ, l’**API HTTP officielle Pokémon TCG** (`api.pokemontcg.io`) ne répondait pas correctement dans notre contexte (erreurs / indisponibilité), ce qui empêchait de remplir le catalogue directement depuis l’API.
-
-**Contournement utilisé :** import de données au format JSON via le dépôt communautaire **[pokemon-tcg-data](https://github.com/PokemonTCG/pokemon-tcg-data)** sur GitHub, qui fournit les cartes dans une structure proche de celle attendue par l’écosystème Pokémon TCG. Cela a permis de peupler la base en attendant une solution stable.
-
-**Situation actuelle :** l’API fonctionne de nouveau côté projet. Les cartes sont **récupérées depuis l’API Pokémon TCG v2**, synchronisées en base PostgreSQL (Prisma), avec possibilité de clé optionnelle (`POKEMON_TCG_API_KEY`) pour un meilleur quota. L’import se fait via `GET /api/cards/import` ou via `npx prisma db seed` (voir le dossier `backend` et les variables `POKEMON_TCG_SET_IDS`, `POKEMON_TCG_IMPORT_MAX`, etc.).
+- **Node.js** 20+
+- **PostgreSQL** (local ou [Neon](https://neon.tech))
+- Comptes optionnels : Google OAuth, Stripe, Resend/Gmail (emails), clé API Pokémon TCG
 
 ---
 
-## 🚀 À Faire (Pour avoir 20/20)
+## Installation rapide
 
-### 1. Sécurité de l'API (Backend)
-- [ ] Restreindre le CORS dans main.ts (uniquement le port 5173 du frontend).
-- [ ] Installer et configurer helmet pour les headers de sécurité HTTP.
-- [ ] Ajouter un @nestjs/throttler (Rate Limiting) pour protéger les routes de login contre le spam.
+### 1. Backend
 
-### 2. Expérience Utilisateur & Feedbacks (Frontend)
-- [ ] Remplacer les alertes basiques JavaScript par des Toasts (ex: react-hot-toast).
-- [ ] Ajouter des états de chargement (loaders/spinners) visuels pendant les appels API (ex: ajout au panier, connexion).
-- [ ] Gérer les messages d'erreur de façon claire dans l'UI (ex: "Mot de passe incorrect" direct sur le modal).
+```bash
+cd backend
+npm install
+cp .env.example .env
+```
 
-### 3. Accessibilité & Performances (Frontend)
-- [ ] Lancer un audit Lighthouse (Chrome) et corriger les contrastes de couleurs si besoin.
-- [ ] Ajouter des attributs aria-label sur les icônes (ex: panier, profil, fermeture de modal).
-- [ ] Utiliser le lazy-loading pour les images des cartes Pokémon (loading="lazy").
+Renseigner au minimum dans `backend/.env` :
 
-### 4. Documentation & Qualité (Global)
-- [ ] Installer Swagger (@nestjs/swagger) sur le backend pour générer une doc API interactive pour les profs.
-- [ ] Rédiger la suite de ce README.md complet (Installation, lancement de la BDD, scripts).
+```env
+DATABASE_URL=postgresql://USER:PASSWORD@localhost:5432/pokemon_app
+JWT_SECRET=un-secret-long-et-aleatoire
+FRONTEND_URL=http://localhost:5173
+```
 
-### 5. Application Mobile (Bonus obligatoire)
-- [ ] Développer l'application "Ma Collection" en Flutter (ou Capacitor) connectée à l'API NestJS existante.
+Puis initialiser la base et lancer l'API :
+
+```bash
+npx prisma migrate dev
+npm run db:seed          # importe des cartes depuis l'API Pokémon TCG
+npm run start:dev        # → http://localhost:3000
+```
+
+### 2. Frontend web
+
+```bash
+cd frontend
+npm install
+cp .env.example .env
+```
+
+Dans `frontend/.env` :
+
+```env
+VITE_API_URL=http://localhost:3000/api
+```
+
+```bash
+npm run dev              # → http://localhost:5173
+```
+
+### 3. Application mobile (Expo Go)
+
+L’app mobile utilise **la même infra que le web** — pas besoin de lancer le backend en local.
+
+```bash
+cd mobile-rn
+npm install
+cp .env.example .env   # déjà configuré pour Render + Vercel
+npm start
+# Scanner le QR code avec Expo Go
+```
+
+Dans `mobile-rn/.env` (valeurs par défaut) :
+
+```env
+EXPO_PUBLIC_API_URL=https://pokestore-api-btz1.onrender.com/api
+EXPO_PUBLIC_WEB_URL=https://pokestore-hazel.vercel.app
+```
+
+> **Render (gratuit)** : le 1er appel peut prendre ~30 s (réveil du serveur). Ensuite c’est fluide.
+
+---
+
+## Variables d'environnement
+
+### Backend (`backend/.env.example`)
+
+| Variable | Description |
+|----------|-------------|
+| `DATABASE_URL` | Connexion PostgreSQL |
+| `JWT_SECRET` | Secret de signature des tokens |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | OAuth Google (optionnel) |
+| `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` | Paiement Stripe (optionnel) |
+| `MAIL_*` | Envoi d'emails (bienvenue, confirmation commande) |
+| `POKEMON_TCG_API_KEY` | Clé API Pokémon TCG (optionnel, meilleur quota) |
+| `POKEMON_TCG_SET_IDS` | Sets à importer au seed (ex. `sv1,swsh12`) |
+
+### Frontend (`frontend/.env.example`)
+
+| Variable | Description |
+|----------|-------------|
+| `VITE_API_URL` | URL de l'API (avec `/api`) |
+
+### Mobile (`mobile-rn/.env.example`)
+
+| Variable | Description |
+|----------|-------------|
+| `EXPO_PUBLIC_API_URL` | URL de l'API accessible depuis le téléphone |
+
+---
+
+## Scripts utiles
+
+### Backend
+
+| Commande | Action |
+|--------|--------|
+| `npm run start:dev` | API en mode watch |
+| `npm run db:seed` | Peupler la base avec des cartes |
+| `npm run db:reprice` | Recalculer les prix selon la rareté |
+| `npm run test` | Tests unitaires |
+
+### Frontend
+
+| Commande | Action |
+|--------|--------|
+| `npm run dev` | Serveur de développement |
+| `npm run build` | Build de production |
+
+### Mobile
+
+| Commande | Action |
+|--------|--------|
+| `npm start` | Expo Dev Tools |
+| `npm run android` | Émulateur Android |
+| `npm run ios` | Simulateur iOS (macOS) |
+
+---
+
+## Endpoints principaux
+
+| Route | Auth | Description |
+|-------|------|-------------|
+| `POST /api/auth/register` | — | Inscription |
+| `POST /api/auth/login` | — | Connexion |
+| `GET /api/cards` | — | Catalogue (filtres, pagination) |
+| `GET /api/cart` | JWT | Panier utilisateur |
+| `POST /api/orders/checkout-session` | JWT | Session Stripe |
+| `GET /api/orders` | JWT | Historique commandes |
+
+Liste complète : **http://localhost:3000/api/docs**
+
+---
+
+## Structure du projet
+
+```
+pokemon-app/
+├── backend/          # API NestJS + Prisma
+├── frontend/         # Interface web React
+├── mobile-rn/        # App mobile Expo
+├── docs/             # Cahier des charges (MD, HTML, PDF)
+└── task.md           # Grille de validation Ynov
+```
+
+---
+
+## Import des cartes Pokémon
+
+Les cartes sont synchronisées depuis l'**API Pokémon TCG v2** vers PostgreSQL.
+
+```bash
+# Via seed (recommandé)
+cd backend && npm run db:seed
+
+# Via HTTP (dev)
+curl "http://localhost:3000/api/cards/import?sets=sv1&limit=50"
+```
+
+Un fallback JSON local (`backend/src/data/pokemon-tcg-data/`) existe si l'API externe est indisponible.
+
+---
+
+## Déploiement (référence)
+
+- **Frontend** : Vercel (`frontend/vercel.json`)
+- **Backend** : Render ou équivalent — définir les variables d'env et `FRONTEND_URL` vers l'URL Vercel
+
+---
+
+## Équipe & contexte
+
+Projet réalisé dans le cadre du **UF DEV B3** — Ynov Informatique (sujet libre mobilisant les mêmes compétences que le Smart Café).

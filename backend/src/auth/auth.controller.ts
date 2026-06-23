@@ -1,10 +1,10 @@
-import { Controller, Post, Body, Get, Put, Patch, UseGuards, Req, Res } from '@nestjs/common';
+import { Controller, Post, Body, Get, Put, Patch, UseGuards, Req, Res, Query } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { RegisterDto, LoginDto } from './dto/auth.dto';
 import { UpdateProfileDto, ChangePasswordDto } from './dto/update-profile.dto';
 import { GoogleAuthGuard, JwtAuthGuard } from './guards/auth.guard';
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -20,6 +20,24 @@ export class AuthController {
         );
     }
 
+    private isAppRedirect(url: string): boolean {
+        return url.startsWith('pokestore://') || url.startsWith('exp://');
+    }
+
+    private buildOAuthRedirect(base: string, params: Record<string, string>): string {
+        const separator = base.includes('?') ? '&' : '?';
+        const query = new URLSearchParams(params).toString();
+        return `${base}${separator}${query}`;
+    }
+
+    private oauthRedirectBase(req: Request): string {
+        const fromCookie = req.cookies?.oauth_redirect as string | undefined;
+        if (fromCookie) {
+            return decodeURIComponent(fromCookie);
+        }
+        return this.frontendBaseUrl();
+    }
+
     @Post('register')
     async register(@Body() registerDto: RegisterDto) {
         return this.authService.register(registerDto);
@@ -30,6 +48,20 @@ export class AuthController {
         return this.authService.login(loginDto);
     }
 
+  /** Démarre OAuth Google pour l'app mobile (Expo Go). */
+  @Get('google/mobile')
+  googleAuthMobile(@Query('redirect_uri') redirectUri: string, @Res() res: Response) {
+    const fallback = 'pokestore://auth';
+    const target = redirectUri?.trim() || fallback;
+    res.cookie('oauth_redirect', encodeURIComponent(target), {
+      httpOnly: true,
+      maxAge: 5 * 60 * 1000,
+      sameSite: 'lax',
+      secure: true,
+    });
+    return res.redirect('/api/auth/google');
+  }
+
     @Get('google')
     @UseGuards(GoogleAuthGuard)
     async googleAuth() {
@@ -38,19 +70,26 @@ export class AuthController {
 
     @Get('google/callback')
     @UseGuards(GoogleAuthGuard)
-    async googleAuthCallback(@Req() req, @Res() res: Response) {
-        // Vérifier si une erreur s'est produite
+    async googleAuthCallback(@Req() req: Request, @Res() res: Response) {
+        const redirectBase = this.oauthRedirectBase(req);
+        res.clearCookie('oauth_redirect');
+
         if (!req.user) {
-            const base = this.frontendBaseUrl();
-            const frontendUrl = `${base}/?error=${encodeURIComponent('Jeune dresseur, ton compte existe déjà ! Connecte-toi avec ton email et mot de passe.')}`;
+            const errorMsg = 'Jeune dresseur, ton compte existe déjà ! Connecte-toi avec ton email et mot de passe.';
+            if (this.isAppRedirect(redirectBase)) {
+                return res.redirect(this.buildOAuthRedirect(redirectBase, { error: errorMsg }));
+            }
+            const frontendUrl = `${redirectBase}/?error=${encodeURIComponent(errorMsg)}`;
             return res.redirect(frontendUrl);
         }
 
         const result = await this.authService.googleLogin(req.user);
 
-        const base = this.frontendBaseUrl();
-        const frontendUrl = `${base}/auth/callback?token=${result.access_token}`;
-        res.redirect(frontendUrl);
+        if (this.isAppRedirect(redirectBase)) {
+            return res.redirect(this.buildOAuthRedirect(redirectBase, { token: result.access_token }));
+        }
+
+        res.redirect(`${redirectBase}/?token=${result.access_token}`);
     }
 
     @Get('profile')

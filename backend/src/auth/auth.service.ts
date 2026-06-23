@@ -38,10 +38,9 @@ export class AuthService {
             },
         });
 
-        // Envoyer l'email de bienvenue
-        await this.mailService.sendWelcomeEmail(user.email, user.name ?? 'Dresseur');
+        // Email de bienvenue en arrière-plan — ne pas bloquer l'inscription (SMTP lent sur Render)
+        void this.mailService.sendWelcomeEmail(user.email, user.name ?? 'Dresseur');
 
-        // Générer le token JWT
         return this.generateToken(user);
     }
 

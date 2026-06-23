@@ -63,10 +63,12 @@ export function CardDetailModal({ product, onClose, onAddToCart }: CardDetailMod
         onClick={(e) => e.stopPropagation()}
       >
         <button
+          type="button"
           onClick={onClose}
+          aria-label="Fermer le détail de la carte"
           className="absolute top-4 right-4 z-10 p-3 bg-[#2d3561] text-white rounded-full hover:bg-[#3d4571] transition-all shadow-lg border-2 border-white"
         >
-          <X className="w-6 h-6" />
+          <X className="w-6 h-6" aria-hidden="true" />
         </button>
 
         <div className="relative flex flex-col items-center justify-center">

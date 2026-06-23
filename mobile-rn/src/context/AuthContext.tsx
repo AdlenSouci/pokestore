@@ -16,6 +16,7 @@ type AuthContextValue = {
   cartCount: number;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
+  loginWithGoogleToken: (token: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshCart: () => Promise<void>;
 };
@@ -84,6 +85,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await persistAuth(data);
   };
 
+  const loginWithGoogleToken = async (token: string) => {
+    const data = await authApi.authFromGoogleToken(token);
+    await persistAuth(data);
+  };
+
   const logout = async () => {
     authTokenRef.current = null;
     await AsyncStorage.multiRemove([STORAGE_ACCESS_TOKEN, STORAGE_USER_JSON]);
@@ -98,6 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       cartCount,
       login,
       register,
+      loginWithGoogleToken,
       logout,
       refreshCart,
     }),

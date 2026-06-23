@@ -13,7 +13,10 @@ export class MailService {
     this.transporter = nodemailer.createTransport({
       host: this.configService.get<string>('MAIL_HOST') ?? 'smtp.gmail.com',
       port: parseInt(this.configService.get<string>('MAIL_PORT') ?? '587'),
-      secure: false, // TLS
+      secure: false,
+      connectionTimeout: 8_000,
+      greetingTimeout: 8_000,
+      socketTimeout: 10_000,
       auth: {
         user: this.configService.get<string>('MAIL_USER'),
         pass: this.configService.get<string>('MAIL_PASS'),

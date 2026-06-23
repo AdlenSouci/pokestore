@@ -73,7 +73,7 @@ export class OrdersService {
         return order;
     }
 
-    async createCheckoutSession(userId: number): Promise<{ url: string }> {
+    async createCheckoutSession(userId: number, returnBaseUrl?: string): Promise<{ url: string }> {
         const cart = await this.cartService.getCart(userId);
 
         if (!cart.items || cart.items.length === 0) {
@@ -117,6 +117,7 @@ export class OrdersService {
                 imageUrl: item.card.imageUrl ?? undefined,
             })),
             user?.email ?? '',
+            returnBaseUrl,
         );
 
         return { url };

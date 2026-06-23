@@ -7,6 +7,7 @@ import { useFonts, PressStart2P_400Regular } from '@expo-google-fonts/press-star
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
+import * as WebBrowser from 'expo-web-browser';
 import { ActivityIndicator, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from './src/context/AuthContext';
@@ -21,6 +22,8 @@ import { font } from './src/theme/typography';
 import type { RootStackParamList } from './src/types/navigation';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+
+WebBrowser.maybeCompleteAuthSession();
 
 const screenOptions = {
   headerStyle: { backgroundColor: colors.border },

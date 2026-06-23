@@ -17,9 +17,12 @@ export class StripeService {
     orderId: number,
     items: Array<{ name: string; price: number; quantity: number; imageUrl?: string }>,
     customerEmail: string,
+    returnBaseUrl?: string,
   ): Promise<string> {
     const frontendUrl =
-      this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:5173';
+      returnBaseUrl?.replace(/\/$/, '') ||
+      this.configService.get<string>('FRONTEND_URL')?.replace(/\/$/, '') ||
+      'http://localhost:5173';
 
     const session = await this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],

@@ -77,8 +77,13 @@ export function ProfilePage({ onClose, onUpdate }: ProfilePageProps) {
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b-4 border-[#2d3561] bg-gradient-to-r from-[#5a4f99] to-[#2d3561] sticky top-0 z-10">
                     <h2 className="text-white text-2xl pixel-font">MON PROFIL</h2>
-                    <button onClick={onClose} className="text-white hover:bg-[#7b6eb8] p-2 rounded-xl transition">
-                        <X className="w-6 h-6" />
+                    <button
+                      type="button"
+                      onClick={onClose}
+                      aria-label="Fermer le profil"
+                      className="text-white hover:bg-[#7b6eb8] p-2 rounded-xl transition"
+                    >
+                        <X className="w-6 h-6" aria-hidden="true" />
                     </button>
                 </div>
 

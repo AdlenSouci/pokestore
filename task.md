@@ -32,18 +32,19 @@ Coche les cases (`[x]`) au fur et à mesure que nous avançons !
 - [ ] Ajouter un @nestjs/throttler (Rate Limiting) pour protéger les routes de login contre le spam.
 
 ### 2. Expérience Utilisateur & Feedbacks (Frontend)
-- [ ] Remplacer les alertes basiques JavaScript par des Toasts (ex: react-hot-toast).
-- [ ] Ajouter des états de chargement (loaders/spinners) visuels pendant les appels API (ex: ajout au panier, connexion).
-- [ ] Gérer les messages d'erreur de façon claire dans l'UI (ex: "Mot de passe incorrect" direct sur le modal).
+- [x] Remplacer les alertes basiques JavaScript par des Toasts (ex: react-hot-toast).
+- [x] Ajouter des états de chargement (loaders/spinners) visuels pendant les appels API (ex: ajout au panier, connexion).
+- [x] Gérer les messages d'erreur de façon claire dans l'UI (ex: "Mot de passe incorrect" direct sur le modal).
 
 ### 3. Accessibilité & Performances (Frontend)
 - [ ] Lancer un audit Lighthouse (Chrome) et corriger les contrastes de couleurs si besoin.
-- [ ] Ajouter des attributs aria-label sur les icônes (ex: panier, profil, fermeture de modal).
-- [ ] Utiliser le lazy-loading pour les images des cartes Pokémon (loading="lazy").
+- [x] Ajouter des attributs aria-label sur les icônes (ex: panier, profil, fermeture de modal).
+- [x] Utiliser le lazy-loading pour les images des cartes Pokémon (loading="lazy").
+- [x] Menu mobile complet dans la Navbar (hamburger + navigation).
 
 ### 4. Documentation & Qualité (Global)
-- [ ] Installer Swagger (@nestjs/swagger) sur le backend pour générer une doc API interactive pour les profs.
-- [ ] Rédiger la suite de ce README.md complet (Installation, lancement de la BDD, scripts).
+- [x] Installer Swagger (@nestjs/swagger) sur le backend pour générer une doc API interactive pour les profs.
+- [x] Rédiger la suite de ce README.md complet (Installation, lancement de la BDD, scripts).
 
 ### 5. Application Mobile (Bonus obligatoire)
-- [ ] Développer l'application "Ma Collection" en Flutter (ou Capacitor) connectée à l'API NestJS existante.
+- [x] Développer l'application mobile (React Native / Expo) connectée à l'API NestJS existante (`mobile-rn/`).

@@ -1,10 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   // rawBody: true est nécessaire pour que le webhook Stripe puisse vérifier la signature
   const app = await NestFactory.create(AppModule, { rawBody: true });
+
+  app.use(cookieParser());
 
   // Préfixe global /api pour toutes les routes (utile pour l'app mobile)
   app.setGlobalPrefix('api');
