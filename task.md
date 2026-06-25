@@ -48,3 +48,12 @@ Coche les cases (`[x]`) au fur et à mesure que nous avançons !
 
 ### 5. Application Mobile (Bonus obligatoire)
 - [x] Développer l'application mobile (React Native / Expo) connectée à l'API NestJS existante (`mobile-rn/`).
+- [x] Écrans commandes et collection sur mobile (`OrdersScreen`, `CollectionScreen`).
+- [x] APK Android via EAS Build (preview).
+
+### 6. SEO & Livrables oral
+- [x] SEO : react-helmet-async, robots.txt, sitemap.xml (`mise_en_place_seo.md`).
+- [x] Livrable synthèse oral (`docs/LIVRABLE_ORAL_FINAL.md`).
+- [x] Tests E2E Playwright (7 tests, 100% passés - voir `docs/tests/`).
+- [ ] Formulaire contact par email (à implémenter).
+- [ ] Audit Lighthouse formalisé avec captures.
