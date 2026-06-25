@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { type Product } from '../types/product'; // Ajout de "type" ici
-import { ShoppingCart, Eye } from 'lucide-react';
+import { type Product } from '../types/product';
+import { ShoppingCart } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
@@ -12,7 +12,7 @@ export function ProductCard({ product, onAddToCart, onViewCard }: ProductCardPro
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <article className="flex flex-col h-full bg-gradient-to-b from-[#3d4571]/40 to-[#2d3561]/50 rounded-2xl border-2 border-[#5a4f99]/40 p-3 sm:p-4 transition-shadow hover:shadow-2xl hover:border-[#7ec8a3]/60">
+    <article className="flex flex-col h-full bg-gradient-to-b from-[#3d4571]/40 to-[#2d3561]/50 rounded-2xl border-2 border-[#5a4f99]/40 p-3 sm:p-4 transition-shadow hover:shadow-xl">
       <div
         className="relative cursor-pointer w-full"
         onMouseEnter={() => setIsHovered(true)}
@@ -38,32 +38,14 @@ export function ProductCard({ product, onAddToCart, onViewCard }: ProductCardPro
           />
 
           {isHovered && (
-            <>
-              <div
-                className="absolute inset-0 opacity-40 pointer-events-none"
-                style={{
-                  background:
-                    'linear-gradient(135deg, transparent 20%, rgba(255,255,255,0.9) 50%, transparent 80%)',
-                  animation: 'shine 2s infinite',
-                }}
-              />
-              <div
-                className="absolute inset-0 opacity-30 pointer-events-none"
-                style={{
-                  background:
-                    'linear-gradient(45deg, #5a4f99, #7ec8a3, #8b7ec8, #5a4f99)',
-                  backgroundSize: '200% 200%',
-                  animation: 'rainbow 3s ease infinite',
-                  mixBlendMode: 'color-dodge',
-                }}
-              />
-              <div className="absolute inset-0 bg-black/50 flex items-center justify-center pointer-events-none">
-                <div className="flex items-center gap-2 px-3 py-2 sm:px-5 sm:py-2.5 bg-[#7ec8a3] rounded-full border-2 border-white shadow-2xl">
-                  <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                  <span className="font-bold text-white text-xs sm:text-sm uppercase">Voir</span>
-                </div>
-              </div>
-            </>
+            <div
+              className="absolute inset-0 opacity-40 pointer-events-none"
+              style={{
+                background:
+                  'linear-gradient(135deg, transparent 20%, rgba(255,255,255,0.9) 50%, transparent 80%)',
+                animation: 'shine 2s infinite',
+              }}
+            />
           )}
         </div>
       </div>
@@ -94,11 +76,6 @@ export function ProductCard({ product, onAddToCart, onViewCard }: ProductCardPro
         @keyframes shine {
           0% { transform: translateX(-100%) translateY(-100%) rotate(30deg); }
           100% { transform: translateX(100%) translateY(100%) rotate(30deg); }
-        }
-        @keyframes rainbow {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
         }
       `}</style>
     </article>
