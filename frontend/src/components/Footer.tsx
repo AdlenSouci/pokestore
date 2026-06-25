@@ -1,11 +1,85 @@
+import { Github, Twitter, Instagram, Mail, MapPin, Shield, Truck, CreditCard } from 'lucide-react';
+import { PokeballIcon } from './PokeballIcon';
+
 export function Footer() {
+  const year = new Date().getFullYear();
+
   return (
-    <footer className="mt-auto py-8 flex justify-center gap-8 text-white opacity-80 relative z-10">
-      <div className="px-4 py-2 bg-[#2d3561] rounded-lg border-2 border-[#7ec8a3]">
-        <p className="text-xs pixel-font">VERSION GBA</p>
-      </div>
-      <div className="px-4 py-2 bg-[#2d3561] rounded-lg border-2 border-[#7ec8a3]">
-        <p className="text-xs pixel-font">© 2025</p>
+    <footer className="mt-auto bg-gradient-to-b from-[#1a1f3a] to-[#0f1428] text-white border-t-4 border-[#5a4f99] relative z-10">
+      <div className="container mx-auto px-4 py-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+          <div className="col-span-2 md:col-span-1">
+            <div className="flex items-center gap-2 mb-3">
+              <PokeballIcon size={32} />
+              <span className="pixel-font text-lg text-white">PokéStore</span>
+            </div>
+            <p className="text-sm text-[#a5b4fc] leading-relaxed font-sans">
+              Boutique en ligne dédiée aux cartes Pokémon TCG. Trouve, collectionne et achète tes cartes préférées.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="text-sm uppercase font-bold text-[#7ec8a3] mb-3 tracking-wider">Boutique</h3>
+            <ul className="space-y-2 text-sm font-sans text-[#c4b5fd]">
+              <li><a href="/" className="hover:text-white transition-colors">Accueil</a></li>
+              <li><a href="/shop" className="hover:text-white transition-colors">Catalogue</a></li>
+              <li><a href="/shop?q=pikachu" className="hover:text-white transition-colors">Pikachu</a></li>
+              <li><a href="/shop?q=dracaufeu" className="hover:text-white transition-colors">Dracaufeu</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="text-sm uppercase font-bold text-[#7ec8a3] mb-3 tracking-wider">Aide</h3>
+            <ul className="space-y-2 text-sm font-sans text-[#c4b5fd]">
+              <li><a href="/contact" className="hover:text-white transition-colors">Contact</a></li>
+              <li><a href="/faq" className="hover:text-white transition-colors">FAQ</a></li>
+              <li><a href="/livraison" className="hover:text-white transition-colors">Livraison</a></li>
+              <li><a href="/mentions-legales" className="hover:text-white transition-colors">Mentions légales</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="text-sm uppercase font-bold text-[#7ec8a3] mb-3 tracking-wider">Suis-nous</h3>
+            <div className="flex gap-3 mb-4">
+              <a href="#" aria-label="Twitter" className="p-2 rounded-lg bg-[#2d3561] hover:bg-[#5a4f99] transition-colors">
+                <Twitter className="w-4 h-4" aria-hidden="true" />
+              </a>
+              <a href="#" aria-label="Instagram" className="p-2 rounded-lg bg-[#2d3561] hover:bg-[#5a4f99] transition-colors">
+                <Instagram className="w-4 h-4" aria-hidden="true" />
+              </a>
+              <a href="https://github.com/AdlenSouci/pokestore" aria-label="GitHub" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-[#2d3561] hover:bg-[#5a4f99] transition-colors">
+                <Github className="w-4 h-4" aria-hidden="true" />
+              </a>
+            </div>
+            <a href="mailto:contact@pokestore.dev" className="text-sm font-sans text-[#a5b4fc] hover:text-white transition-colors flex items-center gap-2">
+              <Mail className="w-4 h-4" aria-hidden="true" />
+              contact@pokestore.dev
+            </a>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 py-6 border-y border-[#5a4f99]/30">
+          <div className="flex items-center gap-3 text-sm font-sans text-[#a5b4fc]">
+            <Truck className="w-5 h-5 text-[#7ec8a3] flex-shrink-0" aria-hidden="true" />
+            <span>Livraison rapide en France</span>
+          </div>
+          <div className="flex items-center gap-3 text-sm font-sans text-[#a5b4fc]">
+            <Shield className="w-5 h-5 text-[#7ec8a3] flex-shrink-0" aria-hidden="true" />
+            <span>Paiement sécurisé Stripe</span>
+          </div>
+          <div className="flex items-center gap-3 text-sm font-sans text-[#a5b4fc]">
+            <CreditCard className="w-5 h-5 text-[#7ec8a3] flex-shrink-0" aria-hidden="true" />
+            <span>CB, Apple Pay, Google Pay</span>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-3 text-xs font-sans text-[#a5b4fc]/70">
+          <p className="flex items-center gap-2">
+            <MapPin className="w-3 h-3" aria-hidden="true" />
+            <span>Projet étudiant — Ynov B3 DEV — Paris, France</span>
+          </p>
+          <p>© {year} PokéStore. Pokémon™ © Nintendo / Game Freak. Projet à but pédagogique.</p>
+        </div>
       </div>
     </footer>
   );

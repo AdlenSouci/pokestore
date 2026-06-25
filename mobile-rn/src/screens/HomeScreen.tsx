@@ -116,7 +116,7 @@ export function HomeScreen({ navigation }: Props) {
                 },
               ]}
             >
-              ⚡ POKÉCARD ⚡
+              POKÉSTORE
             </Text>
             <Text
               style={[
@@ -128,7 +128,7 @@ export function HomeScreen({ navigation }: Props) {
                 },
               ]}
             >
-              STORE
+              Cartes Pokémon TCG
             </Text>
           </Animated.View>
 
@@ -155,12 +155,12 @@ export function HomeScreen({ navigation }: Props) {
             style={({ pressed }) => [styles.startBtn, pressed && { transform: [{ scale: 0.96 }] }]}
             onPress={() => navigation.navigate('Shop')}
           >
-            <Text style={[styles.startText, { fontSize: startBtnTextSize }]}>▶ START GAME</Text>
+            <Text style={[styles.startText, { fontSize: startBtnTextSize }]}>Voir la boutique</Text>
           </Pressable>
 
           <View style={styles.pressRow}>
             {showPress ? (
-              <Text style={[styles.pressStart, { fontSize: pressTextSize }]}>Press Start to Begin</Text>
+              <Text style={[styles.pressStart, { fontSize: pressTextSize }]}>Touche pour commencer</Text>
             ) : (
               <Text style={styles.pressStartHidden}> </Text>
             )}

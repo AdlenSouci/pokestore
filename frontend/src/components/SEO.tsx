@@ -9,11 +9,11 @@ interface SEOProps {
   jsonLd?: object;
 }
 
-const SITE_NAME = 'PokéCard Store';
+const SITE_NAME = 'PokéStore';
 const DEFAULT_DESCRIPTION =
   'Achetez et collectionnez les meilleures cartes Pokémon rares en ligne. Livraison rapide, paiement sécurisé.';
-const DEFAULT_IMAGE = 'https://pokecardstore.com/og-image.jpg';
-const SITE_URL = 'https://pokecardstore.com';
+const DEFAULT_IMAGE = 'https://pokestore-hazel.vercel.app/og-image.jpg';
+const SITE_URL = 'https://pokestore-hazel.vercel.app';
 
 export function SEO({
   title,

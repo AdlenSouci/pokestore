@@ -89,7 +89,7 @@ export function HomePage({
           </p>
 
           <h1 className="text-4xl md:text-6xl text-white mb-4 pixel-font leading-tight">
-            PokéCard Store
+            PokéStore
           </h1>
 
           <p className="text-[#c4b5fd] text-base md:text-lg font-sans mb-10 max-w-xl leading-relaxed">
@@ -110,7 +110,7 @@ export function HomePage({
               onClick={onNavigateToShop}
               className="px-10 py-4 bg-transparent text-white rounded-xl border-4 border-[#5a4f99] font-bold text-lg hover:bg-white/10 transition"
             >
-              Nouveautés
+              Découvrir le catalogue
             </button>
           </div>
 
@@ -118,7 +118,7 @@ export function HomePage({
             {[
               { title: 'Catalogue filtré', desc: 'Prix, année, série et extension' },
               { title: 'Paiement sécurisé', desc: 'Stripe & commandes suivies' },
-              { title: 'Collection mobile', desc: 'Boutique aussi sur téléphone' },
+              { title: 'Disponible mobile', desc: 'App Android et site responsive' },
             ].map((item) => (
               <div
                 key={item.title}

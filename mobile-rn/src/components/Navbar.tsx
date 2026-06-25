@@ -32,9 +32,20 @@ export function Navbar() {
     >
       <View style={styles.inner}>
         <View style={styles.left}>
-          <Pressable onPress={() => navigation.navigate('Home')}>
+          <Pressable
+            onPress={() => navigation.navigate('Home')}
+            style={styles.logoWrap}
+            accessibilityLabel="Retour à l'accueil PokéStore"
+          >
+            <View style={styles.pokeball}>
+              <View style={styles.pokeballTop} />
+              <View style={styles.pokeballBand} />
+              <View style={styles.pokeballCenter}>
+                <View style={styles.pokeballCenterDot} />
+              </View>
+            </View>
             <Text style={styles.logo} numberOfLines={1}>
-              ⚡ PokéCard
+              PokéStore
             </Text>
           </Pressable>
           <Pressable onPress={() => navigation.navigate('Shop')} style={styles.navLink}>
@@ -121,11 +132,59 @@ const styles = StyleSheet.create({
     flex: 1,
     flexShrink: 1,
   },
+  logoWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   logo: {
     fontFamily: font.pixel,
-    fontSize: 12,
+    fontSize: 13,
     color: colors.text,
     letterSpacing: -0.5,
+  },
+  pokeball: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    borderColor: '#1a1a2e',
+    backgroundColor: '#fff',
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pokeballTop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 9,
+    backgroundColor: '#ef4444',
+  },
+  pokeballBand: {
+    position: 'absolute',
+    top: 9,
+    left: 0,
+    right: 0,
+    height: 2,
+    backgroundColor: '#1a1a2e',
+  },
+  pokeballCenter: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#fff',
+    borderWidth: 1.5,
+    borderColor: '#1a1a2e',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pokeballCenterDot: {
+    width: 2,
+    height: 2,
+    borderRadius: 1,
+    backgroundColor: '#1a1a2e',
   },
   navLink: {
     paddingVertical: 4,

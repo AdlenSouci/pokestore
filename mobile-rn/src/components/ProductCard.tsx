@@ -40,6 +40,7 @@ export function ProductCard({ product, columnWidth }: Props) {
   const sweep = useRef(new Animated.Value(0)).current;
 
   const imgMax = imageMaxWidth(columnWidth);
+  const isCompact = columnWidth != null && columnWidth < 220;
 
   const onView = () => {
     navigation.navigate('CardDetail', { product });
@@ -162,26 +163,43 @@ export function ProductCard({ product, columnWidth }: Props) {
       </Pressable>
 
       <View style={[styles.meta, { maxWidth: imgMax }]}>
-        <Text style={styles.name}>{product.name}</Text>
-        <Text style={styles.sub}>
+        <Text
+          style={[styles.name, isCompact && styles.nameCompact]}
+          numberOfLines={2}
+        >
+          {product.name}
+        </Text>
+        <Text
+          style={[styles.sub, isCompact && styles.subCompact]}
+          numberOfLines={1}
+        >
           {product.category} — {product.rarity}
         </Text>
-        <Text style={styles.price}>
+        <Text style={[styles.price, isCompact && styles.priceCompact]}>
           {Number.isFinite(product.price) ? `${product.price.toFixed(2)} €` : '—'}
         </Text>
 
         <Pressable
           onPress={onAddToCart}
-          style={({ pressed }) => [styles.btnOuter, pressed && { opacity: 0.92, transform: [{ scale: 0.98 }] }]}
+          style={({ pressed }) => [
+            styles.btnOuter,
+            pressed && { opacity: 0.92, transform: [{ scale: 0.98 }] },
+          ]}
         >
           <LinearGradient
             colors={['#5a4f99', '#2d3561']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
-            style={styles.btnGrad}
+            style={[styles.btnGrad, isCompact && styles.btnGradCompact]}
           >
-            <MaterialCommunityIcons name="cart-plus" size={20} color={colors.text} />
-            <Text style={styles.btnText}>Ajouter au panier</Text>
+            <MaterialCommunityIcons
+              name="cart-plus"
+              size={isCompact ? 16 : 20}
+              color={colors.text}
+            />
+            <Text style={[styles.btnText, isCompact && styles.btnTextCompact]}>
+              {isCompact ? 'Ajouter' : 'Ajouter au panier'}
+            </Text>
           </LinearGradient>
         </Pressable>
       </View>
@@ -192,7 +210,7 @@ export function ProductCard({ product, columnWidth }: Props) {
 const styles = StyleSheet.create({
   wrap: {
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 16,
     maxWidth: 360,
     alignSelf: 'center',
     width: '100%',
@@ -248,33 +266,46 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   meta: {
-    marginTop: 16,
+    marginTop: 10,
     width: '100%',
     alignItems: 'center',
   },
   name: {
     fontFamily: font.sansBold,
     color: colors.text,
-    fontSize: 16,
+    fontSize: 15,
     textAlign: 'center',
     marginBottom: 4,
+    minHeight: 36,
+  },
+  nameCompact: {
+    fontSize: 12,
+    minHeight: 30,
+    lineHeight: 15,
   },
   sub: {
     fontFamily: font.sansMedium,
     color: colors.textMuted,
-    fontSize: 14,
+    fontSize: 13,
     marginBottom: 4,
     textAlign: 'center',
   },
+  subCompact: {
+    fontSize: 10,
+  },
   price: {
     fontFamily: font.sansBold,
-    fontSize: 24,
+    fontSize: 22,
     color: colors.mint,
-    marginBottom: 12,
+    marginBottom: 10,
+  },
+  priceCompact: {
+    fontSize: 16,
+    marginBottom: 8,
   },
   btnOuter: {
     width: '100%',
-    borderRadius: 16,
+    borderRadius: 14,
     overflow: 'hidden',
     borderWidth: 2,
     borderColor: colors.cardBorder,
@@ -283,13 +314,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
+    gap: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+  },
+  btnGradCompact: {
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    gap: 4,
   },
   btnText: {
     fontFamily: font.sansBold,
     color: colors.text,
-    fontSize: 15,
+    fontSize: 14,
+  },
+  btnTextCompact: {
+    fontSize: 11,
   },
 });

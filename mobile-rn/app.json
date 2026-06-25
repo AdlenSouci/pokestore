@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "mobile-rn",
+    "name": "PokéStore",
     "slug": "mobile-rn",
     "scheme": "pokestore",
     "version": "1.0.0",

@@ -7,7 +7,7 @@ const OUT = path.resolve(__dirname, '../../docs/tests');
 
 test('E2E-01 - Accueil charge et affiche le titre', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('h1')).toContainText(/PokéCard|PokeCard/i);
+  await expect(page.locator('h1')).toContainText(/Pok[ée]Store/i);
   await expect(page.getByRole('button', { name: /voir la boutique/i })).toBeVisible();
   await page.screenshot({
     path: path.join(OUT, 'e2e-01-home.png'),

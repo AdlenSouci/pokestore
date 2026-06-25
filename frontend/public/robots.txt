@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /api/
 
-Sitemap: https://pokecardstore.com/sitemap.xml
+Sitemap: https://pokestore-hazel.vercel.app/sitemap.xml

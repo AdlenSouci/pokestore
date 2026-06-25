@@ -12,36 +12,31 @@ export function ProductCard({ product, onAddToCart, onViewCard }: ProductCardPro
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <article className="flex flex-col h-full bg-gradient-to-b from-[#3d4571]/40 to-[#2d3561]/50 rounded-2xl border-2 border-[#5a4f99]/40 p-3 sm:p-4 transition-shadow hover:shadow-2xl hover:border-[#7ec8a3]/60">
       <div
-        className="relative cursor-pointer"
+        className="relative cursor-pointer w-full"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onClick={() => onViewCard?.(product)}
-        style={{
-          perspective: '1000px',
-          width: '100%',
-          maxWidth: '280px',
-        }}
+        style={{ perspective: '1000px' }}
       >
         <div
-          className="relative rounded-2xl overflow-hidden shadow-2xl transition-all duration-500 border-4 border-[#2d3561]"
+          className="relative rounded-xl overflow-hidden shadow-xl transition-all duration-500 border-2 sm:border-4 border-[#2d3561] w-full aspect-[63/88]"
           style={{
             transform: isHovered
-              ? 'rotateY(15deg) rotateX(10deg) scale(1.05)'
+              ? 'rotateY(10deg) rotateX(6deg) scale(1.03)'
               : 'rotateY(0deg) rotateX(0deg) scale(1)',
             transformStyle: 'preserve-3d',
-            aspectRatio: '63/88',
           }}
         >
           <img
             src={product.image}
-            alt={product.name}
+            alt={`Carte Pokémon ${product.name} - ${product.rarity}`}
             loading="lazy"
             decoding="async"
             className="w-full h-full object-cover"
           />
-          
+
           {isHovered && (
             <>
               <div
@@ -62,11 +57,10 @@ export function ProductCard({ product, onAddToCart, onViewCard }: ProductCardPro
                   mixBlendMode: 'color-dodge',
                 }}
               />
-              
               <div className="absolute inset-0 bg-black/50 flex items-center justify-center pointer-events-none">
-                <div className="flex items-center gap-2 px-6 py-3 bg-[#7ec8a3] rounded-full border-3 border-white shadow-2xl">
-                  <Eye className="w-6 h-6 text-white" />
-                  <span className="font-bold text-white text-lg">VIEW CARD</span>
+                <div className="flex items-center gap-2 px-3 py-2 sm:px-5 sm:py-2.5 bg-[#7ec8a3] rounded-full border-2 border-white shadow-2xl">
+                  <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                  <span className="font-bold text-white text-xs sm:text-sm uppercase">Voir</span>
                 </div>
               </div>
             </>
@@ -74,21 +68,25 @@ export function ProductCard({ product, onAddToCart, onViewCard }: ProductCardPro
         </div>
       </div>
 
-      <div className="text-center w-full max-w-[280px]">
-        <h3 className="text-white font-bold mb-1 drop-shadow-sm">{product.name}</h3>
-        <p className="text-[#e0e7ff] text-sm mb-1 font-medium">
+      <div className="text-center w-full flex flex-col flex-1 pt-3 sm:pt-4">
+        <h3 className="text-white font-bold text-sm sm:text-base mb-1 line-clamp-2 drop-shadow-sm">
+          {product.name}
+        </h3>
+        <p className="text-[#e0e7ff] text-xs sm:text-sm mb-1 font-medium opacity-80">
           {product.category} — {product.rarity}
         </p>
-        <div className="text-2xl font-bold text-[#7ec8a3] mb-3 tabular-nums">
+        <div className="text-lg sm:text-2xl font-bold text-[#7ec8a3] mb-3 tabular-nums">
           {Number.isFinite(product.price) ? `${product.price.toFixed(2)} €` : '—'}
         </div>
-        
+
         <button
           onClick={() => onAddToCart(product)}
-          className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#5a4f99] to-[#2d3561] text-white rounded-2xl hover:from-[#6a5fa9] hover:to-[#3d4571] transition-all transform hover:scale-105 active:scale-95 shadow-lg border-2 border-[#2d3561]"
+          className="mt-auto w-full flex items-center justify-center gap-2 px-3 py-2 sm:px-4 sm:py-3 bg-gradient-to-r from-[#5a4f99] to-[#2d3561] text-white rounded-xl hover:from-[#6a5fa9] hover:to-[#3d4571] transition-all transform hover:scale-105 active:scale-95 shadow-lg border-2 border-[#2d3561] text-xs sm:text-sm font-semibold"
+          aria-label={`Ajouter ${product.name} au panier`}
         >
-          <ShoppingCart className="w-5 h-5" />
-          Ajouter au panier
+          <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />
+          <span className="hidden sm:inline">Ajouter au panier</span>
+          <span className="sm:hidden">Ajouter</span>
         </button>
       </div>
 
@@ -103,6 +101,6 @@ export function ProductCard({ product, onAddToCart, onViewCard }: ProductCardPro
           100% { background-position: 0% 50%; }
         }
       `}</style>
-    </div>
+    </article>
   );
 }

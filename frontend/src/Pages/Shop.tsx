@@ -260,7 +260,7 @@ export function Shop({ onAddToCart, onViewCard }: ShopProps) {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 pb-24">
+    <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8 pb-24">
       <SEO
         title="Boutique – Cartes Pokémon"
         description="Catalogue de cartes Pokémon avec filtres par prix, série, année et extension."
@@ -398,7 +398,7 @@ export function Shop({ onAddToCart, onViewCard }: ShopProps) {
       ) : (
         <>
           <div
-            className={`relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 transition-opacity duration-200 ${
+            className={`relative grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5 lg:gap-6 transition-opacity duration-200 ${
               pageLoading ? 'opacity-50 pointer-events-none' : 'opacity-100'
             }`}
           >

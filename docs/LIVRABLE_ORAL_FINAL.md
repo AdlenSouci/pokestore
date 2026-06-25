@@ -405,16 +405,36 @@ Dossier source : `docs/cahier-des-charges/images/`
 
 ![Inscription](./cahier-des-charges/images/capture-v2-auth-signup.png)
 
-### Captures complémentaires (voir section 7 pour les tests Playwright)
+## 8.8 Captures complémentaires mobile et desktop
 
-| Capture | Statut | Contenu |
-|---------|--------|---------|
-| `tests/e2e-01-home.png` à `e2e-06-swagger.png` | ✅ Généré | Playwright E2E |
-| `tests/tests-unitaires-jest.png` | ✅ Généré | Sortie Jest |
-| `capture-mobile-home.png` | À ajouter | Écran GBA mobile |
-| `capture-mobile-collection.png` | À ajouter | Galerie collection mobile |
-| `capture-stripe.png` | À ajouter | Page checkout Stripe |
-| `capture-admin-electron.png` | À ajouter | Outil desktop admin |
+> Les fichiers ci-dessous sont des **placeholders générés** : il suffit de les **écraser** par les vraies captures (mêmes noms, mêmes chemins) puis de régénérer le `.docx` pour qu'elles apparaissent automatiquement dans le livrable.
+
+### Mobile — Accueil GBA
+
+![Accueil mobile](./cahier-des-charges/images/capture-mobile-home.png)
+
+### Mobile — Ma collection
+
+![Collection mobile](./cahier-des-charges/images/capture-mobile-collection.png)
+
+### Mobile — Mes commandes
+
+![Commandes mobile](./cahier-des-charges/images/capture-mobile-orders.png)
+
+### Desktop — Outil admin Electron
+
+![Admin Electron](./cahier-des-charges/images/capture-admin-electron.png)
+
+### Comment remplacer les placeholders
+
+| Fichier à fournir | Chemin exact | Comment l'obtenir |
+|-------------------|--------------|-------------------|
+| `capture-mobile-home.png` | `docs/cahier-des-charges/images/` | Screenshot téléphone — écran d'accueil GBA |
+| `capture-mobile-collection.png` | `docs/cahier-des-charges/images/` | Connecté → navbar "COLLECTION" |
+| `capture-mobile-orders.png` | `docs/cahier-des-charges/images/` | Connecté → icône 📦 navbar |
+| `capture-admin-electron.png` | `docs/cahier-des-charges/images/` | App `pokemon-electron` — dashboard |
+
+Puis : `cd docs && pandoc LIVRABLE_ORAL_FINAL.md -o LIVRABLE_ORAL_FINAL.docx --toc --toc-depth=2 --from gfm`
 
 ---
 

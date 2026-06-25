@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ShoppingCart, LogOut, UserCircle, Package, Menu, X } from 'lucide-react';
+import { PokeballIcon } from './PokeballIcon';
 
 interface NavbarProps {
   cartItemsCount: number;
@@ -78,9 +79,13 @@ export function Navbar({
             <button
               type="button"
               onClick={handleNavigateHome}
-              className="text-xl md:text-2xl pixel-font tracking-tighter cursor-pointer hover:scale-105 transition-transform text-left"
+              className="flex items-center gap-2 cursor-pointer hover:scale-105 transition-transform text-left"
+              aria-label="Retour à l'accueil PokéStore"
             >
-              ⚡ PokéCard
+              <PokeballIcon size={28} />
+              <span className="text-lg md:text-2xl pixel-font tracking-tighter">
+                PokéStore
+              </span>
             </button>
             <div className="hidden md:flex gap-6 font-bold text-sm">
               <button onClick={onNavigateToShop} className="hover:text-[#7ec8a3] transition-colors uppercase">

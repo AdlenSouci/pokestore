@@ -29,9 +29,9 @@ const PAGE_SIZE = 24;
 
 export function ShopScreen({}: Props) {
   const { width: windowWidth } = useWindowDimensions();
-  const horizontalPad = 16;
-  const gridCols = windowWidth >= 640 ? 2 : 1;
-  const gridGap = 20;
+  const horizontalPad = 12;
+  const gridCols = windowWidth >= 900 ? 3 : windowWidth >= 360 ? 2 : 1;
+  const gridGap = 12;
   const colW = (windowWidth - horizontalPad * 2 - gridGap * (gridCols - 1)) / gridCols;
   const [products, setProducts] = useState<Product[]>([]);
   const [meta, setMeta] = useState<ShopMeta | null>(null);
@@ -158,9 +158,9 @@ export function ShopScreen({}: Props) {
         keyboardDismissMode="on-drag"
       >
         <View style={styles.headerBlock}>
-          <Text style={styles.h2}>Cartes Pokémon</Text>
+          <Text style={styles.h2}>Boutique PokéStore</Text>
           <Text style={styles.subtitle}>
-            Filtre par prix, année, série ou extension — mélange de plusieurs générations selon ton import.
+            Filtre par prix, année, série ou extension.
           </Text>
         </View>
 
@@ -402,8 +402,8 @@ function Field({
 
 const styles = StyleSheet.create({
   scrollContent: {
-    paddingHorizontal: 16,
-    paddingTop: 24,
+    paddingHorizontal: 12,
+    paddingTop: 20,
     paddingBottom: 48,
   },
   headerBlock: {
