@@ -40,6 +40,11 @@ export function Navbar() {
           <Pressable onPress={() => navigation.navigate('Shop')} style={styles.navLink}>
             <Text style={styles.navLinkText}>BOUTIQUE</Text>
           </Pressable>
+          {user && (
+            <Pressable onPress={() => navigation.navigate('Collection')} style={styles.navLink}>
+              <Text style={styles.navLinkText}>COLLECTION</Text>
+            </Pressable>
+          )}
         </View>
 
         <View style={styles.right}>
@@ -51,6 +56,13 @@ export function Navbar() {
                   {user.name}
                 </Text>
               </View>
+              <Pressable
+                onPress={() => navigation.navigate('Orders')}
+                style={styles.iconBtn}
+                accessibilityLabel="Mes commandes"
+              >
+                <MaterialCommunityIcons name="package-variant" size={22} color={colors.text} />
+              </Pressable>
               <Pressable onPress={logout} style={styles.iconBtn} accessibilityLabel="Déconnexion">
                 <MaterialCommunityIcons name="logout" size={22} color={colors.text} />
               </Pressable>

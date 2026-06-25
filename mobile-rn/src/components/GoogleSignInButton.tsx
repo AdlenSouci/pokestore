@@ -4,6 +4,7 @@ import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
 import { useAuth } from '../context/AuthContext';
 import { getApiBaseUrl } from '../config/api';
+import { parseOAuthCallback } from '../lib/parseOAuthCallback';
 import { colors } from '../theme/colors';
 import { font } from '../theme/typography';
 
@@ -25,9 +26,7 @@ export function GoogleSignInButton({ disabled, loading, onLoadingChange, onSucce
       const result = await WebBrowser.openAuthSessionAsync(startUrl, redirectUri);
 
       if (result.type === 'success' && result.url) {
-        const parsed = new URL(result.url);
-        const token = parsed.searchParams.get('token');
-        const error = parsed.searchParams.get('error');
+        const { token, error } = parseOAuthCallback(result.url);
         if (error) {
           throw new Error(decodeURIComponent(error));
         }

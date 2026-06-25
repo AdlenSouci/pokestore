@@ -18,6 +18,7 @@ import { useAuth } from '../context/AuthContext';
 import * as cartService from '../services/cart';
 import * as orderService from '../services/order';
 import { getWebReturnUrl } from '../config/api';
+import { parseOAuthCallback } from '../lib/parseOAuthCallback';
 import type { RootStackParamList } from '../types/navigation';
 import type { Cart as CartType } from '../services/cart';
 import { colors } from '../theme/colors';
@@ -86,13 +87,15 @@ export function CartScreen({ navigation }: Props) {
       const result = await WebBrowser.openAuthSessionAsync(url, returnUrl);
 
       if (result.type === 'success' && result.url) {
-        const parsed = new URL(result.url);
-        const sessionId = parsed.searchParams.get('session_id');
-        const payment = parsed.searchParams.get('payment');
+        const { sessionId, payment } = parseOAuthCallback(result.url);
 
         if (payment === 'success' && sessionId) {
           await orderService.confirmPayment(sessionId);
-          Alert.alert('Paiement', 'Commande validée ! Un email de confirmation t’a été envoyé.');
+          Alert.alert('Paiement', 'Commande validée ! Un email de confirmation t’a été envoyé.', [
+            { text: 'Ma collection', onPress: () => navigation.navigate('Collection') },
+            { text: 'Mes commandes', onPress: () => navigation.navigate('Orders') },
+            { text: 'OK' },
+          ]);
           setCart(null);
           await refreshCart();
         } else if (payment === 'cancelled') {
