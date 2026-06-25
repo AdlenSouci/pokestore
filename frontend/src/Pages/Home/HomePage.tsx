@@ -1,7 +1,7 @@
 import { Layout } from '../../components/Layout';
 import { SEO } from '../../components/SEO';
 import { PokemonBackground } from '../../components/animations/PokemonBackground';
-import { GbaBattleScene } from '../../components/animations/GbaBattleScene';
+import { BattleAnim } from '../../components/animations/BattleAnim';
 import { PokeballIcon } from '../../components/PokeballIcon';
 import './HomePage.css';
 
@@ -83,9 +83,8 @@ export function HomePage({
             quelques clics.
           </p>
 
-          {/* Combat GBA hero */}
-          <div className="w-full max-w-lg mb-10">
-            <GbaBattleScene variant="hero" />
+          <div className="w-full max-w-md mb-10">
+            <BattleAnim size="hero" />
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mb-14">

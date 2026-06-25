@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ShoppingCart, LogOut, UserCircle, Package, Menu, X } from 'lucide-react';
 import { PokeballIcon } from './PokeballIcon';
-import { GbaBattleScene } from './animations/GbaBattleScene';
+import { BattleAnim } from './animations/BattleAnim';
 
 interface NavbarProps {
   cartItemsCount: number;
@@ -89,9 +89,9 @@ export function Navbar({
               </span>
             </button>
 
-            {/* Mini combat GBA — desktop uniquement */}
-            <div className="hidden xl:block flex-1 max-w-[280px] mx-2">
-              <GbaBattleScene variant="compact" />
+            {/* Combat animé navbar */}
+            <div className="hidden lg:block shrink-0">
+              <BattleAnim size="nav" />
             </div>
 
             <div className="hidden md:flex gap-6 font-bold text-sm shrink-0">

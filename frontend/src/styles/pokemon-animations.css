@@ -18,45 +18,59 @@
   50% { transform: skewX(3deg) scaleY(1.04); }
 }
 
-@keyframes battle-idle-left {
-  0%, 100% { transform: translateY(0) scaleX(-1); }
-  50% { transform: translateY(-4px) scaleX(-1); }
-}
-
-@keyframes battle-idle-right {
+@keyframes battle-bob {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
+  50% { transform: translateY(-3px); }
 }
 
-@keyframes battle-lunge-left {
-  0%, 100% { transform: translateX(0) scaleX(-1); }
-  15% { transform: translateX(8px) scaleX(-1); }
-  30% { transform: translateX(0) scaleX(-1); }
+@keyframes battle-drac-attack {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  20% { transform: translateX(6px) translateY(-2px); }
+  40% { transform: translateX(0) translateY(0); }
 }
 
-@keyframes battle-lunge-right {
-  0%, 100% { transform: translateX(0); }
-  55% { transform: translateX(-8px); }
-  70% { transform: translateX(0); }
+@keyframes battle-tortank-attack {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  60% { transform: translateX(-6px) translateY(-2px); }
+  80% { transform: translateX(0) translateY(0); }
 }
 
-@keyframes flame-burst {
-  0%, 100% { opacity: 0; transform: scale(0.4) translateX(0); }
-  15% { opacity: 1; transform: scale(1) translateX(-6px); }
-  35% { opacity: 0.6; transform: scale(1.3) translateX(-14px); }
-  50% { opacity: 0; }
-}
-
-@keyframes water-burst {
-  0%, 100% { opacity: 0; transform: scale(0.4) translateX(0); }
-  55% { opacity: 1; transform: scale(1) translateX(6px); }
-  75% { opacity: 0.5; transform: scale(1.2) translateX(14px); }
+@keyframes battle-effect {
+  0%, 100% { opacity: 0; transform: scale(0.5); }
+  20% { opacity: 1; transform: scale(1); }
+  40% { opacity: 0; transform: scale(1.2); }
+  60% { opacity: 0; }
+  75% { opacity: 1; transform: scale(1); }
   90% { opacity: 0; }
 }
 
-@keyframes hp-bar-pulse {
-  0%, 100% { opacity: 0.85; }
-  50% { opacity: 1; }
+@keyframes battle-spark-pop {
+  0%, 100% { opacity: 0; transform: scale(0); }
+  25% { opacity: 1; transform: scale(1.5); }
+  35% { opacity: 0; transform: scale(2); }
+  65% { opacity: 1; transform: scale(1.5); }
+  75% { opacity: 0; transform: scale(2); }
+}
+
+.battle-drac {
+  animation: battle-bob 2s ease-in-out infinite, battle-drac-attack 3s ease-in-out infinite;
+}
+
+.battle-tortank {
+  animation: battle-bob 2s ease-in-out infinite 0.3s, battle-tortank-attack 3s ease-in-out infinite;
+}
+
+.battle-flame,
+.battle-water {
+  animation: battle-effect 3s ease-out infinite;
+}
+
+.battle-water {
+  animation-delay: 1.5s;
+}
+
+.battle-spark {
+  animation: battle-spark-pop 3s ease-out infinite;
 }
 
 @keyframes scanline {
@@ -83,11 +97,6 @@
 .animate-poke-float { animation: poke-float 4s ease-in-out infinite; }
 .animate-poke-drift { animation: poke-drift 14s ease-in-out infinite; }
 .animate-grass-sway { animation: grass-sway 3s ease-in-out infinite; }
-.animate-battle-left { animation: battle-idle-left 2s ease-in-out infinite, battle-lunge-left 4s ease-in-out infinite; }
-.animate-battle-right { animation: battle-idle-right 2s ease-in-out infinite, battle-lunge-right 4s ease-in-out infinite; }
-.animate-flame-burst { animation: flame-burst 4s ease-out infinite; }
-.animate-water-burst { animation: water-burst 4s ease-out infinite; }
-.animate-hp-pulse { animation: hp-bar-pulse 2s ease-in-out infinite; }
 .animate-title-glow { animation: title-glow 3s ease-in-out infinite; }
 .animate-pokeball-wiggle { animation: pokeball-wiggle 2.5s ease-in-out infinite; }
 
