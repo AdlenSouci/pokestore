@@ -260,7 +260,7 @@ export function Shop({ onAddToCart, onViewCard }: ShopProps) {
   }
 
   return (
-    <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8 pb-24">
+    <div className="relative z-10 container mx-auto px-3 sm:px-4 py-6 sm:py-8 pb-24">
       <SEO
         title="Boutique – Cartes Pokémon"
         description="Catalogue de cartes Pokémon avec filtres par prix, série, année et extension."

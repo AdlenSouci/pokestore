@@ -1,5 +1,6 @@
 /* src/index.css */
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@import './styles/pokemon-animations.css';
 
 @tailwind base;
 @tailwind components;

@@ -1,6 +1,8 @@
-import { useMemo } from 'react';
 import { Layout } from '../../components/Layout';
 import { SEO } from '../../components/SEO';
+import { PokemonBackground } from '../../components/animations/PokemonBackground';
+import { GbaBattleScene } from '../../components/animations/GbaBattleScene';
+import { PokeballIcon } from '../../components/PokeballIcon';
 import './HomePage.css';
 
 interface HomePageProps {
@@ -30,17 +32,6 @@ export function HomePage({
   onNavigateToHome,
   onNavigateToShop,
 }: HomePageProps) {
-  const stars = useMemo(
-    () =>
-      Array.from({ length: 24 }, (_, i) => ({
-        top: `${(i * 37 + 11) % 100}%`,
-        left: `${(i * 53 + 7) % 100}%`,
-        delay: `${(i % 6) * 0.7}s`,
-        duration: `${3 + (i % 4)}s`,
-      })),
-    [],
-  );
-
   return (
     <Layout
       cartItemsCount={cartItemsCount}
@@ -56,59 +47,59 @@ export function HomePage({
     >
       <SEO
         title="Accueil"
-        description="PokéCard Store – Achetez et collectionnez des cartes Pokémon rares. Filtres par série, extension et prix."
+        description="PokéStore – Achetez et collectionnez des cartes Pokémon rares. Filtres par série, extension et prix."
         url="https://pokestore-hazel.vercel.app"
         jsonLd={{
           '@context': 'https://schema.org',
           '@type': 'WebSite',
-          name: 'PokéCard Store',
+          name: 'PokéStore',
           url: 'https://pokestore-hazel.vercel.app',
           description: 'Boutique en ligne de cartes Pokémon',
         }}
       />
 
-      <section className="relative min-h-[calc(100vh-64px)] overflow-hidden bg-gradient-to-b from-[#1a1f3a] via-[#2d3561] to-[#1a1f3a]">
-        <div className="absolute inset-0 pointer-events-none">
-          {stars.map((s, i) => (
-            <div
-              key={i}
-              className="absolute w-1 h-1 bg-white/60 rounded-full star-twinkle"
-              style={{
-                top: s.top,
-                left: s.left,
-                animationDelay: s.delay,
-                animationDuration: s.duration,
-              }}
-            />
-          ))}
-        </div>
+      <section className="relative min-h-[calc(100vh-64px)] overflow-hidden">
+        <PokemonBackground intensity="full" />
 
-        <div className="relative z-10 container mx-auto px-4 py-16 md:py-24 flex flex-col items-center text-center max-w-3xl">
-          <p className="text-[#7ec8a3] text-sm md:text-base font-sans font-semibold tracking-widest uppercase mb-4">
-            Boutique officielle de cartes Pokémon
+        <div className="relative z-10 container mx-auto px-4 py-12 md:py-20 flex flex-col items-center text-center max-w-4xl">
+          {/* Pokéball animée */}
+          <div className="mb-6 animate-poke-float">
+            <div className="relative">
+              <div className="absolute inset-0 rounded-full bg-[#7ec8a3]/20 blur-2xl scale-150 animate-title-glow" />
+              <PokeballIcon size={72} className="relative drop-shadow-2xl animate-pokeball-wiggle" />
+            </div>
+          </div>
+
+          <p className="text-[#7ec8a3] text-sm md:text-base font-sans font-semibold tracking-widest uppercase mb-3 animate-fade-in">
+            Boutique de cartes Pokémon
           </p>
 
-          <h1 className="text-4xl md:text-6xl text-white mb-4 pixel-font leading-tight">
+          <h1 className="text-4xl md:text-6xl text-white mb-4 pixel-font leading-tight animate-title-glow">
             PokéStore
           </h1>
 
-          <p className="text-[#c4b5fd] text-base md:text-lg font-sans mb-10 max-w-xl leading-relaxed">
+          <p className="text-[#c4b5fd] text-base md:text-lg font-sans mb-8 max-w-xl leading-relaxed">
             Parcours notre catalogue, filtre par prix, série ou extension, et complète ta collection en
             quelques clics.
           </p>
+
+          {/* Combat GBA hero */}
+          <div className="w-full max-w-lg mb-10">
+            <GbaBattleScene variant="hero" />
+          </div>
 
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mb-14">
             <button
               type="button"
               onClick={onStartGame}
-              className="px-10 py-4 bg-[#7ec8a3] text-[#1a1f3a] rounded-xl border-4 border-[#2d3561] font-bold text-lg hover:bg-[#6eb893] transition transform hover:scale-[1.02] active:scale-[0.98] shadow-lg"
+              className="px-10 py-4 bg-[#7ec8a3] text-[#1a1f3a] rounded-xl border-4 border-[#2d3561] font-bold text-lg hover:bg-[#6eb893] transition transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-[#7ec8a3]/30"
             >
               Voir la boutique
             </button>
             <button
               type="button"
               onClick={onNavigateToShop}
-              className="px-10 py-4 bg-transparent text-white rounded-xl border-4 border-[#5a4f99] font-bold text-lg hover:bg-white/10 transition"
+              className="px-10 py-4 bg-transparent text-white rounded-xl border-4 border-[#5a4f99] font-bold text-lg hover:bg-white/10 transition hover:border-[#7ec8a3]/60"
             >
               Découvrir le catalogue
             </button>
@@ -116,14 +107,16 @@ export function HomePage({
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full text-left">
             {[
-              { title: 'Catalogue filtré', desc: 'Prix, année, série et extension' },
-              { title: 'Paiement sécurisé', desc: 'Stripe & commandes suivies' },
-              { title: 'Disponible mobile', desc: 'App Android et site responsive' },
-            ].map((item) => (
+              { title: 'Catalogue filtré', desc: 'Prix, année, série et extension', emoji: '🃏' },
+              { title: 'Paiement sécurisé', desc: 'Stripe & commandes suivies', emoji: '💳' },
+              { title: 'Disponible mobile', desc: 'App Android et site responsive', emoji: '📱' },
+            ].map((item, i) => (
               <div
                 key={item.title}
-                className="rounded-2xl border-2 border-[#5a4f99]/50 bg-white/5 backdrop-blur-sm p-5"
+                className="rounded-2xl border-2 border-[#5a4f99]/50 bg-white/5 backdrop-blur-sm p-5 transition hover:border-[#7ec8a3]/50 hover:bg-white/10 hover:-translate-y-1"
+                style={{ animationDelay: `${i * 0.15}s` }}
               >
+                <span className="text-2xl mb-2 block" aria-hidden="true">{item.emoji}</span>
                 <h3 className="text-[#7ec8a3] font-bold font-sans mb-1">{item.title}</h3>
                 <p className="text-[#a5b4fc] text-sm font-sans">{item.desc}</p>
               </div>

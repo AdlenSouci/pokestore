@@ -1,0 +1,120 @@
+/* Animations Pokémon — fond, combat GBA, effets */
+
+@keyframes poke-float {
+  0%, 100% { transform: translateY(0) rotate(-6deg); }
+  50% { transform: translateY(-18px) rotate(6deg); }
+}
+
+@keyframes poke-drift {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 0.15; }
+  25% { opacity: 0.35; }
+  50% { transform: translate(12px, -24px) rotate(8deg); opacity: 0.2; }
+  75% { opacity: 0.3; }
+  100% { transform: translate(-8px, -48px) rotate(-5deg); opacity: 0.12; }
+}
+
+@keyframes grass-sway {
+  0%, 100% { transform: skewX(-2deg) scaleY(1); }
+  50% { transform: skewX(3deg) scaleY(1.04); }
+}
+
+@keyframes battle-idle-left {
+  0%, 100% { transform: translateY(0) scaleX(-1); }
+  50% { transform: translateY(-4px) scaleX(-1); }
+}
+
+@keyframes battle-idle-right {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes battle-lunge-left {
+  0%, 100% { transform: translateX(0) scaleX(-1); }
+  15% { transform: translateX(8px) scaleX(-1); }
+  30% { transform: translateX(0) scaleX(-1); }
+}
+
+@keyframes battle-lunge-right {
+  0%, 100% { transform: translateX(0); }
+  55% { transform: translateX(-8px); }
+  70% { transform: translateX(0); }
+}
+
+@keyframes flame-burst {
+  0%, 100% { opacity: 0; transform: scale(0.4) translateX(0); }
+  15% { opacity: 1; transform: scale(1) translateX(-6px); }
+  35% { opacity: 0.6; transform: scale(1.3) translateX(-14px); }
+  50% { opacity: 0; }
+}
+
+@keyframes water-burst {
+  0%, 100% { opacity: 0; transform: scale(0.4) translateX(0); }
+  55% { opacity: 1; transform: scale(1) translateX(6px); }
+  75% { opacity: 0.5; transform: scale(1.2) translateX(14px); }
+  90% { opacity: 0; }
+}
+
+@keyframes hp-bar-pulse {
+  0%, 100% { opacity: 0.85; }
+  50% { opacity: 1; }
+}
+
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+@keyframes aurora-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes title-glow {
+  0%, 100% { text-shadow: 0 0 20px rgba(126, 200, 163, 0.3), 4px 4px 0 #2d3561; }
+  50% { text-shadow: 0 0 32px rgba(126, 200, 163, 0.6), 4px 4px 0 #2d3561; }
+}
+
+@keyframes pokeball-wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-12deg); }
+  75% { transform: rotate(12deg); }
+}
+
+.animate-poke-float { animation: poke-float 4s ease-in-out infinite; }
+.animate-poke-drift { animation: poke-drift 14s ease-in-out infinite; }
+.animate-grass-sway { animation: grass-sway 3s ease-in-out infinite; }
+.animate-battle-left { animation: battle-idle-left 2s ease-in-out infinite, battle-lunge-left 4s ease-in-out infinite; }
+.animate-battle-right { animation: battle-idle-right 2s ease-in-out infinite, battle-lunge-right 4s ease-in-out infinite; }
+.animate-flame-burst { animation: flame-burst 4s ease-out infinite; }
+.animate-water-burst { animation: water-burst 4s ease-out infinite; }
+.animate-hp-pulse { animation: hp-bar-pulse 2s ease-in-out infinite; }
+.animate-title-glow { animation: title-glow 3s ease-in-out infinite; }
+.animate-pokeball-wiggle { animation: pokeball-wiggle 2.5s ease-in-out infinite; }
+
+.pokemon-bg-aurora {
+  background: linear-gradient(
+    135deg,
+    #0f1428 0%,
+    #1a1f3a 25%,
+    #2d3561 50%,
+    #1e2a4a 75%,
+    #0f1428 100%
+  );
+  background-size: 400% 400%;
+  animation: aurora-shift 18s ease infinite;
+}
+
+.battle-scanline::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.03) 2px,
+    rgba(0, 0, 0, 0.03) 4px
+  );
+  pointer-events: none;
+  opacity: 0.5;
+}

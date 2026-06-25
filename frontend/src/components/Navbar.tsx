@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ShoppingCart, LogOut, UserCircle, Package, Menu, X } from 'lucide-react';
 import { PokeballIcon } from './PokeballIcon';
+import { GbaBattleScene } from './animations/GbaBattleScene';
 
 interface NavbarProps {
   cartItemsCount: number;
@@ -72,22 +73,28 @@ export function Navbar({
   };
 
   return (
-    <nav className="bg-gradient-to-r from-[#5a4f99] via-[#8b7ec8] to-[#2d3561] text-white shadow-2xl sticky top-0 z-50 border-b-4 border-[#2d3561]">
+    <nav className="relative bg-gradient-to-r from-[#5a4f99]/95 via-[#8b7ec8]/95 to-[#2d3561]/95 backdrop-blur-sm text-white shadow-2xl sticky top-0 z-50 border-b-4 border-[#2d3561]">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center gap-4 md:gap-8">
+        <div className="flex items-center justify-between h-16 gap-2">
+          <div className="flex items-center gap-3 md:gap-6 min-w-0 flex-1">
             <button
               type="button"
               onClick={handleNavigateHome}
-              className="flex items-center gap-2 cursor-pointer hover:scale-105 transition-transform text-left"
+              className="flex items-center gap-2 cursor-pointer hover:scale-105 transition-transform text-left shrink-0"
               aria-label="Retour à l'accueil PokéStore"
             >
-              <PokeballIcon size={28} />
+              <PokeballIcon size={28} className="animate-pokeball-wiggle" />
               <span className="text-lg md:text-2xl pixel-font tracking-tighter">
                 PokéStore
               </span>
             </button>
-            <div className="hidden md:flex gap-6 font-bold text-sm">
+
+            {/* Mini combat GBA — desktop uniquement */}
+            <div className="hidden xl:block flex-1 max-w-[280px] mx-2">
+              <GbaBattleScene variant="compact" />
+            </div>
+
+            <div className="hidden md:flex gap-6 font-bold text-sm shrink-0">
               <button onClick={onNavigateToShop} className="hover:text-[#7ec8a3] transition-colors uppercase">
                 Boutique
               </button>
