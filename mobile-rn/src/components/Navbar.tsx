@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -6,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import type { RootStackParamList } from '../types/navigation';
+import { BattleAnim } from './BattleAnim';
 import { colors } from '../theme/colors';
 import { font } from '../theme/typography';
 
@@ -15,27 +17,40 @@ export function Navbar() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<Nav>();
   const { user, cartCount, logout } = useAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const closeMenu = () => setMenuOpen(false);
+
+  const go = (screen: 'Home' | 'Shop' | 'Cart' | 'Login' | 'Register' | 'Orders' | 'Collection') => {
+    closeMenu();
+    navigation.navigate(screen);
+  };
+
+  const handleLogout = () => {
+    closeMenu();
+    logout();
+  };
 
   return (
-    <LinearGradient
-      colors={['#5a4f99', '#8b7ec8', '#2d3561']}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 0 }}
-      style={[
-        styles.gradient,
-        {
-          paddingTop: Math.max(insets.top, 8),
-          borderBottomWidth: 4,
-          borderBottomColor: colors.border,
-        },
-      ]}
-    >
-      <View style={styles.inner}>
-        <View style={styles.left}>
+    <View>
+      <LinearGradient
+        colors={['#5a4f99', '#8b7ec8', '#2d3561']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={[
+          styles.gradient,
+          {
+            paddingTop: Math.max(insets.top, 8),
+            borderBottomWidth: menuOpen ? 0 : 4,
+            borderBottomColor: colors.border,
+          },
+        ]}
+      >
+        <View style={styles.inner}>
           <Pressable
-            onPress={() => navigation.navigate('Home')}
+            onPress={() => go('Home')}
             style={styles.logoWrap}
-            accessibilityLabel="Retour à l'accueil PokéStore"
+            accessibilityLabel="Accueil PokéStore"
           >
             <View style={styles.pokeball}>
               <View style={styles.pokeballTop} />
@@ -48,64 +63,95 @@ export function Navbar() {
               PokéStore
             </Text>
           </Pressable>
-          <Pressable onPress={() => navigation.navigate('Shop')} style={styles.navLink}>
-            <Text style={styles.navLinkText}>BOUTIQUE</Text>
-          </Pressable>
-          {user && (
-            <Pressable onPress={() => navigation.navigate('Collection')} style={styles.navLink}>
-              <Text style={styles.navLinkText}>COLLECTION</Text>
-            </Pressable>
-          )}
-        </View>
 
-        <View style={styles.right}>
+          <View style={styles.center}>
+            <BattleAnim size="nav" />
+          </View>
+
+          <View style={styles.right}>
+            <Pressable
+              style={styles.iconBtn}
+              onPress={() => go('Cart')}
+              accessibilityLabel="Panier"
+            >
+              <MaterialCommunityIcons name="cart" size={24} color={colors.text} />
+              {cartCount > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{cartCount > 99 ? '99+' : cartCount}</Text>
+                </View>
+              )}
+            </Pressable>
+
+            <Pressable
+              style={styles.iconBtn}
+              onPress={() => setMenuOpen((o) => !o)}
+              accessibilityLabel={menuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+            >
+              <MaterialCommunityIcons
+                name={menuOpen ? 'close' : 'menu'}
+                size={26}
+                color={colors.text}
+              />
+            </Pressable>
+          </View>
+        </View>
+      </LinearGradient>
+
+      {menuOpen && (
+        <View style={styles.menu}>
+          <MenuItem label="Accueil" icon="home" onPress={() => go('Home')} />
+          <MenuItem label="Boutique" icon="store" onPress={() => go('Shop')} />
+          {user && (
+            <>
+              <MenuItem label="Ma collection" icon="cards" onPress={() => go('Collection')} />
+              <MenuItem label="Mes commandes" icon="package-variant" onPress={() => go('Orders')} />
+            </>
+          )}
+          <View style={styles.menuDivider} />
           {user ? (
             <>
-              <View style={styles.userBox}>
-                <Text style={styles.userLabel}>Dresseur</Text>
-                <Text style={styles.userName} numberOfLines={1}>
-                  {user.name}
-                </Text>
-              </View>
-              <Pressable
-                onPress={() => navigation.navigate('Orders')}
-                style={styles.iconBtn}
-                accessibilityLabel="Mes commandes"
-              >
-                <MaterialCommunityIcons name="package-variant" size={22} color={colors.text} />
-              </Pressable>
-              <Pressable onPress={logout} style={styles.iconBtn} accessibilityLabel="Déconnexion">
-                <MaterialCommunityIcons name="logout" size={22} color={colors.text} />
-              </Pressable>
+              <Text style={styles.menuUser}>Dresseur · {user.name}</Text>
+              <MenuItem label="Déconnexion" icon="logout" onPress={handleLogout} danger />
             </>
           ) : (
-            <View style={styles.authRow}>
-              <Pressable
-                style={styles.btnConnexion}
-                onPress={() => navigation.navigate('Login')}
-              >
-                <Text style={styles.btnConnexionText}>Connexion</Text>
-              </Pressable>
-              <Pressable
-                style={styles.btnInscription}
-                onPress={() => navigation.navigate('Register')}
-              >
-                <Text style={styles.btnInscriptionText}>Inscription</Text>
-              </Pressable>
-            </View>
+            <>
+              <MenuItem label="Connexion" icon="login" onPress={() => go('Login')} />
+              <MenuItem label="Inscription" icon="account-plus" onPress={() => go('Register')} accent />
+            </>
           )}
-
-          <Pressable style={styles.iconBtn} onPress={() => navigation.navigate('Cart')}>
-            <MaterialCommunityIcons name="cart" size={26} color={colors.text} />
-            {cartCount > 0 && (
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{cartCount > 99 ? '99+' : cartCount}</Text>
-              </View>
-            )}
-          </Pressable>
         </View>
-      </View>
-    </LinearGradient>
+      )}
+    </View>
+  );
+}
+
+function MenuItem({
+  label,
+  icon,
+  onPress,
+  danger,
+  accent,
+}: {
+  label: string;
+  icon: keyof typeof MaterialCommunityIcons.glyphMap;
+  onPress: () => void;
+  danger?: boolean;
+  accent?: boolean;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
+    >
+      <MaterialCommunityIcons
+        name={icon}
+        size={20}
+        color={danger ? '#ffb4b4' : accent ? colors.mint : colors.text}
+      />
+      <Text style={[styles.menuItemText, danger && styles.menuItemDanger, accent && styles.menuItemAccent]}>
+        {label}
+      </Text>
+    </Pressable>
   );
 }
 
@@ -121,32 +167,37 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    minHeight: 52,
-  },
-  left: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-    flex: 1,
-    flexShrink: 1,
+    paddingHorizontal: 12,
+    paddingBottom: 10,
+    minHeight: 48,
+    gap: 8,
   },
   logoWrap: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    flexShrink: 0,
   },
   logo: {
     fontFamily: font.pixel,
-    fontSize: 13,
+    fontSize: 11,
     color: colors.text,
     letterSpacing: -0.5,
   },
+  center: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  right: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexShrink: 0,
+  },
   pokeball: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     borderWidth: 2,
     borderColor: '#1a1a2e',
     backgroundColor: '#fff',
@@ -159,20 +210,20 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: 9,
+    height: 8,
     backgroundColor: '#ef4444',
   },
   pokeballBand: {
     position: 'absolute',
-    top: 9,
+    top: 8,
     left: 0,
     right: 0,
     height: 2,
     backgroundColor: '#1a1a2e',
   },
   pokeballCenter: {
-    width: 8,
-    height: 8,
+    width: 7,
+    height: 7,
     borderRadius: 4,
     backgroundColor: '#fff',
     borderWidth: 1.5,
@@ -186,67 +237,6 @@ const styles = StyleSheet.create({
     borderRadius: 1,
     backgroundColor: '#1a1a2e',
   },
-  navLink: {
-    paddingVertical: 4,
-  },
-  navLinkText: {
-    fontFamily: font.sansBold,
-    fontSize: 12,
-    color: colors.text,
-    textTransform: 'uppercase',
-  },
-  right: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  userBox: {
-    maxWidth: 100,
-  },
-  userLabel: {
-    fontFamily: font.sans,
-    fontSize: 9,
-    textTransform: 'uppercase',
-    opacity: 0.8,
-    color: colors.text,
-  },
-  userName: {
-    fontFamily: font.sansBold,
-    fontSize: 12,
-    color: colors.text,
-  },
-  authRow: {
-    flexDirection: 'row',
-    gap: 6,
-  },
-  btnConnexion: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    backgroundColor: colors.bg,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: colors.bgDeep,
-  },
-  btnConnexionText: {
-    fontFamily: font.sansBold,
-    fontSize: 10,
-    textTransform: 'uppercase',
-    color: colors.text,
-  },
-  btnInscription: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    backgroundColor: colors.mint,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: colors.border,
-  },
-  btnInscriptionText: {
-    fontSize: 10,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    color: colors.inputText,
-  },
   iconBtn: {
     padding: 8,
     borderRadius: 12,
@@ -255,9 +245,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 2,
     right: 2,
-    minWidth: 18,
-    height: 18,
-    borderRadius: 9,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
     backgroundColor: colors.danger,
     alignItems: 'center',
     justifyContent: 'center',
@@ -267,6 +257,49 @@ const styles = StyleSheet.create({
   badgeText: {
     fontFamily: font.sansBold,
     color: colors.text,
-    fontSize: 9,
+    fontSize: 8,
+  },
+  menu: {
+    backgroundColor: colors.bgDeep,
+    borderBottomWidth: 4,
+    borderBottomColor: colors.borderAccent,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    gap: 2,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+  },
+  menuItemPressed: {
+    backgroundColor: 'rgba(123, 110, 184, 0.35)',
+  },
+  menuItemText: {
+    fontFamily: font.sansBold,
+    fontSize: 15,
+    color: colors.text,
+  },
+  menuItemDanger: {
+    color: '#ffb4b4',
+  },
+  menuItemAccent: {
+    color: colors.mint,
+  },
+  menuDivider: {
+    height: 1,
+    backgroundColor: 'rgba(90, 79, 153, 0.5)',
+    marginVertical: 6,
+  },
+  menuUser: {
+    fontFamily: font.sans,
+    fontSize: 11,
+    color: colors.indigoText,
+    textTransform: 'uppercase',
+    paddingHorizontal: 8,
+    paddingBottom: 4,
   },
 });

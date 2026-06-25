@@ -4,12 +4,17 @@ import { colors } from '../theme/colors';
 import { Footer } from './Footer';
 import { Navbar } from './Navbar';
 
-export function AppShell({ children }: { children: ReactNode }) {
+interface AppShellProps {
+  children: ReactNode;
+  hideFooter?: boolean;
+}
+
+export function AppShell({ children, hideFooter = false }: AppShellProps) {
   return (
     <View style={styles.root}>
       <Navbar />
       <View style={styles.main}>{children}</View>
-      <Footer />
+      {!hideFooter && <Footer />}
     </View>
   );
 }

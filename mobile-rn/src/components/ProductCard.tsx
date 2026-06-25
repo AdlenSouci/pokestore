@@ -156,7 +156,7 @@ export function ProductCard({ product, columnWidth }: Props) {
             />
             <View style={styles.viewPill}>
               <MaterialCommunityIcons name="eye" size={22} color={colors.text} />
-              <Text style={styles.viewPillText}>VIEW CARD</Text>
+              <Text style={styles.viewPillText}>Voir</Text>
             </View>
           </Animated.View>
         </Animated.View>
