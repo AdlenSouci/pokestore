@@ -17,6 +17,7 @@ import { AuthProvider } from './src/context/AuthContext';
 import { CardDetailScreen } from './src/screens/CardDetailScreen';
 import { CartScreen } from './src/screens/CartScreen';
 import { CollectionScreen } from './src/screens/CollectionScreen';
+import { ContactScreen } from './src/screens/ContactScreen';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { LoginScreen } from './src/screens/LoginScreen';
 import { OrdersScreen } from './src/screens/OrdersScreen';
@@ -74,6 +75,7 @@ export default function App() {
               <Stack.Screen name="Cart" component={CartScreen} options={{ headerShown: false }} />
               <Stack.Screen name="Orders" component={OrdersScreen} options={{ headerShown: false }} />
               <Stack.Screen name="Collection" component={CollectionScreen} options={{ headerShown: false }} />
+              <Stack.Screen name="Contact" component={ContactScreen} options={{ headerShown: false }} />
             </Stack.Navigator>
           </NavigationContainer>
         </AuthProvider>

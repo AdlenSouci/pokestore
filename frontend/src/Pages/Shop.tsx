@@ -268,9 +268,9 @@ export function Shop({ onAddToCart, onViewCard }: ShopProps) {
       />
 
       <div ref={gridRef} className="mb-6 text-center scroll-mt-24">
-        <h2 className="text-[#2d3561] text-3xl md:text-4xl font-bold mb-2 pixel-font text-white">
+        <h1 className="text-[#2d3561] text-3xl md:text-4xl font-bold mb-2 pixel-font text-white">
           Boutique
-        </h2>
+        </h1>
         <p className="text-[#a5b4fc] text-sm md:text-base font-sans">
           Trouve ta carte par prix, année, série ou extension.
         </p>
@@ -288,7 +288,7 @@ export function Shop({ onAddToCart, onViewCard }: ShopProps) {
               placeholder={meta ? String(meta.priceMin) : '—'}
               value={minPrice}
               onChange={(e) => setMinPrice(e.target.value)}
-              className="rounded-xl border-2 border-[#2d3561] bg-white/90 px-3 py-2 text-[#2d3561] font-sans"
+              className="rounded-xl border-2 border-[#2d3561] bg-white/90 px-3 py-2 text-[#2d3561] font-sans focus-visible:ring-2 focus-visible:ring-[#7ec8a3]"
             />
           </label>
           <label className="flex flex-col gap-1 text-left">
@@ -301,7 +301,7 @@ export function Shop({ onAddToCart, onViewCard }: ShopProps) {
               placeholder={meta ? String(meta.priceMax) : '—'}
               value={maxPrice}
               onChange={(e) => setMaxPrice(e.target.value)}
-              className="rounded-xl border-2 border-[#2d3561] bg-white/90 px-3 py-2 text-[#2d3561] font-sans"
+              className="rounded-xl border-2 border-[#2d3561] bg-white/90 px-3 py-2 text-[#2d3561] font-sans focus-visible:ring-2 focus-visible:ring-[#7ec8a3]"
             />
           </label>
           <label className="flex flex-col gap-1 text-left">
@@ -311,7 +311,7 @@ export function Shop({ onAddToCart, onViewCard }: ShopProps) {
             <select
               value={year}
               onChange={(e) => setYear(e.target.value)}
-              className="rounded-xl border-2 border-[#2d3561] bg-white/90 px-3 py-2 text-[#2d3561] font-sans"
+              className="rounded-xl border-2 border-[#2d3561] bg-white/90 px-3 py-2 text-[#2d3561] font-sans focus-visible:ring-2 focus-visible:ring-[#7ec8a3]"
             >
               <option value="">Toutes</option>
               {(meta?.years ?? []).map((y) => (
@@ -328,7 +328,7 @@ export function Shop({ onAddToCart, onViewCard }: ShopProps) {
             <select
               value={series}
               onChange={(e) => setSeries(e.target.value)}
-              className="rounded-xl border-2 border-[#2d3561] bg-white/90 px-3 py-2 text-[#2d3561] font-sans"
+              className="rounded-xl border-2 border-[#2d3561] bg-white/90 px-3 py-2 text-[#2d3561] font-sans focus-visible:ring-2 focus-visible:ring-[#7ec8a3]"
             >
               <option value="">Toutes</option>
               {(meta?.series ?? []).map((s) => (
@@ -348,7 +348,7 @@ export function Shop({ onAddToCart, onViewCard }: ShopProps) {
             <select
               value={setId}
               onChange={(e) => setSetId(e.target.value)}
-              className="rounded-xl border-2 border-[#2d3561] bg-white/90 px-3 py-2 text-[#2d3561] font-sans"
+              className="rounded-xl border-2 border-[#2d3561] bg-white/90 px-3 py-2 text-[#2d3561] font-sans focus-visible:ring-2 focus-visible:ring-[#7ec8a3]"
             >
               <option value="">Toutes</option>
               {(meta?.sets ?? []).map((s) => (
@@ -367,7 +367,7 @@ export function Shop({ onAddToCart, onViewCard }: ShopProps) {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Pikachu, Dracaufeu…"
-              className="rounded-xl border-2 border-[#2d3561] bg-white/90 px-3 py-2 text-[#2d3561] font-sans"
+              className="rounded-xl border-2 border-[#2d3561] bg-white/90 px-3 py-2 text-[#2d3561] font-sans focus-visible:ring-2 focus-visible:ring-[#7ec8a3]"
             />
           </label>
         </div>
@@ -376,7 +376,7 @@ export function Shop({ onAddToCart, onViewCard }: ShopProps) {
           <button
             type="button"
             onClick={resetFilters}
-            className="px-6 py-2 rounded-xl bg-[#2d3561] text-white font-bold border-2 border-[#5a4f99] hover:bg-[#3d4571] transition font-sans text-sm"
+            className="px-6 py-2 rounded-xl bg-[#2d3561] text-white font-bold border-2 border-[#5a4f99] hover:bg-[#3d4571] transition font-sans text-sm focus-visible:ring-2 focus-visible:ring-[#7ec8a3]"
           >
             Réinitialiser
           </button>
@@ -421,7 +421,8 @@ export function Shop({ onAddToCart, onViewCard }: ShopProps) {
                 type="button"
                 disabled={page <= 1 || pageLoading}
                 onClick={() => goToPage(page - 1)}
-                className="px-4 py-2 rounded-xl bg-[#2d3561] text-white font-bold border-2 border-[#5a4f99] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#3d4571] transition font-sans text-sm"
+                aria-label="Page précédente"
+                className="px-4 py-2 rounded-xl bg-[#2d3561] text-white font-bold border-2 border-[#5a4f99] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#3d4571] transition font-sans text-sm focus-visible:ring-2 focus-visible:ring-[#7ec8a3]"
               >
                 Précédent
               </button>
@@ -437,8 +438,9 @@ export function Shop({ onAddToCart, onViewCard }: ShopProps) {
                       key={item}
                       type="button"
                       aria-current={page === item ? 'page' : undefined}
+                      aria-label={`Page ${item}`}
                       onClick={() => goToPage(item)}
-                      className={`min-w-[2.5rem] px-3 py-2 rounded-lg font-sans text-sm font-bold border-2 transition ${
+                      className={`min-w-[2.5rem] px-3 py-2 rounded-lg font-sans text-sm font-bold border-2 transition focus-visible:ring-2 focus-visible:ring-[#7ec8a3] ${
                         page === item
                           ? 'bg-[#5a4f99] text-white border-[#a5b4fc]'
                           : 'bg-white/10 text-[#a5b4fc] border-[#2d3561] hover:bg-white/20'
@@ -454,7 +456,8 @@ export function Shop({ onAddToCart, onViewCard }: ShopProps) {
                 type="button"
                 disabled={page >= totalPages || pageLoading}
                 onClick={() => goToPage(page + 1)}
-                className="px-4 py-2 rounded-xl bg-[#2d3561] text-white font-bold border-2 border-[#5a4f99] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#3d4571] transition font-sans text-sm"
+                aria-label="Page suivante"
+                className="px-4 py-2 rounded-xl bg-[#2d3561] text-white font-bold border-2 border-[#5a4f99] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#3d4571] transition font-sans text-sm focus-visible:ring-2 focus-visible:ring-[#7ec8a3]"
               >
                 Suivant
               </button>

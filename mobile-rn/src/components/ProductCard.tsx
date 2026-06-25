@@ -26,9 +26,10 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 type Props = {
   product: Product;
   columnWidth?: number;
+  quantity?: number;
 };
 
-export function ProductCard({ product, columnWidth }: Props) {
+export function ProductCard({ product, columnWidth, quantity }: Props) {
   const navigation = useNavigation<Nav>();
   const { user, refreshCart } = useAuth();
   const scale = useRef(new Animated.Value(1)).current;
@@ -36,6 +37,8 @@ export function ProductCard({ product, columnWidth }: Props) {
 
   const imgMax = imageMaxWidth(columnWidth);
   const isCompact = columnWidth != null && columnWidth < 220;
+
+  const inCollection = quantity != null && quantity > 0;
 
   const onView = () => {
     navigation.navigate('CardDetail', { product });
@@ -112,6 +115,12 @@ export function ProductCard({ product, columnWidth }: Props) {
         >
           <Image source={{ uri: product.image }} style={styles.image} contentFit="contain" />
 
+          {inCollection && (
+            <View style={styles.qtyBadge}>
+              <Text style={styles.qtyBadgeText}>×{quantity}</Text>
+            </View>
+          )}
+
           <Animated.View
             style={[
               styles.shineStrip,
@@ -146,7 +155,11 @@ export function ProductCard({ product, columnWidth }: Props) {
           {product.category} — {product.rarity}
         </Text>
         <Text style={[styles.price, isCompact && styles.priceCompact]}>
-          {Number.isFinite(product.price) ? `${product.price.toFixed(2)} €` : '—'}
+          {inCollection
+            ? `${quantity} en collection`
+            : Number.isFinite(product.price)
+              ? `${product.price.toFixed(2)} €`
+              : '—'}
         </Text>
 
         <Pressable
@@ -201,6 +214,23 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: '100%',
+  },
+  qtyBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    zIndex: 2,
+    backgroundColor: colors.mint,
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderWidth: 2,
+    borderColor: colors.border,
+  },
+  qtyBadgeText: {
+    fontFamily: font.sansBold,
+    fontSize: 11,
+    color: colors.inputText,
   },
   shineStrip: {
     position: 'absolute',

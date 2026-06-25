@@ -3,7 +3,6 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
   ActivityIndicator,
   FlatList,
-  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -12,6 +11,7 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { AppShell } from '../components/AppShell';
+import { ProductCard } from '../components/ProductCard';
 import { useOrders } from '../hooks/useOrders';
 import { useAuth } from '../context/AuthContext';
 import { buildCollectionFromOrders } from '../lib/collectionFromOrders';
@@ -59,9 +59,12 @@ export function CollectionScreen({ navigation }: Props) {
             <Text style={styles.title}>MA COLLECTION</Text>
             {!loading && collection.length > 0 && (
               <Text style={styles.subtitle}>
-                {collection.length} carte{collection.length > 1 ? 's' : ''} · {totalCards} au total
+                {collection.length} carte{collection.length > 1 ? 's uniques' : ' unique'} · {totalCards} au total
               </Text>
             )}
+            <Text style={styles.hint}>
+              Cartes achetées — appuie pour les effets 3D et animations de type
+            </Text>
           </View>
         </View>
 
@@ -96,25 +99,13 @@ export function CollectionScreen({ navigation }: Props) {
             }}
             columnWrapperStyle={numCols > 1 ? { gap } : undefined}
             renderItem={({ item }) => (
-              <Pressable
-                style={[styles.card, { width: colWidth }]}
-                onPress={() => navigation.navigate('CardDetail', { product: item.product })}
-              >
-                <View style={styles.imageFrame}>
-                  <Image source={{ uri: item.product.image }} style={styles.image} />
-                  {item.quantity > 1 && (
-                    <View style={styles.qtyBadge}>
-                      <Text style={styles.qtyBadgeText}>×{item.quantity}</Text>
-                    </View>
-                  )}
-                </View>
-                <Text style={styles.name} numberOfLines={2}>
-                  {item.product.name}
-                </Text>
-                <Text style={styles.meta} numberOfLines={1}>
-                  {item.product.category} · {item.product.rarity}
-                </Text>
-              </Pressable>
+              <View style={{ width: colWidth }}>
+                <ProductCard
+                  product={item.product}
+                  columnWidth={colWidth}
+                  quantity={item.quantity}
+                />
+              </View>
             )}
           />
         )}
@@ -149,7 +140,7 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: 12,
     paddingTop: 16,
     paddingBottom: 16,
@@ -169,6 +160,13 @@ const styles = StyleSheet.create({
     color: colors.indigoText,
     fontSize: 13,
     marginTop: 4,
+  },
+  hint: {
+    fontFamily: font.sans,
+    color: colors.violet,
+    fontSize: 11,
+    marginTop: 6,
+    lineHeight: 16,
   },
   error: {
     fontFamily: font.sansBold,
@@ -206,51 +204,5 @@ const styles = StyleSheet.create({
   primaryBtnText: {
     fontFamily: font.sansBold,
     color: colors.text,
-  },
-  card: {
-    marginBottom: 16,
-  },
-  imageFrame: {
-    aspectRatio: 63 / 88,
-    borderRadius: 12,
-    overflow: 'hidden',
-    borderWidth: 3,
-    borderColor: colors.cardBorder,
-    backgroundColor: colors.border,
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'contain',
-  },
-  qtyBadge: {
-    position: 'absolute',
-    top: 6,
-    right: 6,
-    backgroundColor: colors.mint,
-    borderRadius: 999,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderWidth: 2,
-    borderColor: colors.border,
-  },
-  qtyBadgeText: {
-    fontFamily: font.sansBold,
-    fontSize: 11,
-    color: colors.inputText,
-  },
-  name: {
-    fontFamily: font.sansBold,
-    color: colors.text,
-    fontSize: 13,
-    marginTop: 8,
-    textAlign: 'center',
-  },
-  meta: {
-    fontFamily: font.sans,
-    color: colors.indigoText,
-    fontSize: 11,
-    marginTop: 2,
-    textAlign: 'center',
   },
 });

@@ -17,6 +17,8 @@ interface HomePageProps {
   onLogout: () => void;
   onNavigateToHome: () => void;
   onNavigateToShop: () => void;
+  onNavigateToCollection: () => void;
+  onNavigateToContact: () => void;
 }
 
 export function HomePage({
@@ -31,6 +33,8 @@ export function HomePage({
   onLogout,
   onNavigateToHome,
   onNavigateToShop,
+  onNavigateToCollection,
+  onNavigateToContact,
 }: HomePageProps) {
   return (
     <Layout
@@ -44,6 +48,8 @@ export function HomePage({
       onLogout={onLogout}
       onNavigateToHome={onNavigateToHome}
       onNavigateToShop={onNavigateToShop}
+      onNavigateToCollection={onNavigateToCollection}
+      onNavigateToContact={onNavigateToContact}
     >
       <SEO
         title="Accueil"

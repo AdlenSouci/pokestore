@@ -15,6 +15,8 @@ interface LayoutProps {
   onLogout: () => void;
   onNavigateToHome: () => void;
   onNavigateToShop: () => void;
+  onNavigateToCollection: () => void;
+  onNavigateToContact: () => void;
 }
 
 export function Layout({
@@ -29,11 +31,16 @@ export function Layout({
   onLogout,
   onNavigateToHome,
   onNavigateToShop,
+  onNavigateToCollection,
+  onNavigateToContact,
 }: LayoutProps) {
   return (
     <div className="min-h-screen flex flex-col text-white font-sans relative overflow-x-hidden">
       <PokemonBackground intensity="subtle" />
       <div className="relative z-10 flex flex-col min-h-screen">
+        <a href="#main-content" className="skip-link">
+          Aller au contenu principal
+        </a>
         <Navbar
           cartItemsCount={cartItemsCount}
           onCartClick={onCartClick}
@@ -45,9 +52,16 @@ export function Layout({
           onLogout={onLogout}
           onNavigateToHome={onNavigateToHome}
           onNavigateToShop={onNavigateToShop}
+          onNavigateToCollection={onNavigateToCollection}
         />
-        <main className="flex-1 relative w-full">{children}</main>
-        <Footer />
+        <main id="main-content" className="flex-1 relative w-full" tabIndex={-1}>
+          {children}
+        </main>
+        <Footer
+          onNavigateContact={onNavigateToContact}
+          onNavigateHome={onNavigateToHome}
+          onNavigateShop={onNavigateToShop}
+        />
       </div>
     </div>
   );

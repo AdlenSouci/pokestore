@@ -21,7 +21,7 @@ export function Navbar() {
 
   const closeMenu = () => setMenuOpen(false);
 
-  const go = (screen: 'Home' | 'Shop' | 'Cart' | 'Login' | 'Register' | 'Orders' | 'Collection') => {
+  const go = (screen: 'Home' | 'Shop' | 'Cart' | 'Login' | 'Register' | 'Orders' | 'Collection' | 'Contact') => {
     closeMenu();
     navigation.navigate(screen);
   };
@@ -107,6 +107,7 @@ export function Navbar() {
               <MenuItem label="Mes commandes" icon="package-variant" onPress={() => go('Orders')} />
             </>
           )}
+          <MenuItem label="Contact" icon="email-outline" onPress={() => go('Contact')} />
           <View style={styles.menuDivider} />
           {user ? (
             <>

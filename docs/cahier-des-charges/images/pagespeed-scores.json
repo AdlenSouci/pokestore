@@ -1,0 +1,17 @@
+{
+  "url": "https://pokestore-hazel.vercel.app",
+  "date": "2026-06-25",
+  "source": "PageSpeed Insights (desktop capture utilisateur) + Lighthouse CLI mobile",
+  "desktop": {
+    "performance": 99,
+    "accessibility": 98,
+    "bestPractices": 100,
+    "seo": 100
+  },
+  "mobile": {
+    "performance": 83,
+    "accessibility": 98,
+    "bestPractices": 100,
+    "seo": 100
+  }
+}

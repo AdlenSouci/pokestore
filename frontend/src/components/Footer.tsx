@@ -1,7 +1,43 @@
 import { Github, Twitter, Instagram, Mail, MapPin, Shield, Truck, CreditCard } from 'lucide-react';
 import { PokeballIcon } from './PokeballIcon';
 
-export function Footer() {
+interface FooterProps {
+  onNavigateHome?: () => void;
+  onNavigateShop?: () => void;
+  onNavigateContact?: () => void;
+}
+
+function NavLink({
+  href,
+  onClick,
+  children,
+}: {
+  href: string;
+  onClick?: () => void;
+  children: React.ReactNode;
+}) {
+  if (onClick) {
+    return (
+      <a
+        href={href}
+        onClick={(e) => {
+          e.preventDefault();
+          onClick();
+        }}
+        className="hover:text-white transition-colors"
+      >
+        {children}
+      </a>
+    );
+  }
+  return (
+    <a href={href} className="hover:text-white transition-colors">
+      {children}
+    </a>
+  );
+}
+
+export function Footer({ onNavigateHome, onNavigateShop, onNavigateContact }: FooterProps) {
   const year = new Date().getFullYear();
 
   return (
@@ -21,17 +57,17 @@ export function Footer() {
           <div>
             <h3 className="text-sm uppercase font-bold text-[#7ec8a3] mb-3 tracking-wider">Boutique</h3>
             <ul className="space-y-2 text-sm font-sans text-[#c4b5fd]">
-              <li><a href="/" className="hover:text-white transition-colors">Accueil</a></li>
-              <li><a href="/shop" className="hover:text-white transition-colors">Catalogue</a></li>
-              <li><a href="/shop?q=pikachu" className="hover:text-white transition-colors">Pikachu</a></li>
-              <li><a href="/shop?q=dracaufeu" className="hover:text-white transition-colors">Dracaufeu</a></li>
+              <li><NavLink href="/" onClick={onNavigateHome}>Accueil</NavLink></li>
+              <li><NavLink href="/shop" onClick={onNavigateShop}>Catalogue</NavLink></li>
+              <li><NavLink href="/shop?q=pikachu" onClick={onNavigateShop}>Pikachu</NavLink></li>
+              <li><NavLink href="/shop?q=dracaufeu" onClick={onNavigateShop}>Dracaufeu</NavLink></li>
             </ul>
           </div>
 
           <div>
             <h3 className="text-sm uppercase font-bold text-[#7ec8a3] mb-3 tracking-wider">Aide</h3>
             <ul className="space-y-2 text-sm font-sans text-[#c4b5fd]">
-              <li><a href="/contact" className="hover:text-white transition-colors">Contact</a></li>
+              <li><NavLink href="/contact" onClick={onNavigateContact}>Contact</NavLink></li>
               <li><a href="/faq" className="hover:text-white transition-colors">FAQ</a></li>
               <li><a href="/livraison" className="hover:text-white transition-colors">Livraison</a></li>
               <li><a href="/mentions-legales" className="hover:text-white transition-colors">Mentions légales</a></li>
@@ -41,20 +77,30 @@ export function Footer() {
           <div>
             <h3 className="text-sm uppercase font-bold text-[#7ec8a3] mb-3 tracking-wider">Suis-nous</h3>
             <div className="flex gap-3 mb-4">
-              <a href="#" aria-label="Twitter" className="p-2 rounded-lg bg-[#2d3561] hover:bg-[#5a4f99] transition-colors">
-                <Twitter className="w-4 h-4" aria-hidden="true" />
-              </a>
-              <a href="#" aria-label="Instagram" className="p-2 rounded-lg bg-[#2d3561] hover:bg-[#5a4f99] transition-colors">
-                <Instagram className="w-4 h-4" aria-hidden="true" />
-              </a>
+              <span
+                className="p-2 rounded-lg bg-[#2d3561] opacity-50 cursor-not-allowed"
+                title="Twitter — bientôt disponible"
+                aria-hidden="true"
+              >
+                <Twitter className="w-4 h-4" />
+              </span>
+              <span
+                className="p-2 rounded-lg bg-[#2d3561] opacity-50 cursor-not-allowed"
+                title="Instagram — bientôt disponible"
+                aria-hidden="true"
+              >
+                <Instagram className="w-4 h-4" />
+              </span>
               <a href="https://github.com/AdlenSouci/pokestore" aria-label="GitHub" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-[#2d3561] hover:bg-[#5a4f99] transition-colors">
                 <Github className="w-4 h-4" aria-hidden="true" />
               </a>
             </div>
-            <a href="mailto:contact@pokestore.dev" className="text-sm font-sans text-[#a5b4fc] hover:text-white transition-colors flex items-center gap-2">
-              <Mail className="w-4 h-4" aria-hidden="true" />
-              contact@pokestore.dev
-            </a>
+            <NavLink href="/contact" onClick={onNavigateContact}>
+              <span className="text-sm font-sans text-[#a5b4fc] hover:text-white transition-colors flex items-center gap-2">
+                <Mail className="w-4 h-4" aria-hidden="true" />
+                adlenssouci03@gmail.com
+              </span>
+            </NavLink>
           </div>
         </div>
 
@@ -73,7 +119,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-3 text-xs font-sans text-[#a5b4fc]/70">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-3 text-xs font-sans text-[#c4b5fd]">
           <p className="flex items-center gap-2">
             <MapPin className="w-3 h-3" aria-hidden="true" />
             <span>Projet étudiant — Ynov B3 DEV — Paris, France</span>

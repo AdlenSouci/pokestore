@@ -10,6 +10,7 @@ import { OrdersModule } from './orders/orders.module';
 import { PrismaModule } from './database/prisma.module';
 import { MailModule } from './mail/mail.module';
 import { StripeModule } from './stripe/stripe.module';
+import { ContactModule } from './contact/contact.module';
 
 @Module({
   controllers: [AppController],
@@ -26,6 +27,7 @@ import { StripeModule } from './stripe/stripe.module';
     CardsModule,
     CartModule,
     OrdersModule,
+    ContactModule,
   ],
 })
-export class AppModule { }
+export class AppModule { }

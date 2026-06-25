@@ -1,9 +1,15 @@
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import type { RootStackParamList } from '../types/navigation';
 import { colors } from '../theme/colors';
 import { font } from '../theme/typography';
 
+type Nav = NativeStackNavigationProp<RootStackParamList>;
+
 export function Footer() {
+  const navigation = useNavigation<Nav>();
   const year = new Date().getFullYear();
 
   return (
@@ -21,8 +27,8 @@ export function Footer() {
       <View style={styles.iconRow}>
         <Pressable
           style={styles.iconBtn}
-          onPress={() => Linking.openURL('mailto:contact@pokestore.dev')}
-          accessibilityLabel="Contact email"
+          onPress={() => navigation.navigate('Contact')}
+          accessibilityLabel="Formulaire de contact"
         >
           <MaterialCommunityIcons name="email-outline" size={18} color={colors.text} />
         </Pressable>

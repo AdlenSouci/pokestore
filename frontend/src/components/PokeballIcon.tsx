@@ -12,7 +12,6 @@ export function PokeballIcon({ className, size = 28 }: Props) {
       height={size}
       className={className}
       aria-hidden="true"
-      role="img"
     >
       <circle cx="50" cy="50" r="46" fill="#fff" stroke="#1a1a2e" strokeWidth="5" />
       <path d="M4 50 A46 46 0 0 1 96 50 Z" fill="#ef4444" stroke="#1a1a2e" strokeWidth="5" />

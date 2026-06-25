@@ -115,4 +115,38 @@ export class MailService {
       this.logger.error((error as Error).stack ?? '');
     }
   }
+
+  async sendContactEmail(payload: {
+    name: string;
+    email: string;
+    subject: string;
+    message: string;
+  }): Promise<void> {
+    const to =
+      this.configService.get<string>('CONTACT_TO') ??
+      this.configService.get<string>('MAIL_USER') ??
+      'contact@pokestore.dev';
+
+    const escaped = (s: string) =>
+      s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+    const html = `
+      <div style="font-family:Arial,sans-serif;background:#1a1f3a;color:#fff;padding:24px;">
+        <h2 style="color:#7ec8a3;">📬 Nouveau message — PokéStore</h2>
+        <p><strong>De :</strong> ${escaped(payload.name)} &lt;${escaped(payload.email)}&gt;</p>
+        <p><strong>Sujet :</strong> ${escaped(payload.subject)}</p>
+        <div style="background:#2d3561;padding:16px;border-radius:8px;margin-top:16px;white-space:pre-wrap;">${escaped(payload.message)}</div>
+      </div>`;
+
+    await this.transporter.sendMail({
+      from: this.configService.get<string>('MAIL_FROM') ?? '"PokéStore" <noreply@pokestore.dev>',
+      to,
+      replyTo: `"${payload.name}" <${payload.email}>`,
+      subject: `[PokéStore Contact] ${payload.subject}`,
+      html,
+      text: `De: ${payload.name} <${payload.email}>\nSujet: ${payload.subject}\n\n${payload.message}`,
+    });
+
+    this.logger.log(`✅ Email contact envoyé à ${to} (de ${payload.email})`);
+  }
 }

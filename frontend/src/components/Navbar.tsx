@@ -14,6 +14,7 @@ interface NavbarProps {
   onLogout: () => void;
   onNavigateToHome: () => void;
   onNavigateToShop: () => void;
+  onNavigateToCollection: () => void;
 }
 
 export function Navbar({
@@ -27,6 +28,7 @@ export function Navbar({
   onLogout,
   onNavigateToHome,
   onNavigateToShop,
+  onNavigateToCollection,
 }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -39,6 +41,11 @@ export function Navbar({
 
   const handleNavigateShop = () => {
     onNavigateToShop();
+    closeMobileMenu();
+  };
+
+  const handleNavigateCollection = () => {
+    onNavigateToCollection();
     closeMobileMenu();
   };
 
@@ -98,8 +105,12 @@ export function Navbar({
               <button onClick={onNavigateToShop} className="hover:text-[#7ec8a3] transition-colors uppercase">
                 Boutique
               </button>
-              <button className="hover:text-[#7ec8a3] transition-colors uppercase cursor-not-allowed opacity-50">
-                Collections
+              <button
+                type="button"
+                onClick={onNavigateToCollection}
+                className="hover:text-[#7ec8a3] transition-colors uppercase focus-visible:ring-2 focus-visible:ring-[#7ec8a3] rounded"
+              >
+                Collection
               </button>
             </div>
           </div>
@@ -204,10 +215,10 @@ export function Navbar({
             </button>
             <button
               type="button"
-              disabled
-              className="w-full text-left px-3 py-3 rounded-xl font-bold uppercase text-sm opacity-50 cursor-not-allowed"
+              onClick={handleNavigateCollection}
+              className="w-full text-left px-3 py-3 rounded-xl hover:bg-[#7b6eb8]/40 font-bold uppercase text-sm transition-colors"
             >
-              Collections
+              Ma collection
             </button>
 
             <div className="border-t border-[#2d3561]/40 my-2" />
