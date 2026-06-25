@@ -52,9 +52,21 @@ mobile/android/.idea/
 
 # Expo (mobile-rn/)
 mobile-rn/.expo/
+mobile-rn/.expo-export-test/
 mobile-rn/web-build/
 mobile-rn/ios/
 mobile-rn/android/
+
+# Desktop Electron (hors scope dépôt)
+pokemon-electron/
+
+# Playwright
+frontend/test-results/
+frontend/playwright-report/
+docs/tests/playwright-report/
+
+# Word lock files
+~$*
 
 # Misc
 *.local
