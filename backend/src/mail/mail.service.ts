@@ -60,8 +60,7 @@ export class MailService {
       const template = this.loadTemplate('welcome');
       const html = this.renderTemplate(template, { userName, userEmail });
 
-      await this.transporter.sendMail({
-        from: this.configService.get<string>('MAIL_FROM') ?? '"PokéStore" <noreply@pokestore.dev>',
+      await this.deliver({
         to: userEmail,
         subject: '⚡ Bienvenue sur PokéStore, Dresseur !',
         html,
@@ -102,8 +101,7 @@ export class MailService {
         total: total.toFixed(2),
       });
 
-      await this.transporter.sendMail({
-        from: this.configService.get<string>('MAIL_FROM') ?? '"PokéStore" <noreply@pokestore.dev>',
+      await this.deliver({
         to: userEmail,
         subject: `🎴 Commande #${orderId} confirmée — PokéStore`,
         html,
@@ -138,15 +136,68 @@ export class MailService {
         <div style="background:#2d3561;padding:16px;border-radius:8px;margin-top:16px;white-space:pre-wrap;">${escaped(payload.message)}</div>
       </div>`;
 
-    await this.transporter.sendMail({
-      from: this.configService.get<string>('MAIL_FROM') ?? '"PokéStore" <noreply@pokestore.dev>',
+    await this.deliver({
       to,
-      replyTo: `"${payload.name}" <${payload.email}>`,
+      replyTo: `${payload.name} <${payload.email}>`,
       subject: `[PokéStore Contact] ${payload.subject}`,
       html,
       text: `De: ${payload.name} <${payload.email}>\nSujet: ${payload.subject}\n\n${payload.message}`,
     });
 
     this.logger.log(`✅ Email contact envoyé à ${to} (de ${payload.email})`);
+  }
+
+  /** Resend (HTTPS) en prod Render — SMTP Gmail bloqué sur le plan gratuit. */
+  private async deliver(options: {
+    to: string;
+    subject: string;
+    html: string;
+    text?: string;
+    replyTo?: string;
+  }): Promise<void> {
+    const resendKey = this.configService.get<string>('RESEND_API_KEY')?.trim();
+    if (resendKey) {
+      await this.sendViaResend(resendKey, options);
+      return;
+    }
+
+    await this.transporter.sendMail({
+      from: this.configService.get<string>('MAIL_FROM') ?? '"PokéStore" <noreply@pokestore.dev>',
+      to: options.to,
+      replyTo: options.replyTo,
+      subject: options.subject,
+      html: options.html,
+      text: options.text,
+    });
+  }
+
+  private async sendViaResend(
+    apiKey: string,
+    options: { to: string; subject: string; html: string; text?: string; replyTo?: string },
+  ): Promise<void> {
+    const from =
+      this.configService.get<string>('RESEND_FROM')?.trim() ??
+      'PokéStore <onboarding@resend.dev>';
+
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from,
+        to: [options.to],
+        subject: options.subject,
+        html: options.html,
+        text: options.text,
+        reply_to: options.replyTo,
+      }),
+    });
+
+    if (!res.ok) {
+      const body = await res.text();
+      throw new Error(`Resend ${res.status}: ${body}`);
+    }
   }
 }

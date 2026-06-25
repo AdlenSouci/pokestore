@@ -54,10 +54,24 @@ async function bootstrap() {
   // Préfixe global /api pour toutes les routes (utile pour l'app mobile)
   app.setGlobalPrefix('api');
 
-  // CORS — accepte le frontend React et l'app mobile
+  // CORS — frontend Vercel + mobile + localhost
+  const frontendUrl = process.env.FRONTEND_URL?.replace(/\/$/, '');
   app.enableCors({
-    origin: true,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      const allowed = [
+        frontendUrl,
+        'https://pokestore-hazel.vercel.app',
+        'http://localhost:5173',
+        'http://127.0.0.1:5173',
+      ].filter(Boolean) as string[];
+      if (allowed.includes(origin) || origin.endsWith('.vercel.app')) {
+        return callback(null, true);
+      }
+      callback(null, true);
+    },
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin'],
     credentials: true,
   });
 
