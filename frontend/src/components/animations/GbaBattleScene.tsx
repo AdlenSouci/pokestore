@@ -1,4 +1,32 @@
-import { PixelSprite } from './PixelSprite';
+import dracImg from '../../assets/drac.png';
+import tortankImg from '../../assets/tortank.png';
+
+interface BattleSpriteProps {
+  src: string;
+  alt: string;
+  size: number;
+  flip?: boolean;
+  className?: string;
+}
+
+function BattleSprite({ src, alt, size, flip = false, className = '' }: BattleSpriteProps) {
+  return (
+    <img
+      src={src}
+      alt={alt}
+      width={size}
+      height={size}
+      className={`object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.45)] ${className}`}
+      style={{
+        imageRendering: 'pixelated',
+        width: size,
+        height: size,
+        transform: flip ? 'scaleX(-1)' : undefined,
+      }}
+      draggable={false}
+    />
+  );
+}
 
 interface GbaBattleSceneProps {
   variant?: 'compact' | 'hero';
@@ -7,6 +35,7 @@ interface GbaBattleSceneProps {
 
 export function GbaBattleScene({ variant = 'compact', className = '' }: GbaBattleSceneProps) {
   const isHero = variant === 'hero';
+  const spriteSize = isHero ? 96 : 52;
 
   return (
     <div
@@ -24,17 +53,21 @@ export function GbaBattleScene({ variant = 'compact', className = '' }: GbaBattl
         </p>
       )}
 
-      <div className={`relative z-10 flex items-end justify-between ${isHero ? 'gap-8 md:gap-16 min-h-[80px] md:min-h-[120px]' : 'gap-4 min-h-[48px]'}`}>
-        {/* Dracaufeu (gauche) */}
+      <div
+        className={`relative z-10 flex items-end justify-between ${isHero ? 'gap-8 md:gap-16 min-h-[90px] md:min-h-[130px]' : 'gap-4 min-h-[52px]'}`}
+      >
+        {/* Dracaufeu (gauche, face à droite) */}
         <div className="flex flex-col items-start gap-1">
-          <div className={`${isHero ? 'w-28 md:w-36' : 'w-16'} h-2 rounded-sm bg-[#1a1a2e]/80 border border-[#7ec8a3]/40 overflow-hidden animate-hp-pulse`}>
+          <div
+            className={`${isHero ? 'w-28 md:w-36' : 'w-16'} h-2 rounded-sm bg-[#1a1a2e]/80 border border-[#7ec8a3]/40 overflow-hidden animate-hp-pulse`}
+          >
             <div className="h-full w-[72%] bg-gradient-to-r from-[#f97316] to-[#ef4444] rounded-sm" />
           </div>
           {!isHero && (
             <span className="text-[8px] font-bold text-[#fb923c] uppercase tracking-wide">Dracaufeu</span>
           )}
           <div className="relative animate-battle-left">
-            <PixelSprite kind="charizard" size={isHero ? 80 : 44} />
+            <BattleSprite src={dracImg} alt="Dracaufeu" size={spriteSize} />
             <div className={`absolute ${isHero ? '-right-8 top-2' : '-right-4 top-1'} animate-flame-burst`}>
               <span className={`block ${isHero ? 'text-2xl' : 'text-sm'}`}>🔥</span>
             </div>
@@ -43,7 +76,9 @@ export function GbaBattleScene({ variant = 'compact', className = '' }: GbaBattl
 
         {/* VS */}
         <div className={`flex flex-col items-center justify-center ${isHero ? 'pb-6' : 'pb-2'}`}>
-          <span className={`pixel-font text-[#fbbf24] drop-shadow-md ${isHero ? 'text-lg md:text-xl animate-pokeball-wiggle' : 'text-[10px]'}`}>
+          <span
+            className={`pixel-font text-[#fbbf24] drop-shadow-md ${isHero ? 'text-lg md:text-xl animate-pokeball-wiggle' : 'text-[10px]'}`}
+          >
             VS
           </span>
           {isHero && (
@@ -53,16 +88,18 @@ export function GbaBattleScene({ variant = 'compact', className = '' }: GbaBattl
           )}
         </div>
 
-        {/* Tortank (droite) */}
+        {/* Tortank (droite, face à gauche — image déjà retournée) */}
         <div className="flex flex-col items-end gap-1">
-          <div className={`${isHero ? 'w-28 md:w-36' : 'w-16'} h-2 rounded-sm bg-[#1a1a2e]/80 border border-[#7ec8a3]/40 overflow-hidden animate-hp-pulse`}>
+          <div
+            className={`${isHero ? 'w-28 md:w-36' : 'w-16'} h-2 rounded-sm bg-[#1a1a2e]/80 border border-[#7ec8a3]/40 overflow-hidden animate-hp-pulse`}
+          >
             <div className="h-full w-[85%] bg-gradient-to-r from-[#3b82f6] to-[#60a5fa] rounded-sm ml-auto" />
           </div>
           {!isHero && (
             <span className="text-[8px] font-bold text-[#60a5fa] uppercase tracking-wide">Tortank</span>
           )}
           <div className="relative animate-battle-right">
-            <PixelSprite kind="blastoise" size={isHero ? 80 : 44} />
+            <BattleSprite src={tortankImg} alt="Tortank" size={spriteSize} flip />
             <div className={`absolute ${isHero ? '-left-8 top-2' : '-left-4 top-1'} animate-water-burst`}>
               <span className={`block ${isHero ? 'text-2xl' : 'text-sm'}`}>💧</span>
             </div>
