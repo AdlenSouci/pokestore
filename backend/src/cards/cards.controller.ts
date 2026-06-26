@@ -1,15 +1,21 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CardsService } from './cards.service';
 import type { CardListQuery } from './card-filters.dto';
+import { JwtAuthGuard } from '../auth/guards/auth.guard';
+import { AdminGuard } from '../auth/guards/admin.guard';
 
+@ApiTags('cards')
 @Controller('cards')
 export class CardsController {
   constructor(private readonly cardsService: CardsService) {}
 
   /**
    * Synchronise les cartes depuis l'API Pokémon TCG.
-   * Exemple : GET /api/cards/import?sets=sv1,swsh12&limit=100
+   * Réservé aux administrateurs (JWT + rôle ADMIN).
    */
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @Get('import')
   async importCards(
     @Query('sets') sets?: string,
@@ -24,7 +30,9 @@ export class CardsController {
     return this.cardsService.getShopMeta();
   }
 
-  /** Recalcule les prix selon la rareté (à lancer une fois après mise à jour de la grille). */
+  /** Recalcule les prix selon la rareté — administrateurs uniquement. */
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @Get('reprice')
   async repriceCards() {
     return this.cardsService.repriceAllCards();

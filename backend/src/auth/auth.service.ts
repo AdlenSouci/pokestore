@@ -1,6 +1,7 @@
-import { Injectable, UnauthorizedException, NotFoundException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../database/prisma.service';
+import { UserRole } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { RegisterDto, LoginDto } from './dto/auth.dto';
 import { UpdateProfileDto, ChangePasswordDto } from './dto/update-profile.dto';
@@ -35,6 +36,7 @@ export class AuthService {
                 email,
                 password: hashedPassword,
                 name,
+                role: UserRole.USER,
             },
         });
 
@@ -67,6 +69,30 @@ export class AuthService {
         return this.generateToken(user);
     }
 
+    /** Connexion réservée au panel Electron — rôle ADMIN obligatoire. */
+    async adminLogin(loginDto: LoginDto) {
+        const { email, password } = loginDto;
+
+        const user = await this.prisma.user.findUnique({
+            where: { email },
+        });
+
+        if (!user || !user.password) {
+            throw new UnauthorizedException('Email ou mot de passe incorrect');
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            throw new UnauthorizedException('Email ou mot de passe incorrect');
+        }
+
+        if (user.role !== UserRole.ADMIN) {
+            throw new ForbiddenException('Accès réservé aux administrateurs.');
+        }
+
+        return this.generateToken(user);
+    }
+
     async googleLogin(user: any) {
         // L'utilisateur est déjà créé/mis à jour par GoogleStrategy
         return this.generateToken(user);
@@ -87,6 +113,7 @@ export class AuthService {
             name: user.name,
             phone: user.phone,
             hasPassword: !!user.password,
+            role: user.role,
         };
     }
 
@@ -105,6 +132,7 @@ export class AuthService {
             name: user.name,
             phone: user.phone,
             hasPassword: !!user.password,
+            role: user.role,
         };
     }
 
@@ -164,11 +192,12 @@ export class AuthService {
         return { message: 'Mot de passe défini avec succès ! Tu peux maintenant te connecter avec ton email et mot de passe.' };
     }
 
-    private generateToken(user: any) {
+    private generateToken(user: { id: number; email: string; name: string | null; phone?: string | null; password?: string | null; role?: UserRole }) {
         const payload = {
             email: user.email,
             sub: user.id,
-            name: user.name
+            name: user.name,
+            role: user.role ?? UserRole.USER,
         };
 
         return {
@@ -179,6 +208,7 @@ export class AuthService {
                 name: user.name,
                 phone: user.phone,
                 hasPassword: !!user.password,
+                role: user.role ?? UserRole.USER,
             },
         };
     }

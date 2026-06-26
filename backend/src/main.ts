@@ -2,12 +2,14 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 import type { Request, Response, NextFunction } from 'express';
 
 async function bootstrap() {
   // rawBody: true est nécessaire pour que le webhook Stripe puisse vérifier la signature
   const app = await NestFactory.create(AppModule, { rawBody: true });
 
+  app.use(helmet());
   app.use(cookieParser());
 
   // Page d'accueil de l'API (avant le prefix global) — évite "Cannot GET /"

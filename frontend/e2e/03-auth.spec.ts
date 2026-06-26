@@ -12,7 +12,7 @@ test('E2E-04 - Modal de connexion accessible', async ({ page }) => {
     .first();
   await loginBtn.click();
   await expect(page.getByText(/connexion/i).first()).toBeVisible();
-  await expect(page.getByPlaceholder(/email/i)).toBeVisible();
+  await expect(page.getByLabel(/^email$/i)).toBeVisible();
   await page.screenshot({
     path: path.join(OUT, 'e2e-04-login-modal.png'),
     fullPage: false,
@@ -25,7 +25,7 @@ test('E2E-05 - Modal inscription accessible', async ({ page }) => {
     .getByRole('button', { name: /inscription|s'inscrire|sinscrire/i })
     .first();
   await signupBtn.click();
-  await expect(page.getByPlaceholder(/nom/i).first()).toBeVisible();
+  await expect(page.getByLabel(/nom de dresseur/i)).toBeVisible();
   await page.screenshot({
     path: path.join(OUT, 'e2e-05-signup-modal.png'),
     fullPage: false,

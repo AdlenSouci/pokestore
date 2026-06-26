@@ -19,21 +19,25 @@ const pages: Array<{ slug: string; setup?: (page: import('@playwright/test').Pag
     slug: 'shop',
     setup: async (page) => {
       await page.getByRole('button', { name: /voir la boutique/i }).click();
-      await page.getByRole('heading', { name: /boutique/i }).waitFor({ timeout: 30_000 });
+      await page.getByRole('heading', { level: 1, name: /boutique/i }).waitFor({ timeout: 30_000 });
       await page.waitForTimeout(2500);
     },
   },
   {
     slug: 'login',
     setup: async (page) => {
-      await page.getByRole('button', { name: /connexion|se connecter/i }).first().click();
+      const menuBtn = page.getByRole('button', { name: /ouvrir le menu/i });
+      if (await menuBtn.isVisible()) await menuBtn.click();
+      await page.getByRole('button', { name: /^connexion$/i }).first().click();
       await page.waitForTimeout(800);
     },
   },
   {
     slug: 'signup',
     setup: async (page) => {
-      await page.getByRole('button', { name: /inscription|s'inscrire/i }).first().click();
+      const menuBtn = page.getByRole('button', { name: /ouvrir le menu/i });
+      if (await menuBtn.isVisible()) await menuBtn.click();
+      await page.getByRole('button', { name: /^inscription$/i }).first().click();
       await page.waitForTimeout(800);
     },
   },

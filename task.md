@@ -27,9 +27,10 @@ Coche les cases (`[x]`) au fur et à mesure que nous avançons !
 ## 🚀 À Faire (Pour avoir 20/20)
 
 ### 1. Sécurité de l'API (Backend)
-- [ ] Restreindre le CORS dans main.ts (uniquement le port 5173 du frontend).
-- [ ] Installer et configurer helmet pour les headers de sécurité HTTP.
-- [ ] Ajouter un @nestjs/throttler (Rate Limiting) pour protéger les routes de login contre le spam.
+- [x] Restreindre le CORS dans main.ts (Vercel + `FRONTEND_URL` + localhost).
+- [x] Installer et configurer helmet pour les headers de sécurité HTTP.
+- [x] Ajouter un @nestjs/throttler (Rate Limiting) global + limite renforcée sur login.
+- [x] Protéger `/api/cards/import` et `/api/cards/reprice` (JWT + rôle ADMIN).
 
 ### 2. Expérience Utilisateur & Feedbacks (Frontend)
 - [x] Remplacer les alertes basiques JavaScript par des Toasts (ex: react-hot-toast).
@@ -37,7 +38,8 @@ Coche les cases (`[x]`) au fur et à mesure que nous avançons !
 - [x] Gérer les messages d'erreur de façon claire dans l'UI (ex: "Mot de passe incorrect" direct sur le modal).
 
 ### 3. Accessibilité & Performances (Frontend)
-- [ ] Lancer un audit Lighthouse (Chrome) et corriger les contrastes de couleurs si besoin.
+- [x] Lancer un audit Lighthouse (Chrome) et corriger les contrastes de couleurs si besoin.
+  - *Fait : PageSpeed 99 perf / 98 a11y desktop — captures dans `docs/cahier-des-charges/images/`.*
 - [x] Ajouter des attributs aria-label sur les icônes (ex: panier, profil, fermeture de modal).
 - [x] Utiliser le lazy-loading pour les images des cartes Pokémon (loading="lazy").
 - [x] Menu mobile complet dans la Navbar (hamburger + navigation).
@@ -54,6 +56,6 @@ Coche les cases (`[x]`) au fur et à mesure que nous avançons !
 ### 6. SEO & Livrables oral
 - [x] SEO : react-helmet-async, robots.txt, sitemap.xml (`mise_en_place_seo.md`).
 - [x] Livrable synthèse oral (`docs/LIVRABLE_ORAL_FINAL.md`).
-- [x] Tests E2E Playwright (7 tests, 100% passés - voir `docs/tests/`).
-- [ ] Formulaire contact par email (à implémenter).
-- [ ] Audit Lighthouse formalisé avec captures.
+- [x] Tests E2E Playwright (7 tests, 100% passés — captures dans `docs/tests/`).
+- [x] Formulaire contact par email (`/contact` + `POST /api/contact` + captcha HMAC + Resend).
+- [x] Audit Lighthouse formalisé avec captures (PageSpeed Insights).

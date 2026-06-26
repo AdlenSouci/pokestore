@@ -6,6 +6,7 @@ import {
   BadRequestException,
   Logger,
 } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import { StripeService } from './stripe.service';
 import { PrismaService } from '../database/prisma.service';
 import { MailService } from '../mail/mail.service';
@@ -23,6 +24,7 @@ export class StripeController {
     private mailService: MailService,
   ) {}
 
+  @SkipThrottle()
   @Post('webhook')
   async handleWebhook(
     @Req() req: RawBodyRequest<Request>,

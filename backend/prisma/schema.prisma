@@ -15,6 +15,11 @@ datasource db {
 }
 
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
@@ -22,6 +27,7 @@ model User {
   password  String?  // Pour l'authentification classique
   phone     String?  // Numéro de téléphone (optionnel)
   googleId  String?  @unique
+  role      UserRole @default(USER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
