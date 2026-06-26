@@ -39,9 +39,12 @@ Mêmes fonctions principales : boutique, auth, panier, Stripe, commandes, collec
 
 ## 2.4 Panel admin Electron (bonus)
 
-- Dashboard, import cartes, édition prix, clients, commandes, pipeline  
+- **Dashboard** : ventes payées, CA, graphique 6 mois, produit le plus vendu  
+- **Pokemon Cards** : import API TCG, édition inline, export CSV (113+ cartes)  
+- **Orders** : suivi des commandes (PENDING / PAID)  
 - **Connexion réservée** : `POST /api/auth/admin/login` — rôle **ADMIN** uniquement  
-- Compte admin : `admin@pokemon.local` (voir `npm run db:seed:admin`)
+- Compte admin : `admin@pokemon.local` (voir `npm run db:seed:admin`)  
+- Installateur Windows : `npm run make` dans `pokemon-electron/`
 
 ## 2.5 Contact
 
@@ -110,7 +113,17 @@ Vercel (front), Render (API), Neon (BDD), EAS (APK).
 
 ## Admin Electron
 
-![Admin](./cahier-des-charges/images/capture-admin-electron.png)
+**Dashboard** — statistiques ventes et graphique mensuel :
+
+![Dashboard Electron](./cahier-des-charges/images/capture-electron-dashboard.png)
+
+**Pokemon Cards** — catalogue, import et édition :
+
+![Cartes Electron](./cahier-des-charges/images/capture-electron-cartes.png)
+
+**Commandes** — liste des orders (emails masqués sur la capture) :
+
+![Commandes Electron](./cahier-des-charges/images/capture-electron-commandes.png)
 
 ## PageSpeed
 
@@ -120,7 +133,7 @@ Vercel (front), Render (API), Neon (BDD), EAS (APK).
 
 # 6. Oral (20 min)
 
-Démo web → mobile → sécurité (JWT, ADMIN, helmet) → tests → limites éventuelles.
+Démo web → mobile → **Electron admin** (dashboard, cartes, commandes) → sécurité (JWT, ADMIN, helmet) → tests → limites éventuelles.
 
 ---
 
