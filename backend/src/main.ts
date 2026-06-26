@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
@@ -7,7 +8,7 @@ import type { Request, Response, NextFunction } from 'express';
 
 async function bootstrap() {
   // rawBody: true est nécessaire pour que le webhook Stripe puisse vérifier la signature
-  const app = await NestFactory.create(AppModule, { rawBody: true });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { rawBody: true });
 
   // Render / reverse proxy : IP réelle du client pour le throttler
   app.set('trust proxy', 1);
