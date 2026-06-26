@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { AppThrottlerGuard } from './common/app-throttler.guard';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
@@ -20,7 +21,7 @@ import { ContactModule } from './contact/contact.module';
     AppService,
     {
       provide: APP_GUARD,
-      useClass: ThrottlerGuard,
+      useClass: AppThrottlerGuard,
     },
   ],
   imports: [
@@ -31,7 +32,7 @@ import { ContactModule } from './contact/contact.module';
       {
         name: 'default',
         ttl: 60_000,
-        limit: 120,
+        limit: 500,
       },
     ]),
     PrismaModule,

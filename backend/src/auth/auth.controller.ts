@@ -1,5 +1,5 @@
 import { Controller, Post, Body, Get, Put, Patch, UseGuards, Req, Res, Query } from '@nestjs/common';
-import { Throttle } from '@nestjs/throttler';
+import { SkipThrottle, Throttle } from '@nestjs/throttler';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { RegisterDto, LoginDto } from './dto/auth.dto';
@@ -39,20 +39,20 @@ export class AuthController {
         return this.frontendBaseUrl();
     }
 
-    @Throttle({ default: { limit: 15, ttl: 60_000 } })
+    @Throttle({ default: { limit: 30, ttl: 60_000 } })
     @Post('register')
     async register(@Body() registerDto: RegisterDto) {
         return this.authService.register(registerDto);
     }
 
-    @Throttle({ default: { limit: 15, ttl: 60_000 } })
+    @Throttle({ default: { limit: 30, ttl: 60_000 } })
     @Post('login')
     async login(@Body() loginDto: LoginDto) {
         return this.authService.login(loginDto);
     }
 
     /** Panel admin Electron uniquement — refuse les comptes USER. */
-    @Throttle({ default: { limit: 10, ttl: 60_000 } })
+    @SkipThrottle()
     @Post('admin/login')
     async adminLogin(@Body() loginDto: LoginDto) {
         return this.authService.adminLogin(loginDto);
