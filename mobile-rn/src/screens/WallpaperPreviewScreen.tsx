@@ -23,9 +23,9 @@ import { font } from '../theme/typography';
 type Props = NativeStackScreenProps<RootStackParamList, 'WallpaperPreview'>;
 
 function sourceLabel(source: wallpaperService.WallpaperSource | undefined): string | null {
-  if (source === 'openai') return 'Généré par IA (DALL·E 3)';
-  if (source === 'pollinations') return 'Généré par IA (Flux)';
-  if (source === 'artistic') return 'Style artistique (secours — IA indisponible)';
+  if (source === 'openai') return 'IA DALL·E 3 — basé sur ta carte';
+  if (source === 'pollinations') return 'IA Flux — basé sur l’artwork de ta carte';
+  if (source === 'card-art') return 'Fond stylisé depuis ton artwork (IA indisponible)';
   return null;
 }
 

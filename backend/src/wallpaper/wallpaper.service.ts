@@ -7,13 +7,14 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
+import FormData from 'form-data';
 import sharp from 'sharp';
 import { PrismaService } from '../database/prisma.service';
 
 const WALLPAPER_WIDTH = 1080;
 const WALLPAPER_HEIGHT = 1920;
 
-export type WallpaperSource = 'openai' | 'pollinations' | 'artistic';
+export type WallpaperSource = 'openai' | 'pollinations' | 'card-art';
 
 @Injectable()
 export class WallpaperService {
@@ -48,7 +49,7 @@ export class WallpaperService {
     }
 
     const cardImage = await this.fetchCardImage(card.imageUrl);
-    const prompt = this.buildWallpaperPrompt(card.type, card.rarity);
+    const prompt = this.buildWallpaperPrompt(card.name, card.type, card.rarity);
 
     let output: Buffer;
     let source: WallpaperSource;
@@ -58,13 +59,16 @@ export class WallpaperService {
       output = await this.normalizeWallpaper(openAiBuffer);
       source = 'openai';
     } else {
-      const aiBuffer = await this.tryPollinationsWallpaper(prompt, cardId);
+      const aiBuffer =
+        (await this.tryPollinationsImg2Img(prompt, card.imageUrl, cardId)) ??
+        (await this.tryPollinationsUpload(prompt, cardImage, cardId));
+
       if (aiBuffer) {
         output = await this.normalizeWallpaper(aiBuffer);
         source = 'pollinations';
       } else {
-        output = await this.createArtisticWallpaper(cardImage, card.type);
-        source = 'artistic';
+        output = await this.createCardBasedWallpaper(cardImage, card.type);
+        source = 'card-art';
       }
     }
 
@@ -76,14 +80,33 @@ export class WallpaperService {
     };
   }
 
-  private buildWallpaperPrompt(type: string, rarity: string): string {
+  private buildWallpaperPrompt(
+    cardName: string,
+    type: string,
+    rarity: string,
+  ): string {
     return [
-      'Vertical smartphone wallpaper, ultra detailed digital art,',
-      `${type} elemental energy atmosphere, ${rarity} card mood,`,
-      'cinematic fantasy landscape, glowing particles, depth of field,',
-      'vibrant colors, abstract scenic background,',
-      'no text, no logo, no watermark, no trading card frame',
+      `Transform this Pokémon card artwork into a vertical phone wallpaper.`,
+      `The Pokémon ${cardName} must be the clear hero of the image.`,
+      `${type} type energy, ${rarity} rarity mood.`,
+      `Extend and stylize the background from the card art.`,
+      `Cinematic fantasy atmosphere, full bleed mobile wallpaper.`,
+      `No smartphone mockup, no device frame, no text, no card border.`,
     ].join(' ');
+  }
+
+  private negativePrompt(): string {
+    return [
+      'smartphone',
+      'phone mockup',
+      'device frame',
+      'screen bezel',
+      'text',
+      'watermark',
+      'logo',
+      'trading card border',
+      'UI elements',
+    ].join(', ');
   }
 
   private async userOwnsCard(userId: number, cardId: number): Promise<boolean> {
@@ -161,14 +184,25 @@ export class WallpaperService {
     }
   }
 
-  /** Génération IA gratuite (Flux) — utilisée si pas de clé OpenAI. */
-  private async tryPollinationsWallpaper(
+  /** IA img2img : la carte (URL publique) sert de référence visuelle. */
+  private async tryPollinationsImg2Img(
     prompt: string,
+    cardImageUrl: string,
     seed: number,
   ): Promise<Buffer | null> {
     try {
-      const encoded = encodeURIComponent(prompt);
-      const url = `https://image.pollinations.ai/prompt/${encoded}?width=1080&height=1920&nologo=true&seed=${seed}&model=flux`;
+      const params = new URLSearchParams({
+        model: 'flux',
+        width: String(WALLPAPER_WIDTH),
+        height: String(WALLPAPER_HEIGHT),
+        seed: String(seed),
+        nologo: 'true',
+        image: cardImageUrl,
+        negative_prompt: this.negativePrompt(),
+      });
+      const encodedPrompt = encodeURIComponent(prompt);
+      const url = `https://gen.pollinations.ai/image/${encodedPrompt}?${params.toString()}`;
+
       const res = await axios.get<ArrayBuffer>(url, {
         responseType: 'arraybuffer',
         timeout: 120_000,
@@ -182,7 +216,51 @@ export class WallpaperService {
       return buffer;
     } catch (error) {
       this.logger.warn(
-        `Pollinations wallpaper: ${error instanceof Error ? error.message : String(error)}`,
+        `Pollinations img2img: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      return null;
+    }
+  }
+
+  /** IA img2img : envoi direct du fichier carte (si l'URL ne suffit pas). */
+  private async tryPollinationsUpload(
+    prompt: string,
+    cardImage: Buffer,
+    seed: number,
+  ): Promise<Buffer | null> {
+    try {
+      const form = new FormData();
+      form.append('image', cardImage, {
+        filename: 'card.png',
+        contentType: 'image/png',
+      });
+      form.append('model', 'flux');
+      form.append('width', String(WALLPAPER_WIDTH));
+      form.append('height', String(WALLPAPER_HEIGHT));
+      form.append('seed', String(seed));
+      form.append('nologo', 'true');
+      form.append('negative_prompt', this.negativePrompt());
+
+      const encodedPrompt = encodeURIComponent(prompt);
+      const res = await axios.post<ArrayBuffer>(
+        `https://gen.pollinations.ai/image/${encodedPrompt}`,
+        form,
+        {
+          headers: form.getHeaders(),
+          responseType: 'arraybuffer',
+          timeout: 120_000,
+          maxContentLength: 15 * 1024 * 1024,
+        },
+      );
+
+      const buffer = Buffer.from(res.data);
+      if (buffer.length < 2_000) {
+        return null;
+      }
+      return buffer;
+    } catch (error) {
+      this.logger.warn(
+        `Pollinations upload: ${error instanceof Error ? error.message : String(error)}`,
       );
       return null;
     }
@@ -207,33 +285,47 @@ export class WallpaperService {
     return map[key] ?? { r: 120, g: 140, b: 255 };
   }
 
-  /** Fond plein écran stylisé depuis l'artwork (secours si IA indisponible). */
-  private async createArtisticWallpaper(
+  /**
+   * Secours fiable : le Pokémon de la carte reste visible (artwork agrandi + fond étendu).
+   */
+  private async createCardBasedWallpaper(
     cardImage: Buffer,
     type: string,
   ): Promise<Buffer> {
     const accent = this.typeAccentRgb(type);
 
-    const base = await sharp(cardImage)
+    const background = await sharp(cardImage)
       .resize(WALLPAPER_WIDTH, WALLPAPER_HEIGHT, {
         fit: 'cover',
         position: 'attention',
       })
-      .blur(42)
-      .modulate({ brightness: 0.6, saturation: 1.45 })
+      .blur(38)
+      .modulate({ brightness: 0.45, saturation: 1.35 })
       .toBuffer();
 
-    const overlay = Buffer.from(
+    const heroWidth = Math.round(WALLPAPER_WIDTH * 0.88);
+    const heroHeight = Math.round(heroWidth * (88 / 63));
+    const heroTop = Math.round(WALLPAPER_HEIGHT * 0.1);
+    const heroLeft = Math.round((WALLPAPER_WIDTH - heroWidth) / 2);
+
+    const hero = await sharp(cardImage)
+      .resize(heroWidth, heroHeight, {
+        fit: 'contain',
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
+      })
+      .png()
+      .toBuffer();
+
+    const vignette = Buffer.from(
       `<svg width="${WALLPAPER_WIDTH}" height="${WALLPAPER_HEIGHT}">
         <defs>
-          <radialGradient id="glow" cx="50%" cy="35%" r="65%">
-            <stop offset="0%" stop-color="rgba(${accent.r},${accent.g},${accent.b},0.45)"/>
-            <stop offset="100%" stop-color="rgba(10,12,30,0)"/>
+          <radialGradient id="glow" cx="50%" cy="38%" r="55%">
+            <stop offset="0%" stop-color="rgba(${accent.r},${accent.g},${accent.b},0.25)"/>
+            <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
           </radialGradient>
           <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="rgba(0,0,0,0.15)"/>
-            <stop offset="55%" stop-color="rgba(0,0,0,0)"/>
-            <stop offset="100%" stop-color="rgba(5,8,20,0.85)"/>
+            <stop offset="70%" stop-color="rgba(0,0,0,0)"/>
+            <stop offset="100%" stop-color="rgba(5,8,20,0.75)"/>
           </linearGradient>
         </defs>
         <rect width="100%" height="100%" fill="url(#glow)"/>
@@ -241,8 +333,11 @@ export class WallpaperService {
       </svg>`,
     );
 
-    return sharp(base)
-      .composite([{ input: overlay }])
+    return sharp(background)
+      .composite([
+        { input: hero, top: heroTop, left: heroLeft },
+        { input: vignette, top: 0, left: 0 },
+      ])
       .png()
       .toBuffer();
   }
