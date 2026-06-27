@@ -19,7 +19,7 @@
       "package": "com.pokestore.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#2d3561"
       },
       "edgeToEdgeEnabled": false,
       "predictiveBackGestureEnabled": false
