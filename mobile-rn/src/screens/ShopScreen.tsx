@@ -93,7 +93,11 @@ export function ShopScreen({}: Props) {
       setTotalPages(typeof data.totalPages === 'number' ? Math.max(1, data.totalPages) : 1);
     } catch (err) {
       console.error(err);
-      setError('Impossible de charger les cartes Pokémon.');
+      const msg =
+        err instanceof Error
+          ? err.message
+          : 'Impossible de charger les cartes Pokémon.';
+      setError(msg);
       setProducts([]);
     } finally {
       setLoading(false);
@@ -143,8 +147,14 @@ export function ShopScreen({}: Props) {
     return (
       <AppShell>
         <View style={styles.errorBox}>
-          <Text style={styles.errorTitle}>ERREUR: {error}</Text>
-          <Text style={styles.errorHint}>Vérifie que le backend tourne sur le port 3000</Text>
+          <Text style={styles.errorTitle}>Boutique indisponible</Text>
+          <Text style={styles.errorHint}>{error}</Text>
+          <Text style={styles.errorHint}>
+            L&apos;API Render peut mettre ~30 s à démarrer (plan gratuit). Réessaie.
+          </Text>
+          <Pressable style={styles.retryBtn} onPress={() => void loadCards()}>
+            <Text style={styles.retryBtnText}>Réessayer</Text>
+          </Pressable>
         </View>
       </AppShell>
     );
@@ -605,5 +615,20 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 13,
     textAlign: 'center',
+    marginBottom: 8,
+  },
+  retryBtn: {
+    marginTop: 16,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: colors.border,
+    borderWidth: 2,
+    borderColor: colors.cardBorder,
+  },
+  retryBtnText: {
+    fontFamily: font.sansBold,
+    color: colors.text,
+    fontSize: 15,
   },
 });

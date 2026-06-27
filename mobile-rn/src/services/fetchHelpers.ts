@@ -1,6 +1,6 @@
 import { getApiBaseUrl } from '../config/api';
 
-const DEFAULT_TIMEOUT_MS = 45_000;
+const DEFAULT_TIMEOUT_MS = 90_000;
 
 export function buildUrl(path: string): string {
   const base = getApiBaseUrl();

@@ -3,6 +3,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Image } from 'expo-image';
 import { File, Paths } from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
+import * as Sharing from 'expo-sharing';
 import {
   ActivityIndicator,
   Alert,
@@ -20,6 +21,13 @@ import { colors } from '../theme/colors';
 import { font } from '../theme/typography';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'WallpaperPreview'>;
+
+function sourceLabel(source: wallpaperService.WallpaperSource | undefined): string | null {
+  if (source === 'openai') return 'Généré par IA (DALL·E 3)';
+  if (source === 'pollinations') return 'Généré par IA (Flux)';
+  if (source === 'artistic') return 'Style artistique (secours — IA indisponible)';
+  return null;
+}
 
 export function WallpaperPreviewScreen({ route, navigation }: Props) {
   const { product } = route.params;
@@ -48,34 +56,53 @@ export function WallpaperPreviewScreen({ route, navigation }: Props) {
     }
   }, [cardId]);
 
-  const saveToGallery = async () => {
+  const writeWallpaperFile = (): File => {
+    if (!result?.imageBase64) {
+      throw new Error('Aucune image à enregistrer');
+    }
+    const file = new File(Paths.cache, `pokestore-wallpaper-${cardId}.png`);
+    if (file.exists) {
+      file.delete();
+    }
+    file.create({ overwrite: true });
+    file.write(result.imageBase64, { encoding: 'base64' });
+    return file;
+  };
+
+  const saveWallpaper = async () => {
     if (!result?.imageBase64) return;
 
     setSaving(true);
     try {
-      const permission = await MediaLibrary.requestPermissionsAsync();
+      const file = writeWallpaperFile();
+
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(file.uri, {
+          mimeType: 'image/png',
+          dialogTitle: 'Enregistrer ton fond d’écran',
+        });
+        return;
+      }
+
+      const permission = await MediaLibrary.requestPermissionsAsync(true);
       if (!permission.granted) {
         Alert.alert(
           'Permission requise',
-          'Autorise l’accès à la galerie pour enregistrer le fond d’écran.',
+          'Autorise l’accès aux photos pour enregistrer le fond d’écran.',
         );
         return;
       }
 
-      const file = new File(Paths.cache, `pokestore-wallpaper-${cardId}.png`);
-      if (file.exists) {
-        file.delete();
-      }
-      file.create({ overwrite: true });
-      file.write(result.imageBase64, { encoding: 'base64' });
       await MediaLibrary.saveToLibraryAsync(file.uri);
-
       Alert.alert(
         'Enregistré',
-        'Le fond d’écran est dans ta galerie. Tu peux le définir depuis les paramètres Android.',
+        'Le fond d’écran est dans ta galerie. Définis-le depuis Paramètres → Fond d’écran.',
       );
     } catch (e) {
-      Alert.alert('Erreur', e instanceof Error ? e.message : 'Enregistrement impossible');
+      Alert.alert(
+        'Erreur',
+        e instanceof Error ? e.message : 'Enregistrement impossible. Réessaie via Partager.',
+      );
     } finally {
       setSaving(false);
     }
@@ -84,13 +111,6 @@ export function WallpaperPreviewScreen({ route, navigation }: Props) {
   const imageUri = result
     ? `data:${result.mimeType};base64,${result.imageBase64}`
     : null;
-
-  const sourceLabel =
-    result?.source === 'openai'
-      ? 'Généré par IA (DALL·E)'
-      : result?.source === 'composite'
-        ? 'Style IA (composition serveur)'
-        : null;
 
   return (
     <AppShell>
@@ -101,7 +121,7 @@ export function WallpaperPreviewScreen({ route, navigation }: Props) {
             <Text style={styles.title}>FOND D&apos;ÉCRAN</Text>
             <Text style={styles.subtitle}>{product.name}</Text>
             <Text style={styles.hint}>
-              Génère un fond d’écran vertical à partir d’une carte de ta collection.
+              Fond d’écran vertical généré par IA à partir du type et de la rareté de ta carte.
             </Text>
           </View>
         </View>
@@ -113,7 +133,7 @@ export function WallpaperPreviewScreen({ route, navigation }: Props) {
             <Image source={{ uri: product.image }} style={styles.previewCard} contentFit="contain" />
             <Pressable style={styles.primaryBtn} onPress={() => void generate()}>
               <MaterialCommunityIcons name="auto-fix" size={22} color={colors.text} />
-              <Text style={styles.primaryBtnText}>Générer le fond d’écran</Text>
+              <Text style={styles.primaryBtnText}>Générer avec l&apos;IA</Text>
             </Pressable>
           </View>
         )}
@@ -121,31 +141,37 @@ export function WallpaperPreviewScreen({ route, navigation }: Props) {
         {loading && (
           <View style={styles.center}>
             <ActivityIndicator size="large" color={colors.mint} />
-            <Text style={styles.loadingText}>Génération en cours…</Text>
-            <Text style={styles.loadingSub}>Cela peut prendre jusqu’à 30 secondes.</Text>
+            <Text style={styles.loadingText}>L&apos;IA génère ton fond d’écran…</Text>
+            <Text style={styles.loadingSub}>Compte 30 à 90 secondes.</Text>
           </View>
         )}
 
         {imageUri && !loading && (
           <View style={styles.result}>
-            <Image source={{ uri: imageUri }} style={styles.wallpaper} contentFit="contain" />
-            {sourceLabel && <Text style={styles.source}>{sourceLabel}</Text>}
+            <Image source={{ uri: imageUri }} style={styles.wallpaper} contentFit="cover" />
+            {sourceLabel(result?.source) && (
+              <Text style={styles.source}>{sourceLabel(result?.source)}</Text>
+            )}
 
             <View style={styles.actions}>
               <Pressable
                 style={[styles.primaryBtn, saving && styles.btnDisabled]}
-                onPress={() => void saveToGallery()}
+                onPress={() => void saveWallpaper()}
                 disabled={saving}
               >
                 {saving ? (
                   <ActivityIndicator color={colors.text} />
                 ) : (
                   <>
-                    <MaterialCommunityIcons name="download" size={22} color={colors.text} />
-                    <Text style={styles.primaryBtnText}>Enregistrer dans la galerie</Text>
+                    <MaterialCommunityIcons name="share-variant" size={22} color={colors.text} />
+                    <Text style={styles.primaryBtnText}>Enregistrer / Partager</Text>
                   </>
                 )}
               </Pressable>
+
+              <Text style={styles.shareHint}>
+                Sur Expo Go : choisis « Enregistrer dans Galerie » ou « Photos » dans le menu de partage.
+              </Text>
 
               <Pressable style={styles.secondaryBtn} onPress={() => void generate()}>
                 <Text style={styles.secondaryBtnText}>Régénérer</Text>
@@ -252,12 +278,20 @@ const styles = StyleSheet.create({
     fontFamily: font.sansMedium,
     color: colors.indigoText,
     fontSize: 13,
+    textAlign: 'center',
   },
   actions: {
     width: '100%',
     maxWidth: 360,
     gap: 10,
     marginTop: 8,
+  },
+  shareHint: {
+    fontFamily: font.sans,
+    fontSize: 11,
+    color: colors.violet,
+    textAlign: 'center',
+    lineHeight: 16,
   },
   primaryBtn: {
     flexDirection: 'row',
