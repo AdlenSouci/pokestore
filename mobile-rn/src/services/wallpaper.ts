@@ -1,6 +1,6 @@
 import { fetchJson } from '../api/http';
 
-export type WallpaperSource = 'openai' | 'pollinations' | 'card-art';
+export type WallpaperSource = 'openai' | 'pollinations' | 'gemini';
 
 export interface WallpaperResult {
   imageBase64: string;
@@ -17,6 +17,6 @@ export async function generateWallpaper(cardId: number): Promise<WallpaperResult
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ cardId }),
     },
-    120_000,
+    180_000,
   );
 }

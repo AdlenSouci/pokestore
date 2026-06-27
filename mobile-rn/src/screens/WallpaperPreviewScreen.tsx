@@ -23,9 +23,9 @@ import { font } from '../theme/typography';
 type Props = NativeStackScreenProps<RootStackParamList, 'WallpaperPreview'>;
 
 function sourceLabel(source: wallpaperService.WallpaperSource | undefined): string | null {
-  if (source === 'openai') return 'Fond IA (DALL·E 3) + ton Pokémon (artwork carte)';
-  if (source === 'pollinations') return 'Fond IA (Flux) + ton Pokémon (artwork carte)';
-  if (source === 'card-art') return 'Fond stylisé — IA indisponible, artwork conservé';
+  if (source === 'gemini') return 'Généré par IA (Gemini)';
+  if (source === 'openai') return 'Généré par IA (DALL·E 3)';
+  if (source === 'pollinations') return 'Généré par IA (Flux)';
   return null;
 }
 
@@ -121,7 +121,7 @@ export function WallpaperPreviewScreen({ route, navigation }: Props) {
             <Text style={styles.title}>FOND D&apos;ÉCRAN</Text>
             <Text style={styles.subtitle}>{product.name}</Text>
             <Text style={styles.hint}>
-              L&apos;IA stylise le décor autour de ton Pokémon — l&apos;illustration de la carte reste au centre, fidèle à l&apos;original.
+              L&apos;IA transforme l&apos;illustration de ta carte en fond d&apos;écran vertical 9:16 — décor étendu, sans bordure ni texte de carte.
             </Text>
           </View>
         </View>
@@ -141,8 +141,8 @@ export function WallpaperPreviewScreen({ route, navigation }: Props) {
         {loading && (
           <View style={styles.center}>
             <ActivityIndicator size="large" color={colors.mint} />
-            <Text style={styles.loadingText}>L&apos;IA génère le décor…</Text>
-            <Text style={styles.loadingSub}>Ton Pokémon reste celui de ta carte · 30 à 90 s</Text>
+            <Text style={styles.loadingText}>Génération IA en cours…</Text>
+            <Text style={styles.loadingSub}>Peut prendre 1 à 3 minutes · ne quitte pas l&apos;écran</Text>
           </View>
         )}
 

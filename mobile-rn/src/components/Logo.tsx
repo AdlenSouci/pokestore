@@ -5,12 +5,23 @@ import { colors } from '../theme/colors';
 
 const logoSource = require('../../assets/logo.png');
 
+/** Ratio du logo préparé (655×908) */
+const LOGO_ASPECT = 655 / 908;
+
 const HEIGHTS = {
-  nav: 38,
-  sm: 52,
-  md: 68,
-  lg: 92,
-  hero: 150,
+  nav: 48,
+  sm: 72,
+  md: 96,
+  lg: 120,
+  hero: 180,
+} as const;
+
+const RADIUS = {
+  nav: 10,
+  sm: 12,
+  md: 14,
+  lg: 16,
+  hero: 20,
 } as const;
 
 export type LogoSize = keyof typeof HEIGHTS;
@@ -31,15 +42,21 @@ export function Logo({
   accessibilityLabel = 'PokéStore',
 }: LogoProps) {
   const height = HEIGHTS[size];
+  const radius = RADIUS[size];
+  const width = Math.round(height * LOGO_ASPECT);
+
+  const badge = (
+    <Image
+      source={logoSource}
+      style={{ width, height, borderRadius: radius }}
+      contentFit="cover"
+      accessibilityIgnoresInvertColors
+    />
+  );
 
   const content = (
     <>
-      <Image
-        source={logoSource}
-        style={{ width: height * 1.15, height }}
-        contentFit="contain"
-        accessibilityIgnoresInvertColors
-      />
+      {badge}
       {showText && (
         <Text style={styles.text} numberOfLines={1}>
           PokéStore

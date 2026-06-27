@@ -68,11 +68,8 @@ export function HomePage({
         <PokemonBackground intensity="full" />
 
         <div className="relative z-10 container mx-auto px-4 py-12 md:py-20 flex flex-col items-center text-center max-w-4xl">
-          <div className="mb-6 animate-poke-float">
-            <div className="relative flex justify-center">
-              <div className="absolute inset-0 rounded-full bg-[#7ec8a3]/20 blur-2xl scale-150 animate-title-glow" />
-              <Logo size="hero" className="relative" imageClassName="drop-shadow-2xl" />
-            </div>
+          <div className="mb-8">
+            <Logo size="hero" className="justify-center" />
           </div>
 
           <p className="text-[#7ec8a3] text-sm md:text-base font-sans font-semibold tracking-widest uppercase mb-3 animate-fade-in">

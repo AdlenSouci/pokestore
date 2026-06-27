@@ -20,7 +20,7 @@ async function writeFromLogo(filename, size, { padding = 48 } = {}) {
   const inner = size - padding * 2;
   const out = path.join(assetsDir, filename);
   await sharp(logoPath)
-    .resize(inner, inner, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .resize(inner, inner, { fit: 'contain', background: { r: 244, g: 239, b: 230, alpha: 255 } })
     .extend({
       top: padding,
       bottom: padding,

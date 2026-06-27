@@ -1,18 +1,25 @@
 import logoSrc from '../assets/logo.png';
 
 const HEIGHTS = {
-  nav: 40,
-  sm: 56,
-  md: 72,
-  lg: 96,
-  hero: 160,
+  nav: 52,
+  sm: 80,
+  md: 100,
+  lg: 128,
+  hero: 200,
+} as const;
+
+const RADIUS = {
+  nav: 10,
+  sm: 12,
+  md: 14,
+  lg: 16,
+  hero: 20,
 } as const;
 
 export type LogoSize = keyof typeof HEIGHTS;
 
 export type LogoProps = {
   size?: LogoSize;
-  /** Affiche « PokéStore » à côté — désactivé par défaut car le visuel contient déjà le nom */
   showText?: boolean;
   className?: string;
   imageClassName?: string;
@@ -29,17 +36,21 @@ export function Logo({
   'aria-label': ariaLabel = 'PokéStore',
 }: LogoProps) {
   const height = HEIGHTS[size];
+  const radius = RADIUS[size];
+
+  const img = (
+    <img
+      src={logoSrc}
+      alt="PokéStore"
+      className={`block w-auto max-w-none object-contain shrink-0 ${imageClassName}`}
+      style={{ height, borderRadius: radius }}
+      decoding="async"
+    />
+  );
 
   const content = (
     <>
-      <img
-        src={logoSrc}
-        alt=""
-        aria-hidden={showText}
-        height={height}
-        className={`w-auto object-contain shrink-0 drop-shadow-md ${imageClassName}`}
-        style={{ height }}
-      />
+      {img}
       {showText && (
         <span className="pixel-font text-lg md:text-2xl text-white tracking-tighter whitespace-nowrap">
           PokéStore
@@ -55,7 +66,7 @@ export function Logo({
       <button
         type="button"
         onClick={onClick}
-        className={`${baseClass} cursor-pointer hover:scale-[1.02] transition-transform text-left`}
+        className={`${baseClass} cursor-pointer hover:opacity-95 transition-opacity text-left`}
         aria-label={ariaLabel}
       >
         {content}
@@ -63,5 +74,9 @@ export function Logo({
     );
   }
 
-  return <div className={baseClass} aria-label={ariaLabel}>{content}</div>;
+  return (
+    <div className={baseClass} aria-label={ariaLabel}>
+      {content}
+    </div>
+  );
 }

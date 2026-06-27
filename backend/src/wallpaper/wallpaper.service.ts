@@ -4,6 +4,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
@@ -14,16 +15,7 @@ import { PrismaService } from '../database/prisma.service';
 const WALLPAPER_WIDTH = 1080;
 const WALLPAPER_HEIGHT = 1920;
 
-export type WallpaperSource = 'openai' | 'pollinations' | 'card-art';
-
-type ArtLayers = {
-  artwork: Buffer;
-  hero: Buffer;
-  glow: Buffer;
-  heroTop: number;
-  heroLeft: number;
-  overlay: Buffer;
-};
+export type WallpaperSource = 'openai' | 'pollinations' | 'gemini';
 
 @Injectable()
 export class WallpaperService {
@@ -58,85 +50,88 @@ export class WallpaperService {
     }
 
     const cardImage = await this.fetchCardImage(card.imageUrl);
-    const layers = await this.prepareArtLayers(cardImage, card.type);
-    const bgPrompt = this.buildBackgroundPrompt(
-      card.name,
-      card.type,
-      card.rarity,
+    const illustration = await this.extractIllustration(cardImage);
+    const outpaintSeed = await this.createOutpaintSeed(illustration);
+    const prompt = this.buildWallpaperPrompt(card.name, card.type, card.rarity);
+
+    const pollinations = await this.tryPollinationsWallpaper(
+      prompt,
+      outpaintSeed,
+      cardId,
     );
-
-    const blurredSeed = await this.createBlurredBackground(layers.artwork);
-
-    let background: Buffer;
-    let source: WallpaperSource;
-
-    const openAiBg = await this.tryOpenAiBackground(bgPrompt);
-    if (openAiBg) {
-      background = openAiBg;
-      source = 'openai';
-    } else {
-      const aiBg =
-        (await this.tryPollinationsImg2Img(
-          bgPrompt,
-          card.imageUrl,
-          cardId,
-        )) ??
-        (await this.tryPollinationsUpload(bgPrompt, blurredSeed, cardId));
-
-      if (aiBg) {
-        background = await this.normalizeWallpaper(aiBg);
-        source = 'pollinations';
-      } else {
-        background = blurredSeed;
-        source = 'card-art';
-      }
+    if (pollinations) {
+      return {
+        imageBase64: pollinations.toString('base64'),
+        mimeType: 'image/png',
+        source: 'pollinations',
+        cardName: card.name,
+      };
     }
 
-    /** Le Pokémon reste l'artwork carte (calque net) — l'IA ne stylise que l'arrière-plan. */
-    const output = await sharp(background)
-      .composite([
-        { input: layers.glow, top: layers.heroTop + 8, left: layers.heroLeft },
-        { input: layers.hero, top: layers.heroTop, left: layers.heroLeft },
-        { input: layers.overlay, top: 0, left: 0 },
-      ])
-      .png()
-      .toBuffer();
+    const gemini = await this.tryGeminiWallpaper(prompt, outpaintSeed);
+    if (gemini) {
+      return {
+        imageBase64: gemini.toString('base64'),
+        mimeType: 'image/png',
+        source: 'gemini',
+        cardName: card.name,
+      };
+    }
 
-    return {
-      imageBase64: output.toString('base64'),
-      mimeType: 'image/png',
-      source,
-      cardName: card.name,
-    };
+    const openAi = await this.tryOpenAiWallpaper(prompt);
+    if (openAi) {
+      return {
+        imageBase64: openAi.toString('base64'),
+        mimeType: 'image/png',
+        source: 'openai',
+        cardName: card.name,
+      };
+    }
+
+    this.logger.error(
+      `Wallpaper IA échoué pour carte ${cardId} (${card.name}) — aucun fournisseur disponible`,
+    );
+    throw new ServiceUnavailableException(
+      "La génération IA n'a pas abouti (service surchargé ou indisponible). Réessaie dans 1 à 2 minutes.",
+    );
   }
 
-  private buildBackgroundPrompt(
+  private buildWallpaperPrompt(
     cardName: string,
     type: string,
     rarity: string,
   ): string {
     return [
-      `Vertical phone wallpaper background for the Pokémon ${cardName}.`,
-      `${type} type energy, ${rarity} mood.`,
-      `Extend and stylize ONLY the scenery and atmosphere around the character.`,
-      `Cinematic fantasy environment, dramatic lighting, full bleed mobile wallpaper.`,
-      `Do not add text, logos, card borders, or device frames.`,
-      `The Pokémon ${cardName} from the reference must remain recognizable.`,
+      `Transform this Pokémon card illustration into a full vertical 9:16 mobile phone wallpaper.`,
+      `The Pokémon ${cardName} must stay the hero — same species, same pose, recognizable.`,
+      `${type} type atmosphere, ${rarity} cinematic mood.`,
+      `Outpaint and extend the scenery above and below to fill the entire frame.`,
+      `Epic fantasy environment, dramatic lighting, painterly detail.`,
+      `NO trading card, NO card border, NO attack text, NO HP, NO UI, NO watermark, NO phone frame.`,
+      `Full bleed wallpaper art only.`,
     ].join(' ');
   }
 
   private negativePrompt(): string {
     return [
+      'trading card',
+      'card border',
+      'card frame',
+      'text',
+      'letters',
+      'numbers',
+      'hp',
+      'attack',
+      'damage',
+      'watermark',
+      'logo',
       'smartphone',
       'phone mockup',
       'device frame',
-      'text',
-      'watermark',
-      'logo',
-      'trading card border',
-      'UI elements',
-      'different pokemon',
-      'wrong character',
+      'ui',
+      'flat color background',
+      'solid background',
+      'wrong pokemon',
     ].join(', ');
   }
 
@@ -168,6 +163,62 @@ export class WallpaperService {
     }
   }
 
+  /** Fenêtre illustration TCG (sans texte d'attaque en bas). */
+  private async extractIllustration(cardImage: Buffer): Promise<Buffer> {
+    const meta = await sharp(cardImage).metadata();
+    const w = meta.width ?? 400;
+    const h = meta.height ?? 560;
+
+    const left = Math.round(w * 0.06);
+    const top = Math.round(h * 0.105);
+    const width = Math.round(w * 0.88);
+    const height = Math.round(h * 0.44);
+
+    return sharp(cardImage)
+      .extract({ left, top, width, height })
+      .png()
+      .toBuffer();
+  }
+
+  /**
+   * Illustration centrée sur toile verticale — l'IA doit remplir le reste (outpainting).
+   */
+  private async createOutpaintSeed(illustration: Buffer): Promise<Buffer> {
+    const artMeta = await sharp(illustration).metadata();
+    const artW = Math.round(WALLPAPER_WIDTH * 0.78);
+    const artH = Math.round(
+      artW * ((artMeta.height ?? 1) / (artMeta.width ?? 1)),
+    );
+    const top = Math.round(WALLPAPER_HEIGHT * 0.14);
+    const left = Math.round((WALLPAPER_WIDTH - artW) / 2);
+
+    const art = await sharp(illustration)
+      .resize(artW, artH, { fit: 'inside' })
+      .png()
+      .toBuffer();
+
+    const artPlaced = await sharp(art).metadata();
+    const placedW = artPlaced.width ?? artW;
+    const placedH = artPlaced.height ?? artH;
+    const adjLeft = Math.round((WALLPAPER_WIDTH - placedW) / 2);
+
+    const base = await sharp({
+      create: {
+        width: WALLPAPER_WIDTH,
+        height: WALLPAPER_HEIGHT,
+        channels: 3,
+        background: { r: 18, g: 24, b: 42 },
+      },
+    })
+      .png()
+      .toBuffer();
+
+    return sharp(base)
+      .composite([{ input: art, top, left: adjLeft }])
+      .png()
+      .toBuffer();
+  }
+
   private async normalizeWallpaper(buffer: Buffer): Promise<Buffer> {
     return sharp(buffer)
       .resize(WALLPAPER_WIDTH, WALLPAPER_HEIGHT, { fit: 'cover' })
@@ -175,109 +226,197 @@ export class WallpaperService {
       .toBuffer();
   }
 
-  private typeAccentRgb(type: string): { r: number; g: number; b: number } {
-    const key = type.toLowerCase();
-    const map: Record<string, { r: number; g: number; b: number }> = {
-      fire: { r: 255, g: 120, b: 40 },
-      water: { r: 40, g: 160, b: 255 },
-      grass: { r: 80, g: 200, b: 80 },
-      electric: { r: 255, g: 220, b: 60 },
-      psychic: { r: 200, g: 80, b: 200 },
-      fighting: { r: 200, g: 80, b: 60 },
-      darkness: { r: 80, g: 60, b: 120 },
-      dark: { r: 80, g: 60, b: 120 },
-      metal: { r: 160, g: 170, b: 190 },
-      dragon: { r: 120, g: 80, b: 220 },
-      fairy: { r: 255, g: 140, b: 200 },
-      colorless: { r: 200, g: 200, b: 210 },
-    };
-    return map[key] ?? { r: 120, g: 140, b: 255 };
-  }
+  /** Rejette les images plates (fond uni) ou trop petites — pas une vraie génération IA. */
+  private async isValidAiWallpaper(buffer: Buffer): Promise<boolean> {
+    if (buffer.length < 80_000) {
+      return false;
+    }
 
-  private async extractArtwork(cardImage: Buffer): Promise<Buffer> {
-    const meta = await sharp(cardImage).metadata();
-    const w = meta.width ?? 400;
-    const h = meta.height ?? 560;
-    const padX = Math.round(w * 0.07);
-    const padY = Math.round(h * 0.09);
-    return sharp(cardImage)
+    const { channels } = await sharp(buffer)
+      .resize(120, 120, { fit: 'cover' })
+      .stats();
+
+    const avgStdev =
+      (channels[0].stdev + channels[1].stdev + channels[2].stdev) / 3;
+
+    if (avgStdev < 22) {
+      this.logger.warn(`Wallpaper rejeté: image trop plate (stdev=${avgStdev.toFixed(1)})`);
+      return false;
+    }
+
+    const bottom = await sharp(buffer)
       .extract({
-        left: padX,
-        top: padY,
-        width: w - padX * 2,
-        height: h - padY * 2,
+        left: 0,
+        top: Math.round(WALLPAPER_HEIGHT * 0.72),
+        width: WALLPAPER_WIDTH,
+        height: Math.round(WALLPAPER_HEIGHT * 0.28),
       })
-      .toBuffer();
+      .resize(80, 40)
+      .stats();
+
+    const bottomStdev =
+      (bottom.channels[0].stdev +
+        bottom.channels[1].stdev +
+        bottom.channels[2].stdev) /
+      3;
+
+    if (bottomStdev < 15) {
+      this.logger.warn(
+        `Wallpaper rejeté: bas de l'image vide/uniforme (stdev=${bottomStdev.toFixed(1)})`,
+      );
+      return false;
+    }
+
+    return true;
   }
 
-  private async prepareArtLayers(
-    cardImage: Buffer,
-    type: string,
-  ): Promise<ArtLayers> {
-    const artwork = await this.extractArtwork(cardImage);
-    const meta = await sharp(artwork).metadata();
-    const artW = meta.width ?? 360;
-    const artH = meta.height ?? 500;
-    const accent = this.typeAccentRgb(type);
+  private async tryPollinationsWallpaper(
+    prompt: string,
+    seedImage: Buffer,
+    seed: number,
+  ): Promise<Buffer | null> {
+    const apiKey = this.config.get<string>('POLLINATIONS_API_KEY')?.trim();
 
-    const heroW = Math.round(WALLPAPER_WIDTH * 0.94);
-    const heroH = Math.round(heroW * (artH / artW));
-    const heroTop = Math.round(WALLPAPER_HEIGHT * 0.06);
-    const heroLeft = Math.round((WALLPAPER_WIDTH - heroW) / 2);
+    const attempts: Array<() => Promise<Buffer | null>> = [
+      () => this.pollinationsPost(prompt, seedImage, seed, 'flux', apiKey),
+      () => this.pollinationsPost(prompt, seedImage, seed, 'kontext', apiKey),
+    ];
 
-    const glow = await sharp(artwork)
-      .resize(heroW, heroH, {
-        fit: 'contain',
-        background: { r: 0, g: 0, b: 0, alpha: 0 },
-      })
-      .blur(18)
-      .modulate({ brightness: 1.2, saturation: 1.3 })
-      .png()
-      .toBuffer();
+    for (const attempt of attempts) {
+      const buffer = await attempt();
+      if (!buffer) continue;
+      const normalized = await this.normalizeWallpaper(buffer);
+      if (await this.isValidAiWallpaper(normalized)) {
+        return normalized;
+      }
+    }
 
-    const hero = await sharp(artwork)
-      .resize(heroW, heroH, {
-        fit: 'contain',
-        background: { r: 0, g: 0, b: 0, alpha: 0 },
-      })
-      .png()
-      .toBuffer();
-
-    const overlay = Buffer.from(
-      `<svg width="${WALLPAPER_WIDTH}" height="${WALLPAPER_HEIGHT}">
-        <defs>
-          <radialGradient id="g" cx="50%" cy="40%" r="70%">
-            <stop offset="0%" stop-color="rgba(${accent.r},${accent.g},${accent.b},0.35)"/>
-            <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
-          </radialGradient>
-          <linearGradient id="v" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="rgba(0,0,0,0.1)"/>
-            <stop offset="75%" stop-color="rgba(0,0,0,0)"/>
-            <stop offset="100%" stop-color="rgba(8,10,24,0.8)"/>
-          </linearGradient>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#g)"/>
-        <rect width="100%" height="100%" fill="url(#v)"/>
-      </svg>`,
-    );
-
-    return { artwork, hero, glow, heroTop, heroLeft, overlay };
+    return null;
   }
 
-  private async createBlurredBackground(artwork: Buffer): Promise<Buffer> {
-    return sharp(artwork)
-      .resize(WALLPAPER_WIDTH, WALLPAPER_HEIGHT, {
-        fit: 'cover',
-        position: 'attention',
-      })
-      .blur(36)
-      .modulate({ brightness: 0.42, saturation: 1.5 })
-      .png()
-      .toBuffer();
+  private async pollinationsPost(
+    prompt: string,
+    seedImage: Buffer,
+    seed: number,
+    model: string,
+    apiKey?: string,
+  ): Promise<Buffer | null> {
+    try {
+      const form = new FormData();
+      form.append('image', seedImage, {
+        filename: 'seed.png',
+        contentType: 'image/png',
+      });
+      form.append('model', model);
+      form.append('width', String(WALLPAPER_WIDTH));
+      form.append('height', String(WALLPAPER_HEIGHT));
+      form.append('seed', String(seed));
+      form.append('nologo', 'true');
+      form.append('enhance', 'true');
+      form.append('guidance_scale', '9');
+      form.append('negative_prompt', this.negativePrompt());
+
+      const headers: Record<string, string> = form.getHeaders();
+      if (apiKey) {
+        headers.Authorization = `Bearer ${apiKey}`;
+      }
+
+      const res = await axios.post<ArrayBuffer>(
+        `https://gen.pollinations.ai/image/${encodeURIComponent(prompt)}`,
+        form,
+        {
+          headers,
+          responseType: 'arraybuffer',
+          timeout: 180_000,
+          maxContentLength: 20 * 1024 * 1024,
+        },
+      );
+
+      const buffer = Buffer.from(res.data);
+      if (buffer.length < 5_000) {
+        return null;
+      }
+      return buffer;
+    } catch (error) {
+      this.logger.warn(
+        `Pollinations ${model}: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      return null;
+    }
   }
 
-  /** IA OpenAI : génère l'ambiance / le décor (DALL·E 3). */
-  private async tryOpenAiBackground(prompt: string): Promise<Buffer | null> {
+  /** Secours : Gemini (image + prompt) — souvent meilleur que DALL·E pour ce cas. */
+  private async tryGeminiWallpaper(
+    prompt: string,
+    seedImage: Buffer,
+  ): Promise<Buffer | null> {
+    const apiKey = this.config.get<string>('GEMINI_API_KEY')?.trim();
+    if (!apiKey) {
+      return null;
+    }
+
+    try {
+      const res = await axios.post<{
+        candidates?: Array<{
+          content?: {
+            parts?: Array<{
+              inlineData?: { mimeType?: string; data?: string };
+            }>;
+          };
+        }>;
+      }>(
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent',
+        {
+          contents: [
+            {
+              parts: [
+                { text: prompt },
+                {
+                  inlineData: {
+                    mimeType: 'image/png',
+                    data: seedImage.toString('base64'),
+                  },
+                },
+              ],
+            },
+          ],
+          generationConfig: {
+            responseModalities: ['TEXT', 'IMAGE'],
+          },
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': apiKey,
+          },
+          timeout: 180_000,
+        },
+      );
+
+      const parts = res.data?.candidates?.[0]?.content?.parts ?? [];
+      for (const part of parts) {
+        const b64 = part.inlineData?.data;
+        if (!b64) continue;
+        const normalized = await this.normalizeWallpaper(
+          Buffer.from(b64, 'base64'),
+        );
+        if (await this.isValidAiWallpaper(normalized)) {
+          return normalized;
+        }
+      }
+
+      this.logger.warn('Gemini wallpaper: pas d’image valide dans la réponse');
+      return null;
+    } catch (error) {
+      this.logger.warn(
+        `Gemini wallpaper: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      return null;
+    }
+  }
+
+  /** Dernier secours si Gemini indisponible. */
+  private async tryOpenAiWallpaper(prompt: string): Promise<Buffer | null> {
     const apiKey = this.config.get<string>('OPENAI_API_KEY')?.trim();
     if (!apiKey) {
       return null;
@@ -293,11 +432,12 @@ export class WallpaperService {
           prompt,
           size: '1024x1792',
           response_format: 'b64_json',
+          quality: 'hd',
           n: 1,
         },
         {
           headers: { Authorization: `Bearer ${apiKey}` },
-          timeout: 90_000,
+          timeout: 120_000,
         },
       );
 
@@ -305,89 +445,20 @@ export class WallpaperService {
       if (!b64) {
         return null;
       }
-      return this.normalizeWallpaper(Buffer.from(b64, 'base64'));
+
+      const normalized = await this.normalizeWallpaper(
+        Buffer.from(b64, 'base64'),
+      );
+
+      if (!(await this.isValidAiWallpaper(normalized))) {
+        this.logger.warn('OpenAI wallpaper rejeté après validation');
+        return null;
+      }
+
+      return normalized;
     } catch (error) {
       this.logger.warn(
         `OpenAI wallpaper: ${error instanceof Error ? error.message : String(error)}`,
-      );
-      return null;
-    }
-  }
-
-  /** IA Flux img2img : la carte sert de référence visuelle pour le décor. */
-  private async tryPollinationsImg2Img(
-    prompt: string,
-    cardImageUrl: string,
-    seed: number,
-  ): Promise<Buffer | null> {
-    try {
-      const params = new URLSearchParams({
-        model: 'flux',
-        width: String(WALLPAPER_WIDTH),
-        height: String(WALLPAPER_HEIGHT),
-        seed: String(seed),
-        nologo: 'true',
-        image: cardImageUrl,
-        negative_prompt: this.negativePrompt(),
-      });
-      const url = `https://gen.pollinations.ai/image/${encodeURIComponent(prompt)}?${params.toString()}`;
-
-      const res = await axios.get<ArrayBuffer>(url, {
-        responseType: 'arraybuffer',
-        timeout: 120_000,
-        maxContentLength: 15 * 1024 * 1024,
-        headers: { Accept: 'image/*' },
-      });
-      const buffer = Buffer.from(res.data);
-      if (buffer.length < 2_000) {
-        return null;
-      }
-      return buffer;
-    } catch (error) {
-      this.logger.warn(
-        `Pollinations img2img: ${error instanceof Error ? error.message : String(error)}`,
-      );
-      return null;
-    }
-  }
-
-  private async tryPollinationsUpload(
-    prompt: string,
-    seedImage: Buffer,
-    seed: number,
-  ): Promise<Buffer | null> {
-    try {
-      const form = new FormData();
-      form.append('image', seedImage, {
-        filename: 'seed.png',
-        contentType: 'image/png',
-      });
-      form.append('model', 'flux');
-      form.append('width', String(WALLPAPER_WIDTH));
-      form.append('height', String(WALLPAPER_HEIGHT));
-      form.append('seed', String(seed));
-      form.append('nologo', 'true');
-      form.append('negative_prompt', this.negativePrompt());
-
-      const res = await axios.post<ArrayBuffer>(
-        `https://gen.pollinations.ai/image/${encodeURIComponent(prompt)}`,
-        form,
-        {
-          headers: form.getHeaders(),
-          responseType: 'arraybuffer',
-          timeout: 120_000,
-          maxContentLength: 15 * 1024 * 1024,
-        },
-      );
-
-      const buffer = Buffer.from(res.data);
-      if (buffer.length < 2_000) {
-        return null;
-      }
-      return buffer;
-    } catch (error) {
-      this.logger.warn(
-        `Pollinations upload: ${error instanceof Error ? error.message : String(error)}`,
       );
       return null;
     }

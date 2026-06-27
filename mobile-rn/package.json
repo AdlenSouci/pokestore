@@ -9,8 +9,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "icons": "node scripts/generate-icons.mjs",
-    "logo:detour": "node scripts/detour-logo.mjs",
-    "logo": "node scripts/detour-logo.mjs && node scripts/generate-icons.mjs"
+    "logo:round": "node scripts/round-logo.mjs",
+    "logo": "node scripts/prepare-logo.mjs && node scripts/generate-icons.mjs"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
