@@ -19,9 +19,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "db:seed": "prisma db seed",
-    "db:seed:admin": "tsx src/seed-admin.ts",
-    "db:migrate:local-to-neon": "tsx scripts/migrate-local-to-neon.ts",
-    "db:reprice": "tsx scripts/reprice-cards.ts"
+    "db:seed:admin": "tsx src/seed-admin.ts"
   },
   "prisma": {
     "seed": "tsx src/seed.ts"

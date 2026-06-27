@@ -124,7 +124,7 @@ EXPO_PUBLIC_WEB_URL=https://pokestore-hazel.vercel.app
 |--------|--------|
 | `npm run start:dev` | API en mode watch |
 | `npm run db:seed` | Peupler la base avec des cartes |
-| `npm run db:reprice` | Recalculer les prix selon la rareté |
+| `npm run db:seed:admin` | Créer / mettre à jour le compte admin |
 | `npm run test` | Tests unitaires |
 
 ### Frontend
@@ -164,10 +164,10 @@ Liste complète : **http://localhost:3000/api/docs**
 ```
 pokemon-app/
 ├── backend/          # API NestJS + Prisma
-├── frontend/         # Interface web React
+├── frontend/         # Site web React
 ├── mobile-rn/        # App mobile Expo
-├── docs/             # Cahier des charges (MD, HTML, PDF)
-└── task.md           # Grille de validation Ynov
+└── docs/             # Livrable client + sources Markdown
+    └── PokeStore-Livraison-Client/   # Word à remettre
 ```
 
 ---

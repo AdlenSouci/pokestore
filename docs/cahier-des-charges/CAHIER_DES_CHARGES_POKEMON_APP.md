@@ -1,210 +1,185 @@
-# Cahier des charges - Pokemon App
+---
+title: "Cahier des charges — PokéStore"
+subtitle: "Spécifications des 3 applications"
+author: "[Équipe PokéStore]"
+date: "Juin 2026"
+lang: fr-FR
+toc-title: "Table des matières"
+---
 
-Version unique de reference (commune a la version MD, HTML et PDF).
+**Version :** Juin 2026 — alignée sur l’état livré du projet
 
-## 1) Resume executif
+# Objet du projet
 
-`Pokemon App` est une plateforme de collection et d'achat de cartes TCG avec une experience immersive.
-Le produit est compose de trois briques:
-- interface web (`frontend`),
-- API metier (`backend`),
-- application mobile (`mobile-rn`).
+Développer une plateforme e-commerce de **cartes Pokémon TCG** comprenant :
 
-Objectif principal: proposer un parcours utilisateur complet, fluide et securise, de la decouverte des cartes jusqu'au paiement et au suivi de commande.
+| Application | Rôle | Utilisateurs |
+|-------------|------|--------------|
+| **Application web** | Boutique en ligne, compte client, paiement | Collectionneurs / acheteurs |
+| **Application mobile** | Même parcours d’achat sur smartphone | Clients en mobilité |
+| **Application admin (desktop)** | Gestion catalogue, ventes, commandes | Administrateur PokéStore |
+| **API + base de données** | Logique métier, persistance, sécurité | Support des 3 applications |
 
-## 2) Contexte et vision
-
-Le projet s'inscrit dans une logique produit "gaming + e-commerce":
-- univers visuel fort (style retro/arcade),
-- navigation simple et rapide,
-- parcours achat fiable (auth, panier, checkout),
-- coherence de comportement entre web et mobile.
-
-La vision cible est de devenir une base solide pour:
-- un usage boutique (achat),
-- un usage collection (recherche et tri),
-- une extension mobile first sur la meme API.
-
-## 3) Objectifs produit
-
-- Permettre la consultation d'un catalogue de cartes riche, filtre et pagine.
-- Permettre l'inscription/connexion locale et Google OAuth.
-- Permettre la gestion du panier (ajout, quantite, suppression).
-- Permettre la creation de commande et le paiement Stripe.
-- Permettre le suivi des commandes depuis l'espace utilisateur.
-- Offrir une base technique propre et maintenable pour evolutions futures.
-
-## 4) Cibles utilisateur
-
-- **Collectionneur debutant**: explore par type, rarete, prix.
-- **Collectionneur confirme**: veut filtrer rapidement par set/serie/annee.
-- **Acheteur mobile**: consulte et finalise des achats en deplacement.
-
-## 5) Parcours utilisateur de reference
-
-1. Arrivee sur l'accueil.
-2. Entree dans la boutique.
-3. Recherche + filtres (prix, annee, serie, set, rarete, type).
-4. Consultation du detail d'une carte.
-5. Ajout au panier.
-6. Passage en checkout Stripe.
-7. Consultation des commandes.
-
-## 6) Perimetre fonctionnel detaille
-
-### 6.1 Frontend web (`frontend`)
-
-- Page d'accueil immersive avec CTA vers la boutique.
-- Catalogue pagine avec filtres dynamiques via API.
-- Cartes produit avec prix et metadonnees.
-- Modal detail carte avec rendu visuel enrichi.
-- Auth modal (connexion, inscription, Google).
-- Espace utilisateur (profil, commandes).
-- Panier complet et transition vers paiement.
-
-### 6.2 Backend API (`backend`)
-
-- API NestJS avec prefixe global `api`.
-- Documentation Swagger exposee sur `/api/docs`.
-- CORS actif pour web et mobile.
-- Auth securisee: JWT, hash password, guards.
-- Integration Stripe pour checkout.
-- Prisma + PostgreSQL pour persistance relationnelle.
-
-### 6.3 Mobile (`mobile-rn`)
-
-- Application React Native / Expo connectee a la meme API.
-- Ecrans MVP: accueil, boutique, detail.
-- Strategie de base URL API compatible emulateur/appareil reel.
-- Objectif d'alignement UX avec le frontend web.
-
-## 7) Endpoints metier cibles
-
-- **Auth**
-  - `POST /api/auth/register`
-  - `POST /api/auth/login`
-  - `GET /api/auth/google`
-  - `GET /api/auth/profile`
-  - `PUT /api/auth/profile`
-
-- **Cards**
-  - `GET /api/cards`
-  - `GET /api/cards/meta`
-  - `GET /api/cards/import`
-
-- **Cart**
-  - `GET /api/cart`
-  - `POST /api/cart`
-  - `PATCH /api/cart/:cardId`
-  - `DELETE /api/cart/:cardId`
-
-- **Orders**
-  - `POST /api/orders/checkout-session`
-  - `POST /api/orders`
-  - `GET /api/orders`
-
-## 8) Exigences non fonctionnelles
-
-- **Securite**
-  - JWT + guards sur routes protegees.
-  - Hash de mot de passe.
-  - Validation des DTO et gestion erreurs claire.
-
-- **Performance**
-  - Pagination catalogue.
-  - Reponses API structurees pour filtres et recherches.
-
-- **Accessibilite**
-  - Actions critiques identifiables.
-  - Contrastes et lisibilite a verifier sur les composants principaux.
-
-- **Qualite**
-  - Architecture modules/services.
-  - Typage TypeScript sur front et back.
-
-## 9) Contraintes techniques
-
-- Backend: Node.js, NestJS 11, Prisma, PostgreSQL, Stripe.
-- Frontend: React 19, TypeScript, Vite, Tailwind.
-- Mobile: React Native, Expo SDK 54.
-- Tests mobile sur LAN: configuration IPv4 locale requise.
-
-## 10) Livrables attendus
-
-- Application web operationnelle (auth, boutique, panier, commandes).
-- API documentee et exploitable.
-- Application mobile connectee a l'API.
-- Documentation projet et scripts de lancement.
-- Cahier des charges unifie (MD + HTML + PDF).
-
-## 11) Planning propose
-
-- **Phase 1 - Stabilisation API (1 semaine)**
-  - Auth mobile, robustesse routes critiques, securite HTTP.
-
-- **Phase 2 - Experience utilisateur (1 semaine)**
-  - Feedbacks UI (toasts/loaders), erreurs lisibles, coherence des ecrans.
-
-- **Phase 3 - Qualite et validation (1 semaine)**
-  - Verification multi-ecrans, tests fonctionnels, controle perf/accessibilite.
-
-- **Phase 4 - Livraison (2 a 3 jours)**
-  - Packaging demo, documentation finale, corrections mineures.
-
-## 12) Risques projet et mitigation
-
-- **Auth web/mobile designee differente**
-  - Mitigation: tests bout en bout sur le meme backend.
-
-- **Dependance fournisseur data cartes**
-  - Mitigation: fallback import JSON et parametrage de limite d'import.
-
-- **Regression visuelle**
-  - Mitigation: captures de reference et checks manuels Android/iOS/web.
-
-- **Reseau mobile instable**
-  - Mitigation: messages d'erreur clairs et reprise utilisateur.
-
-## 13) KPI de succes
-
-- Taux de connexion reussie > 95%.
-- Taux d'ajout panier sans erreur > 98%.
-- Affichage initial catalogue < 2 secondes (contexte local stable).
-- Baisse progressive du taux d'abandon checkout.
+Équivalent métier du sujet « Smart Café » : le **web** et l’**admin** gèrent l’activité ; le **mobile** permet au **client** de commander.
 
 ---
 
-## 14) Annexes visuelles (captures reelles)
+## 2. Contexte et objectifs
 
-### A) Accueil desktop
-![Accueil desktop](./images/capture-home.png)
+### 2.1 Contexte
 
-### B) Accueil mobile viewport
-![Accueil mobile](./images/capture-home-mobile.png)
+Les collectionneurs ont besoin d’un catalogue filtrable, d’un paiement sécurisé et d’un suivi de leurs achats. L’expérience doit être cohérente entre navigateur et téléphone.
 
-### C) Accueil full page
-![Accueil full page](./images/capture-home-fullpage.png)
+### 2.2 Objectifs
 
-### D) Accueil hero (V2)
-![Accueil hero V2](./images/capture-v2-home-hero.png)
-
-### E) Boutique (V2)
-![Boutique V2](./images/capture-v2-shop.png)
-
-### F) Modal connexion (V2)
-![Modal connexion V2](./images/capture-v2-auth-login.png)
-
-### G) Modal inscription (V2)
-![Modal inscription V2](./images/capture-v2-auth-signup.png)
+- Consulter un catalogue riche (filtres, pagination, détail carte).
+- Créer un compte et se connecter (email ou Google).
+- Ajouter des cartes au panier et payer via **Stripe**.
+- Consulter **commandes** et **collection** (cartes achetées).
+- Contacter la boutique via un **formulaire** sécurisé.
+- Permettre à l’**admin** d’importer des cartes, ajuster les prix et suivre les ventes.
 
 ---
 
-## 15) Note de coherence des formats
+## 3. Périmètre fonctionnel par application
 
-Ce document est la source de contenu du cahier des charges.
-Les fichiers:
-- `CAHIER_DES_CHARGES_POKEMON_APP.md`
-- `CAHIER_DES_CHARGES_POKEMON_APP.html`
-- `CAHIER_DES_CHARGES_POKEMON_APP.pdf`
+### 3.1 Application web (`frontend/`)
 
-doivent presenter le meme fond fonctionnel, la meme structure et les memes captures.
+**URL production :** https://pokestore-hazel.vercel.app
+
+| ID | Fonctionnalité | Description | Livré |
+|----|----------------|-------------|-------|
+| W-01 | Accueil | Hero, animation, CTA vers la boutique | ✅ |
+| W-02 | Boutique | Catalogue paginé, filtres (prix, année, série, set, rareté, recherche) | ✅ |
+| W-03 | Détail carte | Modal plein écran, effets visuels par type | ✅ |
+| W-04 | Inscription / connexion | Email + mot de passe, modales | ✅ |
+| W-05 | Connexion Google | OAuth | ✅ |
+| W-06 | Panier | Ajout, quantités, suppression | ✅ |
+| W-07 | Paiement Stripe | Checkout redirect + confirmation | ✅ |
+| W-08 | Mes commandes | Historique et détail | ✅ |
+| W-09 | Ma collection | Cartes des commandes payées, badge quantité | ✅ |
+| W-10 | Profil | Nom, téléphone, mot de passe | ✅ |
+| W-11 | Contact | Formulaire + captcha, envoi email | ✅ |
+| W-12 | Responsive | Desktop, tablette, mobile (Tailwind) | ✅ |
+| W-13 | SEO | Meta, OG, sitemap, robots.txt | ✅ |
+
+**Routes :** `/`, `/shop`, `/collection`, `/contact`
+
+---
+
+### 3.2 Application mobile (`mobile-rn/`)
+
+**Distribution :** Expo Go (dev) + APK Android (EAS Build)
+
+| ID | Fonctionnalité | Description | Livré |
+|----|----------------|-------------|-------|
+| M-01 | Accueil | Branding, animation, CTA boutique | ✅ |
+| M-02 | Boutique | Grille, filtres, pagination (même API) | ✅ |
+| M-03 | Détail carte | Effets canvas + tilt 3D | ✅ |
+| M-04 | Inscription / connexion | JWT persisté (AsyncStorage) | ✅ |
+| M-05 | Connexion Google | OAuth mobile (`pokestore://`) | ✅ |
+| M-06 | Panier | Gestion articles | ✅ |
+| M-07 | Paiement Stripe | Checkout in-app browser | ✅ |
+| M-08 | Mes commandes | Liste, statuts PENDING / PAID / CANCELLED | ✅ |
+| M-09 | Ma collection | Grille cartes achetées | ✅ |
+| M-10 | Contact | Formulaire + captcha | ✅ |
+
+**Écrans :** Home, Shop, CardDetail, Login, Register, Cart, Orders, Collection, Contact
+
+---
+
+### 3.3 Application admin desktop (`pokemon-electron/`)
+
+**Distribution :** Installateur Windows `.exe` (`npm run make`)  
+**Note :** Projet local (hors dépôt Git principal), connecté à l’API Render et à Neon.
+
+| ID | Fonctionnalité | Description | Livré |
+|----|----------------|-------------|-------|
+| A-01 | Connexion admin | `POST /api/auth/admin/login` — rôle ADMIN | ✅ |
+| A-02 | Dashboard | CA, ventes payées, graphique 6 mois, top produit | ✅ |
+| A-03 | Pokemon Cards | Liste, import API TCG, édition inline, CSV | ✅ |
+| A-04 | Clients | Liste et création utilisateurs | ✅ |
+| A-05 | Orders | Liste commandes, changement statut | ✅ |
+| A-06 | Pipeline | Suivi clients par étape (kanban) | ✅ |
+| A-07 | Relances | Commandes / clients à relancer | ✅ |
+
+---
+
+### 3.4 API et données (`backend/`)
+
+| ID | Fonctionnalité | Livré |
+|----|----------------|-------|
+| B-01 | API REST NestJS préfixe `/api` | ✅ |
+| B-02 | Documentation Swagger `/api/docs` | ✅ |
+| B-03 | Auth JWT + Google OAuth | ✅ |
+| B-04 | Rôle ADMIN + guards | ✅ |
+| B-05 | Catalogue, panier, commandes, Stripe webhook | ✅ |
+| B-06 | Contact + emails (Resend en prod) | ✅ |
+| B-07 | PostgreSQL Neon + Prisma | ✅ |
+| B-08 | Helmet, throttler, CORS | ✅ |
+
+---
+
+## 4. Exigences non fonctionnelles
+
+| Domaine | Exigence | Livré |
+|---------|----------|-------|
+| Sécurité | JWT, bcrypt, validation DTO, routes admin protégées | ✅ |
+| Performance | Pagination catalogue, lazy-loading images | ✅ |
+| Accessibilité | aria-label, PageSpeed a11y 98 | ✅ |
+| Disponibilité | Hébergement Vercel + Render + Neon | ✅ |
+| Tests | Jest (7) + Playwright E2E (7) | ✅ |
+
+---
+
+## 5. Hors périmètre (v1)
+
+- Application iOS native (App Store) — Android APK uniquement
+- Favoris utilisateur (modèle BDD prêt, UI non livrée)
+- Fond d’écran IA depuis la collection (évolution prévue)
+- Publication Electron sur un store
+
+---
+
+## 6. Livrables documentaires attendus par le client
+
+| Document | Fichier |
+|----------|---------|
+| Cahier des charges (ce document) | `docs/cahier-des-charges/CAHIER_DES_CHARGES_POKEMON_APP.md` |
+| Documentation fonctionnelle | `docs/DOCUMENTATION_FONCTIONNELLE.md` |
+| Documentation technique | `docs/DOCUMENTATION_TECHNIQUE.md` |
+| Guide utilisateur | `docs/GUIDE_UTILISATEUR.md` |
+| Dossier de livraison | `docs/LIVRAISON_CLIENT.md` |
+| Synthèse projet (soutenance) | `docs/LIVRABLE_ORAL_FINAL_v12.docx` |
+
+---
+
+# Annexes visuelles
+
+## Application web
+
+![Accueil](./images/capture-v2-home-hero.png)
+
+![Boutique](./images/capture-v2-shop.png)
+
+## Application mobile
+
+![Accueil mobile](./images/capture-mobile-home.png)
+
+![Collection](./images/capture-mobile-collection.png)
+
+## Application admin Electron
+
+![Dashboard](./images/capture-electron-dashboard.png)
+
+![Catalogue](./images/capture-electron-cartes.png)
+
+![Commandes](./images/capture-electron-commandes.png)
+
+## Qualité et performances
+
+![PageSpeed](./images/pagespeed-desktop-bureau.png)
+
+---
+
+*PokéStore — Cahier des charges — Juin 2026*
