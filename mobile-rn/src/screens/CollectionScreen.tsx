@@ -78,7 +78,7 @@ export function CollectionScreen({ navigation }: Props) {
           </View>
         ) : collection.length === 0 ? (
           <View style={styles.empty}>
-            <MaterialCommunityIcons name="cards-outline" size={72} color={colors.violet} />
+            <MaterialCommunityIcons name="cards-outline" size={72} color={colors.caption} />
             <Text style={styles.emptyTitle}>Collection vide</Text>
             <Text style={styles.emptySub}>
               Achète des cartes dans la boutique pour les retrouver ici.
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
   },
   hint: {
     fontFamily: font.sans,
-    color: colors.violet,
+    color: colors.caption,
     fontSize: 11,
     marginTop: 6,
     lineHeight: 16,
@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
   },
   emptySub: {
     fontFamily: font.sans,
-    color: colors.violet,
+    color: colors.caption,
     marginBottom: 24,
     textAlign: 'center',
   },

@@ -3,6 +3,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import type { RootStackParamList } from '../types/navigation';
+import { Logo } from './Logo';
 import { colors } from '../theme/colors';
 import { font } from '../theme/typography';
 
@@ -16,12 +17,7 @@ export function Footer() {
     <View style={styles.wrap}>
       <View style={styles.divider} />
       <View style={styles.brandRow}>
-        <View style={styles.pokeball}>
-          <View style={styles.pokeballTop} />
-          <View style={styles.pokeballBand} />
-          <View style={styles.pokeballCenter} />
-        </View>
-        <Text style={styles.brand}>PokéStore</Text>
+        <Logo size="sm" />
       </View>
 
       <View style={styles.iconRow}>
@@ -75,51 +71,8 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   brandRow: {
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
     marginBottom: 6,
-  },
-  pokeball: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: '#1a1a2e',
-    backgroundColor: '#fff',
-    overflow: 'hidden',
-  },
-  pokeballTop: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 8,
-    backgroundColor: '#ef4444',
-  },
-  pokeballBand: {
-    position: 'absolute',
-    top: 8,
-    left: 0,
-    right: 0,
-    height: 2,
-    backgroundColor: '#1a1a2e',
-  },
-  pokeballCenter: {
-    position: 'absolute',
-    top: 6,
-    left: 6,
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    borderWidth: 1.5,
-    borderColor: '#1a1a2e',
-    backgroundColor: '#fff',
-  },
-  brand: {
-    fontFamily: font.pixel,
-    fontSize: 14,
-    color: colors.text,
   },
   iconRow: {
     flexDirection: 'row',

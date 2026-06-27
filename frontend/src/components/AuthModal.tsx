@@ -82,7 +82,7 @@ function AuthModalContent({
               Nom de dresseur
             </label>
             <div className="relative">
-              <User className="absolute left-3 top-3 w-5 h-5 text-[#5a4f99] z-10" aria-hidden="true" />
+              <User className="absolute left-3 top-3 w-5 h-5 text-[#2d3561]/60 z-10" aria-hidden="true" />
               <input
                 id="auth-name"
                 name="name"
@@ -102,7 +102,7 @@ function AuthModalContent({
             Email
           </label>
           <div className="relative">
-            <Mail className="absolute left-3 top-3 w-5 h-5 text-[#5a4f99] z-10" aria-hidden="true" />
+            <Mail className="absolute left-3 top-3 w-5 h-5 text-[#2d3561]/60 z-10" aria-hidden="true" />
             <input
               id="auth-email"
               name="email"
@@ -121,7 +121,7 @@ function AuthModalContent({
             Mot de passe
           </label>
           <div className="relative">
-            <Lock className="absolute left-3 top-3 w-5 h-5 text-[#5a4f99] z-10" aria-hidden="true" />
+            <Lock className="absolute left-3 top-3 w-5 h-5 text-[#2d3561]/60 z-10" aria-hidden="true" />
             <input
               id="auth-password"
               name="password"

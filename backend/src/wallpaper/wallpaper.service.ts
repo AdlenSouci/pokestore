@@ -16,6 +16,15 @@ const WALLPAPER_HEIGHT = 1920;
 
 export type WallpaperSource = 'openai' | 'pollinations' | 'card-art';
 
+type ArtLayers = {
+  artwork: Buffer;
+  hero: Buffer;
+  glow: Buffer;
+  heroTop: number;
+  heroLeft: number;
+  overlay: Buffer;
+};
+
 @Injectable()
 export class WallpaperService {
   private readonly logger = new Logger(WallpaperService.name);
@@ -49,28 +58,49 @@ export class WallpaperService {
     }
 
     const cardImage = await this.fetchCardImage(card.imageUrl);
-    const prompt = this.buildWallpaperPrompt(card.name, card.type, card.rarity);
+    const layers = await this.prepareArtLayers(cardImage, card.type);
+    const bgPrompt = this.buildBackgroundPrompt(
+      card.name,
+      card.type,
+      card.rarity,
+    );
 
-    let output: Buffer;
+    const blurredSeed = await this.createBlurredBackground(layers.artwork);
+
+    let background: Buffer;
     let source: WallpaperSource;
 
-    const openAiBuffer = await this.tryOpenAiWallpaper(prompt);
-    if (openAiBuffer) {
-      output = await this.normalizeWallpaper(openAiBuffer);
+    const openAiBg = await this.tryOpenAiBackground(bgPrompt);
+    if (openAiBg) {
+      background = openAiBg;
       source = 'openai';
     } else {
-      const aiBuffer =
-        (await this.tryPollinationsImg2Img(prompt, card.imageUrl, cardId)) ??
-        (await this.tryPollinationsUpload(prompt, cardImage, cardId));
+      const aiBg =
+        (await this.tryPollinationsImg2Img(
+          bgPrompt,
+          card.imageUrl,
+          cardId,
+        )) ??
+        (await this.tryPollinationsUpload(bgPrompt, blurredSeed, cardId));
 
-      if (aiBuffer) {
-        output = await this.normalizeWallpaper(aiBuffer);
+      if (aiBg) {
+        background = await this.normalizeWallpaper(aiBg);
         source = 'pollinations';
       } else {
-        output = await this.createCardBasedWallpaper(cardImage, card.type);
+        background = blurredSeed;
         source = 'card-art';
       }
     }
+
+    /** Le Pokémon reste l'artwork carte (calque net) — l'IA ne stylise que l'arrière-plan. */
+    const output = await sharp(background)
+      .composite([
+        { input: layers.glow, top: layers.heroTop + 8, left: layers.heroLeft },
+        { input: layers.hero, top: layers.heroTop, left: layers.heroLeft },
+        { input: layers.overlay, top: 0, left: 0 },
+      ])
+      .png()
+      .toBuffer();
 
     return {
       imageBase64: output.toString('base64'),
@@ -80,18 +110,18 @@ export class WallpaperService {
     };
   }
 
-  private buildWallpaperPrompt(
+  private buildBackgroundPrompt(
     cardName: string,
     type: string,
     rarity: string,
   ): string {
     return [
-      `Transform this Pokémon card artwork into a vertical phone wallpaper.`,
-      `The Pokémon ${cardName} must be the clear hero of the image.`,
-      `${type} type energy, ${rarity} rarity mood.`,
-      `Extend and stylize the background from the card art.`,
-      `Cinematic fantasy atmosphere, full bleed mobile wallpaper.`,
-      `No smartphone mockup, no device frame, no text, no card border.`,
+      `Vertical phone wallpaper background for the Pokémon ${cardName}.`,
+      `${type} type energy, ${rarity} mood.`,
+      `Extend and stylize ONLY the scenery and atmosphere around the character.`,
+      `Cinematic fantasy environment, dramatic lighting, full bleed mobile wallpaper.`,
+      `Do not add text, logos, card borders, or device frames.`,
+      `The Pokémon ${cardName} from the reference must remain recognizable.`,
     ].join(' ');
   }
 
@@ -100,12 +130,13 @@ export class WallpaperService {
       'smartphone',
       'phone mockup',
       'device frame',
-      'screen bezel',
       'text',
       'watermark',
       'logo',
       'trading card border',
       'UI elements',
+      'different pokemon',
+      'wrong character',
     ].join(', ');
   }
 
@@ -113,10 +144,7 @@ export class WallpaperService {
     const count = await this.prisma.orderItem.count({
       where: {
         cardId,
-        order: {
-          userId,
-          status: 'PAID',
-        },
+        order: { userId, status: 'PAID' },
       },
     });
     return count > 0;
@@ -147,7 +175,109 @@ export class WallpaperService {
       .toBuffer();
   }
 
-  private async tryOpenAiWallpaper(prompt: string): Promise<Buffer | null> {
+  private typeAccentRgb(type: string): { r: number; g: number; b: number } {
+    const key = type.toLowerCase();
+    const map: Record<string, { r: number; g: number; b: number }> = {
+      fire: { r: 255, g: 120, b: 40 },
+      water: { r: 40, g: 160, b: 255 },
+      grass: { r: 80, g: 200, b: 80 },
+      electric: { r: 255, g: 220, b: 60 },
+      psychic: { r: 200, g: 80, b: 200 },
+      fighting: { r: 200, g: 80, b: 60 },
+      darkness: { r: 80, g: 60, b: 120 },
+      dark: { r: 80, g: 60, b: 120 },
+      metal: { r: 160, g: 170, b: 190 },
+      dragon: { r: 120, g: 80, b: 220 },
+      fairy: { r: 255, g: 140, b: 200 },
+      colorless: { r: 200, g: 200, b: 210 },
+    };
+    return map[key] ?? { r: 120, g: 140, b: 255 };
+  }
+
+  private async extractArtwork(cardImage: Buffer): Promise<Buffer> {
+    const meta = await sharp(cardImage).metadata();
+    const w = meta.width ?? 400;
+    const h = meta.height ?? 560;
+    const padX = Math.round(w * 0.07);
+    const padY = Math.round(h * 0.09);
+    return sharp(cardImage)
+      .extract({
+        left: padX,
+        top: padY,
+        width: w - padX * 2,
+        height: h - padY * 2,
+      })
+      .toBuffer();
+  }
+
+  private async prepareArtLayers(
+    cardImage: Buffer,
+    type: string,
+  ): Promise<ArtLayers> {
+    const artwork = await this.extractArtwork(cardImage);
+    const meta = await sharp(artwork).metadata();
+    const artW = meta.width ?? 360;
+    const artH = meta.height ?? 500;
+    const accent = this.typeAccentRgb(type);
+
+    const heroW = Math.round(WALLPAPER_WIDTH * 0.94);
+    const heroH = Math.round(heroW * (artH / artW));
+    const heroTop = Math.round(WALLPAPER_HEIGHT * 0.06);
+    const heroLeft = Math.round((WALLPAPER_WIDTH - heroW) / 2);
+
+    const glow = await sharp(artwork)
+      .resize(heroW, heroH, {
+        fit: 'contain',
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
+      })
+      .blur(18)
+      .modulate({ brightness: 1.2, saturation: 1.3 })
+      .png()
+      .toBuffer();
+
+    const hero = await sharp(artwork)
+      .resize(heroW, heroH, {
+        fit: 'contain',
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
+      })
+      .png()
+      .toBuffer();
+
+    const overlay = Buffer.from(
+      `<svg width="${WALLPAPER_WIDTH}" height="${WALLPAPER_HEIGHT}">
+        <defs>
+          <radialGradient id="g" cx="50%" cy="40%" r="70%">
+            <stop offset="0%" stop-color="rgba(${accent.r},${accent.g},${accent.b},0.35)"/>
+            <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+          </radialGradient>
+          <linearGradient id="v" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="rgba(0,0,0,0.1)"/>
+            <stop offset="75%" stop-color="rgba(0,0,0,0)"/>
+            <stop offset="100%" stop-color="rgba(8,10,24,0.8)"/>
+          </linearGradient>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#g)"/>
+        <rect width="100%" height="100%" fill="url(#v)"/>
+      </svg>`,
+    );
+
+    return { artwork, hero, glow, heroTop, heroLeft, overlay };
+  }
+
+  private async createBlurredBackground(artwork: Buffer): Promise<Buffer> {
+    return sharp(artwork)
+      .resize(WALLPAPER_WIDTH, WALLPAPER_HEIGHT, {
+        fit: 'cover',
+        position: 'attention',
+      })
+      .blur(36)
+      .modulate({ brightness: 0.42, saturation: 1.5 })
+      .png()
+      .toBuffer();
+  }
+
+  /** IA OpenAI : génère l'ambiance / le décor (DALL·E 3). */
+  private async tryOpenAiBackground(prompt: string): Promise<Buffer | null> {
     const apiKey = this.config.get<string>('OPENAI_API_KEY')?.trim();
     if (!apiKey) {
       return null;
@@ -175,7 +305,7 @@ export class WallpaperService {
       if (!b64) {
         return null;
       }
-      return Buffer.from(b64, 'base64');
+      return this.normalizeWallpaper(Buffer.from(b64, 'base64'));
     } catch (error) {
       this.logger.warn(
         `OpenAI wallpaper: ${error instanceof Error ? error.message : String(error)}`,
@@ -184,7 +314,7 @@ export class WallpaperService {
     }
   }
 
-  /** IA img2img : la carte (URL publique) sert de référence visuelle. */
+  /** IA Flux img2img : la carte sert de référence visuelle pour le décor. */
   private async tryPollinationsImg2Img(
     prompt: string,
     cardImageUrl: string,
@@ -200,8 +330,7 @@ export class WallpaperService {
         image: cardImageUrl,
         negative_prompt: this.negativePrompt(),
       });
-      const encodedPrompt = encodeURIComponent(prompt);
-      const url = `https://gen.pollinations.ai/image/${encodedPrompt}?${params.toString()}`;
+      const url = `https://gen.pollinations.ai/image/${encodeURIComponent(prompt)}?${params.toString()}`;
 
       const res = await axios.get<ArrayBuffer>(url, {
         responseType: 'arraybuffer',
@@ -222,16 +351,15 @@ export class WallpaperService {
     }
   }
 
-  /** IA img2img : envoi direct du fichier carte (si l'URL ne suffit pas). */
   private async tryPollinationsUpload(
     prompt: string,
-    cardImage: Buffer,
+    seedImage: Buffer,
     seed: number,
   ): Promise<Buffer | null> {
     try {
       const form = new FormData();
-      form.append('image', cardImage, {
-        filename: 'card.png',
+      form.append('image', seedImage, {
+        filename: 'seed.png',
         contentType: 'image/png',
       });
       form.append('model', 'flux');
@@ -241,9 +369,8 @@ export class WallpaperService {
       form.append('nologo', 'true');
       form.append('negative_prompt', this.negativePrompt());
 
-      const encodedPrompt = encodeURIComponent(prompt);
       const res = await axios.post<ArrayBuffer>(
-        `https://gen.pollinations.ai/image/${encodedPrompt}`,
+        `https://gen.pollinations.ai/image/${encodeURIComponent(prompt)}`,
         form,
         {
           headers: form.getHeaders(),
@@ -264,81 +391,5 @@ export class WallpaperService {
       );
       return null;
     }
-  }
-
-  private typeAccentRgb(type: string): { r: number; g: number; b: number } {
-    const key = type.toLowerCase();
-    const map: Record<string, { r: number; g: number; b: number }> = {
-      fire: { r: 255, g: 120, b: 40 },
-      water: { r: 40, g: 160, b: 255 },
-      grass: { r: 80, g: 200, b: 80 },
-      electric: { r: 255, g: 220, b: 60 },
-      psychic: { r: 200, g: 80, b: 200 },
-      fighting: { r: 200, g: 80, b: 60 },
-      darkness: { r: 80, g: 60, b: 120 },
-      dark: { r: 80, g: 60, b: 120 },
-      metal: { r: 160, g: 170, b: 190 },
-      dragon: { r: 120, g: 80, b: 220 },
-      fairy: { r: 255, g: 140, b: 200 },
-      colorless: { r: 200, g: 200, b: 210 },
-    };
-    return map[key] ?? { r: 120, g: 140, b: 255 };
-  }
-
-  /**
-   * Secours fiable : le Pokémon de la carte reste visible (artwork agrandi + fond étendu).
-   */
-  private async createCardBasedWallpaper(
-    cardImage: Buffer,
-    type: string,
-  ): Promise<Buffer> {
-    const accent = this.typeAccentRgb(type);
-
-    const background = await sharp(cardImage)
-      .resize(WALLPAPER_WIDTH, WALLPAPER_HEIGHT, {
-        fit: 'cover',
-        position: 'attention',
-      })
-      .blur(38)
-      .modulate({ brightness: 0.45, saturation: 1.35 })
-      .toBuffer();
-
-    const heroWidth = Math.round(WALLPAPER_WIDTH * 0.88);
-    const heroHeight = Math.round(heroWidth * (88 / 63));
-    const heroTop = Math.round(WALLPAPER_HEIGHT * 0.1);
-    const heroLeft = Math.round((WALLPAPER_WIDTH - heroWidth) / 2);
-
-    const hero = await sharp(cardImage)
-      .resize(heroWidth, heroHeight, {
-        fit: 'contain',
-        background: { r: 0, g: 0, b: 0, alpha: 0 },
-      })
-      .png()
-      .toBuffer();
-
-    const vignette = Buffer.from(
-      `<svg width="${WALLPAPER_WIDTH}" height="${WALLPAPER_HEIGHT}">
-        <defs>
-          <radialGradient id="glow" cx="50%" cy="38%" r="55%">
-            <stop offset="0%" stop-color="rgba(${accent.r},${accent.g},${accent.b},0.25)"/>
-            <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
-          </radialGradient>
-          <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="70%" stop-color="rgba(0,0,0,0)"/>
-            <stop offset="100%" stop-color="rgba(5,8,20,0.75)"/>
-          </linearGradient>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#glow)"/>
-        <rect width="100%" height="100%" fill="url(#fade)"/>
-      </svg>`,
-    );
-
-    return sharp(background)
-      .composite([
-        { input: hero, top: heroTop, left: heroLeft },
-        { input: vignette, top: 0, left: 0 },
-      ])
-      .png()
-      .toBuffer();
   }
 }

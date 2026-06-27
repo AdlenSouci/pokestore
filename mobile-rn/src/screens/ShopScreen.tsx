@@ -1,18 +1,23 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
   ActivityIndicator,
+  Animated,
+  LayoutAnimation,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
+  UIManager,
   useWindowDimensions,
   View,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Picker } from '@react-native-picker/picker';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { AppShell } from '../components/AppShell';
+import { FilterDropdown } from '../components/FilterDropdown';
 import { ProductCard } from '../components/ProductCard';
 import { fetchCards, fetchShopMeta, type ShopMeta } from '../api/cards';
 import { mapCardToProduct } from '../lib/mapCard';
@@ -26,6 +31,10 @@ import { font } from '../theme/typography';
 type Props = NativeStackScreenProps<RootStackParamList, 'Shop'>;
 
 const PAGE_SIZE = 24;
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 export function ShopScreen({}: Props) {
   const { width: windowWidth } = useWindowDimensions();
@@ -50,6 +59,47 @@ export function ShopScreen({}: Props) {
   const [series, setSeries] = useState('');
   const [setId, setSetId] = useState('');
   const [q, setQ] = useState('');
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const chevronRotate = useRef(new Animated.Value(0)).current;
+
+  const toggleFilters = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setFiltersOpen((o) => !o);
+    Animated.timing(chevronRotate, {
+      toValue: filtersOpen ? 0 : 1,
+      duration: 250,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const chevronDeg = chevronRotate.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '180deg'],
+  });
+
+  const yearOptions = useMemo(
+    () => [
+      { label: 'Toutes', value: '' },
+      ...(meta?.years ?? []).map((y) => ({ label: String(y), value: String(y) })),
+    ],
+    [meta?.years],
+  );
+
+  const seriesOptions = useMemo(
+    () => [
+      { label: 'Toutes', value: '' },
+      ...(meta?.series ?? []).map((s) => ({ label: s, value: s })),
+    ],
+    [meta?.series],
+  );
+
+  const setOptions = useMemo(
+    () => [
+      { label: 'Toutes', value: '' },
+      ...(meta?.sets ?? []).map((s) => ({ label: `${s.name} (${s.id})`, value: s.id })),
+    ],
+    [meta?.sets],
+  );
 
   const filterParams = useMemo(
     () => ({
@@ -178,6 +228,20 @@ export function ShopScreen({}: Props) {
           colors={['rgba(90,79,153,0.35)', 'rgba(45,53,97,0.5)']}
           style={styles.filterPanel}
         >
+          <Pressable
+            style={({ pressed }) => [styles.filterToggle, pressed && { opacity: 0.9 }]}
+            onPress={toggleFilters}
+            accessibilityRole="button"
+            accessibilityState={{ expanded: filtersOpen }}
+          >
+            <Text style={styles.filterToggleText}>Filtres de recherche</Text>
+            <Animated.View style={{ transform: [{ rotate: chevronDeg }] }}>
+              <MaterialCommunityIcons name="chevron-down" size={24} color={colors.caption} />
+            </Animated.View>
+          </Pressable>
+
+          {filtersOpen && (
+          <View style={styles.filterBody}>
           <View style={styles.row4}>
             <Field label="Prix min (€)">
               <TextInput
@@ -196,7 +260,7 @@ export function ShopScreen({}: Props) {
               <TextInput
                 keyboardType="numeric"
                 placeholder={meta ? String(meta.priceMax) : '—'}
-                placeholderTextColor={colors.indigoText}
+                placeholderTextColor={colors.caption}
                 value={maxPrice}
                 onChangeText={(v) => {
                   setPage(1);
@@ -205,64 +269,37 @@ export function ShopScreen({}: Props) {
                 style={styles.input}
               />
             </Field>
-            <Field label="Année (sortie set)">
-              <View style={styles.pickerWrap}>
-                <Picker
-                  selectedValue={year}
-                  onValueChange={(v) => {
-                    setPage(1);
-                    setYear(String(v));
-                  }}
-                  style={styles.picker}
-                  dropdownIconColor={colors.inputText}
-                >
-                  <Picker.Item label="Toutes" value="" />
-                  {(meta?.years ?? []).map((y) => (
-                    <Picker.Item key={y} label={String(y)} value={String(y)} />
-                  ))}
-                </Picker>
-              </View>
-            </Field>
-            <Field label="Série / bloc">
-              <View style={styles.pickerWrap}>
-                <Picker
-                  selectedValue={series}
-                  onValueChange={(v) => {
-                    setPage(1);
-                    setSeries(String(v));
-                  }}
-                  style={styles.picker}
-                  dropdownIconColor={colors.inputText}
-                >
-                  <Picker.Item label="Toutes" value="" />
-                  {(meta?.series ?? []).map((s) => (
-                    <Picker.Item key={s} label={s} value={s} />
-                  ))}
-                </Picker>
-              </View>
-            </Field>
+            <FilterDropdown
+              label="Année (sortie set)"
+              value={year}
+              options={yearOptions}
+              onChange={(v) => {
+                setPage(1);
+                setYear(v);
+              }}
+            />
+            <FilterDropdown
+              label="Série / bloc"
+              value={series}
+              options={seriesOptions}
+              onChange={(v) => {
+                setPage(1);
+                setSeries(v);
+              }}
+            />
           </View>
 
           <View style={styles.row4}>
             <View style={styles.span2}>
-              <Field label="Extension (set)">
-                <View style={styles.pickerWrap}>
-                  <Picker
-                    selectedValue={setId}
-                    onValueChange={(v) => {
-                      setPage(1);
-                      setSetId(String(v));
-                    }}
-                    style={styles.picker}
-                    dropdownIconColor={colors.inputText}
-                  >
-                    <Picker.Item label="Toutes" value="" />
-                    {(meta?.sets ?? []).map((s) => (
-                      <Picker.Item key={s.id} label={`${s.name} (${s.id})`} value={s.id} />
-                    ))}
-                  </Picker>
-                </View>
-              </Field>
+              <FilterDropdown
+                label="Extension (set)"
+                value={setId}
+                options={setOptions}
+                onChange={(v) => {
+                  setPage(1);
+                  setSetId(v);
+                }}
+              />
             </View>
             <Field label="Année min">
               <TextInput
@@ -316,6 +353,8 @@ export function ShopScreen({}: Props) {
               {totalCards > 1 ? 's' : ''} au total (page {page}/{totalPages}, {PAGE_SIZE} par page)
               {loading ? ' · chargement…' : ''}
             </Text>
+          )}
+          </View>
           )}
         </LinearGradient>
 
@@ -447,6 +486,23 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     gap: 12,
   },
+  filterToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 4,
+  },
+  filterToggleText: {
+    fontFamily: font.sansBold,
+    fontSize: 16,
+    color: colors.text,
+  },
+  filterBody: {
+    gap: 12,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(90,79,153,0.4)',
+    paddingTop: 12,
+  },
   row4: {
     gap: 12,
   },
@@ -570,12 +626,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.1)',
   },
   pageBtnActive: {
-    backgroundColor: colors.violet,
-    borderColor: colors.indigoText,
+    backgroundColor: colors.borderAccent,
+    borderColor: colors.mint,
   },
   pageBtnText: {
     fontFamily: font.sansBold,
-    color: colors.indigoText,
+    color: colors.caption,
     fontSize: 13,
     textAlign: 'center',
   },

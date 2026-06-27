@@ -145,7 +145,7 @@ export function CartScreen({ navigation }: Props) {
 
       {!cart || cart.items.length === 0 ? (
         <View style={styles.empty}>
-          <MaterialCommunityIcons name="cart-off" size={72} color={colors.violet} style={{ opacity: 0.5 }} />
+          <MaterialCommunityIcons name="cart-off" size={72} color={colors.caption} style={{ opacity: 0.7 }} />
           <Text style={styles.emptyTitle}>Votre panier est vide</Text>
           <Text style={styles.emptySub}>Ajoutez des cartes Pokémon pour commencer !</Text>
           <Pressable style={styles.primaryBtn} onPress={() => navigation.navigate('Shop')}>
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
   },
   emptySub: {
     fontFamily: font.sans,
-    color: colors.violet,
+    color: colors.caption,
     marginBottom: 24,
     textAlign: 'center',
   },
@@ -320,7 +320,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
-    backgroundColor: colors.violet,
+    backgroundColor: colors.borderAccent,
     paddingVertical: 16,
     borderRadius: 12,
     borderWidth: 2,

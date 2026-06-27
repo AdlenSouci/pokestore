@@ -13,6 +13,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppShell } from '../components/AppShell';
 import { BattleAnim } from '../components/BattleAnim';
+import { Logo } from '../components/Logo';
 import type { RootStackParamList } from '../types/navigation';
 import { colors } from '../theme/colors';
 import { font } from '../theme/typography';
@@ -30,7 +31,6 @@ export function HomeScreen({ navigation }: Props) {
   const twinkle = useRef(new Animated.Value(0)).current;
   const [showPress, setShowPress] = useState(true);
 
-  const titleSize = Math.round(20 * scale);
   const subSize = Math.round(12 * scale);
   const btnSize = Math.round(13 * scale);
 
@@ -78,9 +78,7 @@ export function HomeScreen({ navigation }: Props) {
 
           <Text style={[styles.tag, { fontSize: subSize }]}>Boutique de cartes Pokémon</Text>
 
-          <Text style={[styles.title, { fontSize: titleSize, lineHeight: titleSize * 1.5 }]}>
-            PokéStore
-          </Text>
+          <Logo size="hero" style={styles.logoHero} />
 
           <Text style={[styles.subtitle, { fontSize: subSize + 1 }]}>
             Catalogue, filtres et paiement sécurisé
@@ -148,14 +146,9 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
     marginBottom: 12,
   },
-  title: {
-    fontFamily: font.pixel,
-    color: colors.text,
-    textAlign: 'center',
-    textShadowColor: colors.bgDeep,
-    textShadowOffset: { width: 3, height: 3 },
-    textShadowRadius: 0,
-    marginBottom: 8,
+  logoHero: {
+    marginBottom: 12,
+    alignSelf: 'center',
   },
   subtitle: {
     fontFamily: font.sans,

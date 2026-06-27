@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ShoppingCart, LogOut, UserCircle, Package, Menu, X } from 'lucide-react';
-import { PokeballIcon } from './PokeballIcon';
+import { Logo } from './Logo';
 import { BattleAnim } from './animations/BattleAnim';
 
 interface NavbarProps {
@@ -84,17 +84,7 @@ export function Navbar({
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 gap-2">
           <div className="flex items-center gap-3 md:gap-6 min-w-0 flex-1">
-            <button
-              type="button"
-              onClick={handleNavigateHome}
-              className="flex items-center gap-2 cursor-pointer hover:scale-105 transition-transform text-left shrink-0"
-              aria-label="Retour à l'accueil PokéStore"
-            >
-              <PokeballIcon size={28} className="animate-pokeball-wiggle" />
-              <span className="text-lg md:text-2xl pixel-font tracking-tighter">
-                PokéStore
-              </span>
-            </button>
+            <Logo size="nav" onClick={handleNavigateHome} className="shrink-0" />
 
             {/* Combat animé navbar */}
             <div className="hidden lg:block shrink-0">

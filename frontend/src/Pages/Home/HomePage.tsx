@@ -2,7 +2,7 @@ import { Layout } from '../../components/Layout';
 import { SEO } from '../../components/SEO';
 import { PokemonBackground } from '../../components/animations/PokemonBackground';
 import { BattleAnim } from '../../components/animations/BattleAnim';
-import { PokeballIcon } from '../../components/PokeballIcon';
+import { Logo } from '../../components/Logo';
 import './HomePage.css';
 
 interface HomePageProps {
@@ -68,21 +68,16 @@ export function HomePage({
         <PokemonBackground intensity="full" />
 
         <div className="relative z-10 container mx-auto px-4 py-12 md:py-20 flex flex-col items-center text-center max-w-4xl">
-          {/* Pokéball animée */}
           <div className="mb-6 animate-poke-float">
-            <div className="relative">
+            <div className="relative flex justify-center">
               <div className="absolute inset-0 rounded-full bg-[#7ec8a3]/20 blur-2xl scale-150 animate-title-glow" />
-              <PokeballIcon size={72} className="relative drop-shadow-2xl animate-pokeball-wiggle" />
+              <Logo size="hero" className="relative" imageClassName="drop-shadow-2xl" />
             </div>
           </div>
 
           <p className="text-[#7ec8a3] text-sm md:text-base font-sans font-semibold tracking-widest uppercase mb-3 animate-fade-in">
             Boutique de cartes Pokémon
           </p>
-
-          <h1 className="text-4xl md:text-6xl text-white mb-4 pixel-font leading-tight animate-title-glow">
-            PokéStore
-          </h1>
 
           <p className="text-[#c4b5fd] text-base md:text-lg font-sans mb-8 max-w-xl leading-relaxed">
             Parcours notre catalogue, filtre par prix, série ou extension, et complète ta collection en

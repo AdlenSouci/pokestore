@@ -1,5 +1,5 @@
 import { Github, Twitter, Instagram, Mail, MapPin, Shield, Truck, CreditCard } from 'lucide-react';
-import { PokeballIcon } from './PokeballIcon';
+import { Logo } from './Logo';
 
 interface FooterProps {
   onNavigateHome?: () => void;
@@ -45,10 +45,7 @@ export function Footer({ onNavigateHome, onNavigateShop, onNavigateContact }: Fo
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
           <div className="col-span-2 md:col-span-1">
-            <div className="flex items-center gap-2 mb-3">
-              <PokeballIcon size={32} />
-              <span className="pixel-font text-lg text-white">PokéStore</span>
-            </div>
+            <Logo size="sm" onClick={onNavigateHome} className="mb-3" />
             <p className="text-sm text-[#a5b4fc] leading-relaxed font-sans">
               Boutique en ligne dédiée aux cartes Pokémon TCG. Trouve, collectionne et achète tes cartes préférées.
             </p>

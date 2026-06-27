@@ -23,9 +23,9 @@ import { font } from '../theme/typography';
 type Props = NativeStackScreenProps<RootStackParamList, 'WallpaperPreview'>;
 
 function sourceLabel(source: wallpaperService.WallpaperSource | undefined): string | null {
-  if (source === 'openai') return 'IA DALL·E 3 — basé sur ta carte';
-  if (source === 'pollinations') return 'IA Flux — basé sur l’artwork de ta carte';
-  if (source === 'card-art') return 'Fond stylisé depuis ton artwork (IA indisponible)';
+  if (source === 'openai') return 'Fond IA (DALL·E 3) + ton Pokémon (artwork carte)';
+  if (source === 'pollinations') return 'Fond IA (Flux) + ton Pokémon (artwork carte)';
+  if (source === 'card-art') return 'Fond stylisé — IA indisponible, artwork conservé';
   return null;
 }
 
@@ -121,7 +121,7 @@ export function WallpaperPreviewScreen({ route, navigation }: Props) {
             <Text style={styles.title}>FOND D&apos;ÉCRAN</Text>
             <Text style={styles.subtitle}>{product.name}</Text>
             <Text style={styles.hint}>
-              Fond d’écran vertical généré par IA à partir du type et de la rareté de ta carte.
+              L&apos;IA stylise le décor autour de ton Pokémon — l&apos;illustration de la carte reste au centre, fidèle à l&apos;original.
             </Text>
           </View>
         </View>
@@ -141,8 +141,8 @@ export function WallpaperPreviewScreen({ route, navigation }: Props) {
         {loading && (
           <View style={styles.center}>
             <ActivityIndicator size="large" color={colors.mint} />
-            <Text style={styles.loadingText}>L&apos;IA génère ton fond d’écran…</Text>
-            <Text style={styles.loadingSub}>Compte 30 à 90 secondes.</Text>
+            <Text style={styles.loadingText}>L&apos;IA génère le décor…</Text>
+            <Text style={styles.loadingSub}>Ton Pokémon reste celui de ta carte · 30 à 90 s</Text>
           </View>
         )}
 
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   },
   hint: {
     fontFamily: font.sans,
-    color: colors.violet,
+    color: colors.caption,
     fontSize: 12,
     marginTop: 6,
     lineHeight: 17,
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
   },
   loadingSub: {
     fontFamily: font.sans,
-    color: colors.violet,
+    color: colors.caption,
     textAlign: 'center',
   },
   result: {
@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
   shareHint: {
     fontFamily: font.sans,
     fontSize: 11,
-    color: colors.violet,
+    color: colors.caption,
     textAlign: 'center',
     lineHeight: 16,
   },

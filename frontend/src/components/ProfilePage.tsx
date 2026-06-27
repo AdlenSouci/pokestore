@@ -104,7 +104,7 @@ export function ProfilePage({ onClose, onUpdate }: ProfilePageProps) {
                     <div className="bg-white/20 p-4 rounded-xl border-2 border-[#2d3561]">
                         <h3 className="text-[#2d3561] font-bold text-lg mb-2">Email</h3>
                         <p className="text-[#2d3561]">{user?.email}</p>
-                        <p className="text-xs text-[#5a4f99] mt-1">L&apos;email ne peut pas être modifié</p>
+                        <p className="text-xs text-[#2d3561]/70 mt-1">L&apos;email ne peut pas être modifié</p>
                     </div>
 
                     <form onSubmit={handleUpdateProfile} className="space-y-4" aria-busy={loading}>
@@ -115,7 +115,7 @@ export function ProfilePage({ onClose, onUpdate }: ProfilePageProps) {
                                 Nom de dresseur
                             </label>
                             <div className="relative">
-                                <User className="absolute left-3 top-3 w-5 h-5 text-[#5a4f99] z-10" aria-hidden="true" />
+                                <User className="absolute left-3 top-3 w-5 h-5 text-[#2d3561]/60 z-10" aria-hidden="true" />
                                 <input
                                     id="profile-name"
                                     name="name"
@@ -130,10 +130,10 @@ export function ProfilePage({ onClose, onUpdate }: ProfilePageProps) {
 
                         <div>
                             <label htmlFor="profile-phone" className="block text-sm font-bold text-[#2d3561] mb-1">
-                                Numéro de téléphone <span className="font-normal text-[#5a4f99]">(optionnel)</span>
+                                Numéro de téléphone <span className="font-normal text-[#2d3561]/60">(optionnel)</span>
                             </label>
                             <div className="relative">
-                                <Phone className="absolute left-3 top-3 w-5 h-5 text-[#5a4f99] z-10" aria-hidden="true" />
+                                <Phone className="absolute left-3 top-3 w-5 h-5 text-[#2d3561]/60 z-10" aria-hidden="true" />
                                 <input
                                     id="profile-phone"
                                     name="phone"
@@ -166,7 +166,7 @@ export function ProfilePage({ onClose, onUpdate }: ProfilePageProps) {
                                     Mot de passe actuel
                                 </label>
                                 <div className="relative">
-                                    <Lock className="absolute left-3 top-3 w-5 h-5 text-[#5a4f99] z-10" aria-hidden="true" />
+                                    <Lock className="absolute left-3 top-3 w-5 h-5 text-[#2d3561]/60 z-10" aria-hidden="true" />
                                     <input
                                         id="profile-current-password"
                                         name="currentPassword"
@@ -184,7 +184,7 @@ export function ProfilePage({ onClose, onUpdate }: ProfilePageProps) {
                                     Nouveau mot de passe
                                 </label>
                                 <div className="relative">
-                                    <Lock className="absolute left-3 top-3 w-5 h-5 text-[#5a4f99] z-10" aria-hidden="true" />
+                                    <Lock className="absolute left-3 top-3 w-5 h-5 text-[#2d3561]/60 z-10" aria-hidden="true" />
                                     <input
                                         id="profile-new-password"
                                         name="newPassword"
@@ -202,7 +202,7 @@ export function ProfilePage({ onClose, onUpdate }: ProfilePageProps) {
                                     Confirmer le nouveau mot de passe
                                 </label>
                                 <div className="relative">
-                                    <Lock className="absolute left-3 top-3 w-5 h-5 text-[#5a4f99] z-10" aria-hidden="true" />
+                                    <Lock className="absolute left-3 top-3 w-5 h-5 text-[#2d3561]/60 z-10" aria-hidden="true" />
                                     <input
                                         id="profile-confirm-password"
                                         name="confirmPassword"

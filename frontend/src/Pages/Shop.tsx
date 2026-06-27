@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { type Product } from '../types/product';
 import { ProductCard } from '../components/ProductCard';
+import { FilterDropdown } from '../components/FilterDropdown';
 import { SEO } from '../components/SEO';
 import { API_URL } from '../lib/api';
 
@@ -108,6 +110,7 @@ export function Shop({ onAddToCart, onViewCard }: ShopProps) {
   const [setId, setSetId] = useState('');
   const [q, setQ] = useState('');
   const [debouncedQ, setDebouncedQ] = useState('');
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const gridRef = useRef<HTMLDivElement>(null);
   const prevPageRef = useRef(1);
@@ -276,10 +279,32 @@ export function Shop({ onAddToCart, onViewCard }: ShopProps) {
         </p>
       </div>
 
-      <div className="mb-8 rounded-2xl border-4 border-[#2d3561] bg-gradient-to-br from-[#5a4f99]/30 to-[#2d3561]/40 p-4 md:p-6 space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="mb-8 rounded-2xl border-4 border-[#2d3561] bg-gradient-to-br from-[#5a4f99]/30 to-[#2d3561]/40 overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setFiltersOpen((o) => !o)}
+          aria-expanded={filtersOpen}
+          className="flex w-full items-center justify-between gap-3 px-4 py-4 md:px-6 text-left hover:bg-white/5 transition-colors"
+        >
+          <span className="font-bold text-white font-sans text-base">Filtres de recherche</span>
+          <ChevronDown
+            className={`h-5 w-5 text-[#c4b5fd] shrink-0 transition-transform duration-300 ease-out ${
+              filtersOpen ? 'rotate-180' : ''
+            }`}
+            aria-hidden
+          />
+        </button>
+
+        <div
+          className={`grid transition-all duration-300 ease-out ${
+            filtersOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+          }`}
+        >
+          <div className="overflow-hidden">
+            <div className="px-4 pb-4 md:px-6 md:pb-6 space-y-4 border-t border-[#5a4f99]/40">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-4">
           <label className="flex flex-col gap-1 text-left">
-            <span className="text-xs font-bold text-[#a5b4fc] uppercase tracking-wide">
+            <span className="text-xs font-bold text-[#c4b5fd] uppercase tracking-wide">
               Prix min (€)
             </span>
             <input
@@ -292,7 +317,7 @@ export function Shop({ onAddToCart, onViewCard }: ShopProps) {
             />
           </label>
           <label className="flex flex-col gap-1 text-left">
-            <span className="text-xs font-bold text-[#a5b4fc] uppercase tracking-wide">
+            <span className="text-xs font-bold text-[#c4b5fd] uppercase tracking-wide">
               Prix max (€)
             </span>
             <input
@@ -304,62 +329,38 @@ export function Shop({ onAddToCart, onViewCard }: ShopProps) {
               className="rounded-xl border-2 border-[#2d3561] bg-white/90 px-3 py-2 text-[#2d3561] font-sans focus-visible:ring-2 focus-visible:ring-[#7ec8a3]"
             />
           </label>
-          <label className="flex flex-col gap-1 text-left">
-            <span className="text-xs font-bold text-[#a5b4fc] uppercase tracking-wide">
-              Année
-            </span>
-            <select
-              value={year}
-              onChange={(e) => setYear(e.target.value)}
-              className="rounded-xl border-2 border-[#2d3561] bg-white/90 px-3 py-2 text-[#2d3561] font-sans focus-visible:ring-2 focus-visible:ring-[#7ec8a3]"
-            >
-              <option value="">Toutes</option>
-              {(meta?.years ?? []).map((y) => (
-                <option key={y} value={String(y)}>
-                  {y}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="flex flex-col gap-1 text-left">
-            <span className="text-xs font-bold text-[#a5b4fc] uppercase tracking-wide">
-              Série
-            </span>
-            <select
-              value={series}
-              onChange={(e) => setSeries(e.target.value)}
-              className="rounded-xl border-2 border-[#2d3561] bg-white/90 px-3 py-2 text-[#2d3561] font-sans focus-visible:ring-2 focus-visible:ring-[#7ec8a3]"
-            >
-              <option value="">Toutes</option>
-              {(meta?.series ?? []).map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-          </label>
+          <FilterDropdown
+            label="Année"
+            value={year}
+            onChange={setYear}
+            options={[
+              { label: 'Toutes', value: '' },
+              ...(meta?.years ?? []).map((y) => ({ label: String(y), value: String(y) })),
+            ]}
+          />
+          <FilterDropdown
+            label="Série"
+            value={series}
+            onChange={setSeries}
+            options={[
+              { label: 'Toutes', value: '' },
+              ...(meta?.series ?? []).map((s) => ({ label: s, value: s })),
+            ]}
+          />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <FilterDropdown
+            label="Extension (set)"
+            value={setId}
+            onChange={setSetId}
+            options={[
+              { label: 'Toutes', value: '' },
+              ...(meta?.sets ?? []).map((s) => ({ label: s.name, value: s.id })),
+            ]}
+          />
           <label className="flex flex-col gap-1 text-left">
-            <span className="text-xs font-bold text-[#a5b4fc] uppercase tracking-wide">
-              Extension (set)
-            </span>
-            <select
-              value={setId}
-              onChange={(e) => setSetId(e.target.value)}
-              className="rounded-xl border-2 border-[#2d3561] bg-white/90 px-3 py-2 text-[#2d3561] font-sans focus-visible:ring-2 focus-visible:ring-[#7ec8a3]"
-            >
-              <option value="">Toutes</option>
-              {(meta?.sets ?? []).map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="flex flex-col gap-1 text-left">
-            <span className="text-xs font-bold text-[#a5b4fc] uppercase tracking-wide">
+            <span className="text-xs font-bold text-[#c4b5fd] uppercase tracking-wide">
               Recherche
             </span>
             <input
@@ -381,11 +382,14 @@ export function Shop({ onAddToCart, onViewCard }: ShopProps) {
             Réinitialiser
           </button>
           {meta && (
-            <p className="text-xs text-[#a5b4fc]/80 font-sans">
+            <p className="text-xs text-[#d4dafa]/90 font-sans">
               {totalCards} carte{totalCards > 1 ? 's' : ''} · page {page}/{totalPages}
               {pageLoading ? ' · chargement…' : ''}
             </p>
           )}
+        </div>
+            </div>
+          </div>
         </div>
       </div>
 

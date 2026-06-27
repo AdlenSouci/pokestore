@@ -111,9 +111,9 @@ export function OrdersPage({ onClose, paymentSuccess, paymentSessionId }: Orders
                         </div>
                     ) : orders.length === 0 ? (
                         <div className="text-center py-12">
-                            <Package className="w-24 h-24 text-[#5a4f99] mx-auto mb-4 opacity-50" aria-hidden="true" />
+                            <Package className="w-24 h-24 text-[#2d3561] mx-auto mb-4 opacity-40" aria-hidden="true" />
                             <h3 className="text-[#2d3561] text-2xl font-bold mb-2">Aucune commande</h3>
-                            <p className="text-[#5a4f99] mb-6">Vous n&apos;avez pas encore passé de commande</p>
+                            <p className="text-[#2d3561]/80 mb-6">Vous n&apos;avez pas encore passé de commande</p>
                         </div>
                     ) : (
                         <ul className="grid grid-cols-1 gap-4 list-none p-0 m-0">
@@ -138,7 +138,7 @@ export function OrdersPage({ onClose, paymentSuccess, paymentSessionId }: Orders
                                                             aria-hidden="true"
                                                         />
                                                     </h3>
-                                                    <div className="flex items-center gap-2 mt-2 text-[#5a4f99]">
+                                                    <div className="flex items-center gap-2 mt-2 text-[#2d3561]/75">
                                                         <Calendar className="w-4 h-4" aria-hidden="true" />
                                                         <time dateTime={order.createdAt}>
                                                             {new Date(order.createdAt).toLocaleDateString('fr-FR')}
@@ -170,7 +170,7 @@ export function OrdersPage({ onClose, paymentSuccess, paymentSessionId }: Orders
                                                             />
                                                             <div className="flex-1">
                                                                 <h5 className="text-[#2d3561] font-bold">{item.card.name}</h5>
-                                                                <p className="text-[#5a4f99] text-sm">Quantité: {item.quantity}</p>
+                                                                <p className="text-[#2d3561]/75 text-sm">Quantité: {item.quantity}</p>
                                                             </div>
                                                             <div className="text-[#2d3561] font-bold">
                                                                 {(item.price * item.quantity).toFixed(2)} €

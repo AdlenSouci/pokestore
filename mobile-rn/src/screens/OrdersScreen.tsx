@@ -82,7 +82,7 @@ export function OrdersScreen({ navigation }: Props) {
           </View>
         ) : orders.length === 0 ? (
           <View style={styles.empty}>
-            <MaterialCommunityIcons name="package-variant-closed" size={72} color={colors.violet} />
+            <MaterialCommunityIcons name="package-variant-closed" size={72} color={colors.caption} />
             <Text style={styles.emptyTitle}>Aucune commande</Text>
             <Text style={styles.emptySub}>Tu n&apos;as pas encore passé de commande.</Text>
             <Pressable style={styles.primaryBtn} onPress={() => navigation.navigate('Shop')}>
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
   },
   emptySub: {
     fontFamily: font.sans,
-    color: colors.violet,
+    color: colors.caption,
     marginBottom: 24,
     textAlign: 'center',
   },

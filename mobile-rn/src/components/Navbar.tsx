@@ -8,6 +8,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import type { RootStackParamList } from '../types/navigation';
 import { BattleAnim } from './BattleAnim';
+import { Logo } from './Logo';
 import { colors } from '../theme/colors';
 import { font } from '../theme/typography';
 
@@ -47,22 +48,7 @@ export function Navbar() {
         ]}
       >
         <View style={styles.inner}>
-          <Pressable
-            onPress={() => go('Home')}
-            style={styles.logoWrap}
-            accessibilityLabel="Accueil PokéStore"
-          >
-            <View style={styles.pokeball}>
-              <View style={styles.pokeballTop} />
-              <View style={styles.pokeballBand} />
-              <View style={styles.pokeballCenter}>
-                <View style={styles.pokeballCenterDot} />
-              </View>
-            </View>
-            <Text style={styles.logo} numberOfLines={1}>
-              PokéStore
-            </Text>
-          </Pressable>
+          <Logo size="nav" onPress={() => go('Home')} style={styles.logoWrap} />
 
           <View style={styles.center}>
             <BattleAnim size="nav" />
@@ -174,16 +160,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   logoWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
     flexShrink: 0,
-  },
-  logo: {
-    fontFamily: font.pixel,
-    fontSize: 11,
-    color: colors.text,
-    letterSpacing: -0.5,
+    maxWidth: '38%',
   },
   center: {
     flex: 1,
@@ -194,49 +172,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     flexShrink: 0,
-  },
-  pokeball: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: '#1a1a2e',
-    backgroundColor: '#fff',
-    overflow: 'hidden',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pokeballTop: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 8,
-    backgroundColor: '#ef4444',
-  },
-  pokeballBand: {
-    position: 'absolute',
-    top: 8,
-    left: 0,
-    right: 0,
-    height: 2,
-    backgroundColor: '#1a1a2e',
-  },
-  pokeballCenter: {
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-    backgroundColor: '#fff',
-    borderWidth: 1.5,
-    borderColor: '#1a1a2e',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pokeballCenterDot: {
-    width: 2,
-    height: 2,
-    borderRadius: 1,
-    backgroundColor: '#1a1a2e',
   },
   iconBtn: {
     padding: 8,

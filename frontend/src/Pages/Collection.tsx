@@ -115,7 +115,7 @@ export function Collection({
         </div>
       ) : collection.length === 0 ? (
         <div className="text-center py-16">
-          <LayoutGrid className="w-20 h-20 text-[#5a4f99] mx-auto mb-4 opacity-60" aria-hidden="true" />
+          <LayoutGrid className="w-20 h-20 text-[#c4b5fd] mx-auto mb-4 opacity-80" aria-hidden="true" />
           <h2 className="text-2xl font-bold text-white mb-2">Collection vide</h2>
           <p className="text-[#a5b4fc] mb-8 font-sans">
             Achète des cartes dans la boutique pour les retrouver ici.

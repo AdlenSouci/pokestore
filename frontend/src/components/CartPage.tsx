@@ -102,9 +102,9 @@ export function CartPage({ onClose }: CartPageProps) {
                         </div>
                     ) : !cart || cart.items.length === 0 ? (
                         <div className="text-center py-12">
-                            <ShoppingCart className="w-24 h-24 text-[#5a4f99] mx-auto mb-4 opacity-50" aria-hidden="true" />
+                            <ShoppingCart className="w-24 h-24 text-[#2d3561] mx-auto mb-4 opacity-40" aria-hidden="true" />
                             <h3 className="text-[#2d3561] text-2xl font-bold mb-2">Votre panier est vide</h3>
-                            <p className="text-[#5a4f99] mb-6">Ajoutez des cartes Pokémon pour commencer !</p>
+                            <p className="text-[#2d3561]/80 mb-6">Ajoutez des cartes Pokémon pour commencer !</p>
                             <button
                                 type="button"
                                 onClick={onClose}
@@ -128,8 +128,8 @@ export function CartPage({ onClose }: CartPageProps) {
                                         />
                                         <div className="flex-1 min-w-0">
                                             <h3 className="text-[#2d3561] font-bold text-lg">{item.card.name}</h3>
-                                            <p className="text-[#5a4f99] text-sm">Type: {item.card.type}</p>
-                                            <p className="text-[#5a4f99] text-sm">Rareté: {item.card.rarity}</p>
+                                            <p className="text-[#2d3561]/75 text-sm">Type: {item.card.type}</p>
+                                            <p className="text-[#2d3561]/75 text-sm">Rareté: {item.card.rarity}</p>
                                             <p className="text-[#2d3561] font-bold text-xl mt-2">{item.card.price} €</p>
                                         </div>
                                         <div className="flex items-center gap-3" role="group" aria-label={`Quantité de ${item.card.name}`}>

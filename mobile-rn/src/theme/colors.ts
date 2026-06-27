@@ -12,6 +12,8 @@ export const colors = {
   mintHover: '#6eb893',
   text: '#ffffff',
   textMuted: '#e0e7ff',
+  /** Texte secondaire lisible sur fond violet / bleu foncé */
+  caption: '#d4dafa',
   inputBg: 'rgba(255,255,255,0.9)',
   inputText: '#2d3561',
   cardBorder: '#2d3561',
