@@ -13,7 +13,7 @@ import { PrismaService } from '../database/prisma.service';
 const WALLPAPER_WIDTH = 1080;
 const WALLPAPER_HEIGHT = 1920;
 
-type WallpaperSource = 'openai' | 'composite';
+export type WallpaperSource = 'openai' | 'pollinations' | 'artistic';
 
 @Injectable()
 export class WallpaperService {
@@ -48,17 +48,24 @@ export class WallpaperService {
     }
 
     const cardImage = await this.fetchCardImage(card.imageUrl);
-    const openAiBuffer = await this.tryOpenAiWallpaper(card.type, card.rarity);
+    const prompt = this.buildWallpaperPrompt(card.type, card.rarity);
 
     let output: Buffer;
     let source: WallpaperSource;
 
+    const openAiBuffer = await this.tryOpenAiWallpaper(prompt);
     if (openAiBuffer) {
-      output = await this.compositeCardOnBackground(openAiBuffer, cardImage, card.name);
+      output = await this.normalizeWallpaper(openAiBuffer);
       source = 'openai';
     } else {
-      output = await this.compositeWallpaper(cardImage, card.name, card.type);
-      source = 'composite';
+      const aiBuffer = await this.tryPollinationsWallpaper(prompt, cardId);
+      if (aiBuffer) {
+        output = await this.normalizeWallpaper(aiBuffer);
+        source = 'pollinations';
+      } else {
+        output = await this.createArtisticWallpaper(cardImage, card.type);
+        source = 'artistic';
+      }
     }
 
     return {
@@ -67,6 +74,16 @@ export class WallpaperService {
       source,
       cardName: card.name,
     };
+  }
+
+  private buildWallpaperPrompt(type: string, rarity: string): string {
+    return [
+      'Vertical smartphone wallpaper, ultra detailed digital art,',
+      `${type} elemental energy atmosphere, ${rarity} card mood,`,
+      'cinematic fantasy landscape, glowing particles, depth of field,',
+      'vibrant colors, abstract scenic background,',
+      'no text, no logo, no watermark, no trading card frame',
+    ].join(' ');
   }
 
   private async userOwnsCard(userId: number, cardId: number): Promise<boolean> {
@@ -100,21 +117,18 @@ export class WallpaperService {
     }
   }
 
-  private async tryOpenAiWallpaper(
-    type: string,
-    rarity: string,
-  ): Promise<Buffer | null> {
+  private async normalizeWallpaper(buffer: Buffer): Promise<Buffer> {
+    return sharp(buffer)
+      .resize(WALLPAPER_WIDTH, WALLPAPER_HEIGHT, { fit: 'cover' })
+      .png()
+      .toBuffer();
+  }
+
+  private async tryOpenAiWallpaper(prompt: string): Promise<Buffer | null> {
     const apiKey = this.config.get<string>('OPENAI_API_KEY')?.trim();
     if (!apiKey) {
       return null;
     }
-
-    const prompt = [
-      'Vertical smartphone wallpaper, cinematic fantasy atmosphere,',
-      `inspired by a ${type} elemental trading card, ${rarity} rarity,`,
-      'rich colors, light particles, scenic abstract background,',
-      'no text, no logos, no copyrighted character names',
-    ].join(' ');
 
     try {
       const res = await axios.post<{
@@ -141,7 +155,34 @@ export class WallpaperService {
       return Buffer.from(b64, 'base64');
     } catch (error) {
       this.logger.warn(
-        `OpenAI wallpaper fallback: ${error instanceof Error ? error.message : String(error)}`,
+        `OpenAI wallpaper: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      return null;
+    }
+  }
+
+  /** Génération IA gratuite (Flux) — utilisée si pas de clé OpenAI. */
+  private async tryPollinationsWallpaper(
+    prompt: string,
+    seed: number,
+  ): Promise<Buffer | null> {
+    try {
+      const encoded = encodeURIComponent(prompt);
+      const url = `https://image.pollinations.ai/prompt/${encoded}?width=1080&height=1920&nologo=true&seed=${seed}&model=flux`;
+      const res = await axios.get<ArrayBuffer>(url, {
+        responseType: 'arraybuffer',
+        timeout: 120_000,
+        maxContentLength: 15 * 1024 * 1024,
+        headers: { Accept: 'image/*' },
+      });
+      const buffer = Buffer.from(res.data);
+      if (buffer.length < 2_000) {
+        return null;
+      }
+      return buffer;
+    } catch (error) {
+      this.logger.warn(
+        `Pollinations wallpaper: ${error instanceof Error ? error.message : String(error)}`,
       );
       return null;
     }
@@ -166,128 +207,43 @@ export class WallpaperService {
     return map[key] ?? { r: 120, g: 140, b: 255 };
   }
 
-  private async compositeWallpaper(
+  /** Fond plein écran stylisé depuis l'artwork (secours si IA indisponible). */
+  private async createArtisticWallpaper(
     cardImage: Buffer,
-    cardName: string,
     type: string,
   ): Promise<Buffer> {
     const accent = this.typeAccentRgb(type);
 
-    const background = await sharp(cardImage)
-      .resize(WALLPAPER_WIDTH, WALLPAPER_HEIGHT, { fit: 'cover' })
-      .blur(28)
-      .modulate({ brightness: 0.55, saturation: 1.25 })
-      .toBuffer();
-
-    const cardWidth = Math.round(WALLPAPER_WIDTH * 0.68);
-    const cardHeight = Math.round(cardWidth * (88 / 63));
-    const cardTop = Math.round((WALLPAPER_HEIGHT - cardHeight) / 2 - 60);
-    const cardLeft = Math.round((WALLPAPER_WIDTH - cardWidth) / 2);
-
-    const cardOverlay = await sharp(cardImage)
-      .resize(cardWidth, cardHeight, {
-        fit: 'contain',
-        background: { r: 0, g: 0, b: 0, alpha: 0 },
+    const base = await sharp(cardImage)
+      .resize(WALLPAPER_WIDTH, WALLPAPER_HEIGHT, {
+        fit: 'cover',
+        position: 'attention',
       })
-      .png()
+      .blur(42)
+      .modulate({ brightness: 0.6, saturation: 1.45 })
       .toBuffer();
 
-    const vignette = Buffer.from(
+    const overlay = Buffer.from(
       `<svg width="${WALLPAPER_WIDTH}" height="${WALLPAPER_HEIGHT}">
         <defs>
-          <radialGradient id="g" cx="50%" cy="45%" r="70%">
-            <stop offset="0%" stop-color="rgba(0,0,0,0)"/>
-            <stop offset="100%" stop-color="rgba(0,0,0,0.75)"/>
+          <radialGradient id="glow" cx="50%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="rgba(${accent.r},${accent.g},${accent.b},0.45)"/>
+            <stop offset="100%" stop-color="rgba(10,12,30,0)"/>
           </radialGradient>
-          <linearGradient id="b" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="rgba(${accent.r},${accent.g},${accent.b},0.15)"/>
-            <stop offset="100%" stop-color="rgba(10,12,30,0.9)"/>
+          <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="rgba(0,0,0,0.15)"/>
+            <stop offset="55%" stop-color="rgba(0,0,0,0)"/>
+            <stop offset="100%" stop-color="rgba(5,8,20,0.85)"/>
           </linearGradient>
         </defs>
-        <rect width="100%" height="100%" fill="url(#b)"/>
-        <rect width="100%" height="100%" fill="url(#g)"/>
+        <rect width="100%" height="100%" fill="url(#glow)"/>
+        <rect width="100%" height="100%" fill="url(#fade)"/>
       </svg>`,
     );
 
-    const safeName = this.escapeXml(cardName).slice(0, 48);
-    const label = Buffer.from(
-      `<svg width="${WALLPAPER_WIDTH}" height="200">
-        <text x="50%" y="120" text-anchor="middle"
-          font-family="Arial, sans-serif" font-size="42" font-weight="700"
-          fill="white" stroke="rgba(0,0,0,0.5)" stroke-width="3">
-          ${safeName}
-        </text>
-        <text x="50%" y="165" text-anchor="middle"
-          font-family="Arial, sans-serif" font-size="24"
-          fill="rgba(255,255,255,0.85)">
-          PokéStore · ${this.escapeXml(type)}
-        </text>
-      </svg>`,
-    );
-
-    return sharp(background)
-      .composite([
-        { input: vignette, top: 0, left: 0 },
-        { input: cardOverlay, top: cardTop, left: cardLeft },
-        { input: label, top: WALLPAPER_HEIGHT - 200, left: 0 },
-      ])
+    return sharp(base)
+      .composite([{ input: overlay }])
       .png()
       .toBuffer();
-  }
-
-  private async compositeCardOnBackground(
-    background: Buffer,
-    cardImage: Buffer,
-    cardName: string,
-  ): Promise<Buffer> {
-    const bg = await sharp(background)
-      .resize(WALLPAPER_WIDTH, WALLPAPER_HEIGHT, { fit: 'cover' })
-      .toBuffer();
-
-    const cardWidth = Math.round(WALLPAPER_WIDTH * 0.62);
-    const cardHeight = Math.round(cardWidth * (88 / 63));
-    const cardTop = Math.round((WALLPAPER_HEIGHT - cardHeight) / 2);
-    const cardLeft = Math.round((WALLPAPER_WIDTH - cardWidth) / 2);
-
-    const cardOverlay = await sharp(cardImage)
-      .resize(cardWidth, cardHeight, {
-        fit: 'contain',
-        background: { r: 0, g: 0, b: 0, alpha: 0 },
-      })
-      .png()
-      .toBuffer();
-
-    const shadow = Buffer.from(
-      `<svg width="${cardWidth + 40}" height="${cardHeight + 40}">
-        <rect x="20" y="20" width="${cardWidth}" height="${cardHeight}" rx="18"
-          fill="rgba(0,0,0,0.45)"/>
-      </svg>`,
-    );
-
-    const label = Buffer.from(
-      `<svg width="${WALLPAPER_WIDTH}" height="120">
-        <text x="50%" y="70" text-anchor="middle"
-          font-family="Arial, sans-serif" font-size="36" font-weight="700" fill="white">
-          ${this.escapeXml(cardName).slice(0, 48)}
-        </text>
-      </svg>`,
-    );
-
-    return sharp(bg)
-      .composite([
-        { input: shadow, top: cardTop - 10, left: cardLeft - 10 },
-        { input: cardOverlay, top: cardTop, left: cardLeft },
-        { input: label, top: WALLPAPER_HEIGHT - 130, left: 0 },
-      ])
-      .png()
-      .toBuffer();
-  }
-
-  private escapeXml(value: string): string {
-    return value
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
   }
 }
