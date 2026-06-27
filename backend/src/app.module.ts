@@ -14,6 +14,7 @@ import { PrismaModule } from './database/prisma.module';
 import { MailModule } from './mail/mail.module';
 import { StripeModule } from './stripe/stripe.module';
 import { ContactModule } from './contact/contact.module';
+import { WallpaperModule } from './wallpaper/wallpaper.module';
 
 @Module({
   controllers: [AppController],
@@ -44,6 +45,7 @@ import { ContactModule } from './contact/contact.module';
     CartModule,
     OrdersModule,
     ContactModule,
+    WallpaperModule,
   ],
 })
 export class AppModule { }

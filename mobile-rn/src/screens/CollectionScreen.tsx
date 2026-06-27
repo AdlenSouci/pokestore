@@ -63,7 +63,7 @@ export function CollectionScreen({ navigation }: Props) {
               </Text>
             )}
             <Text style={styles.hint}>
-              Cartes achetées — appuie pour les effets 3D et animations de type
+              Cartes achetées — bouton « Fond d’écran IA » pour générer un wallpaper
             </Text>
           </View>
         </View>
@@ -104,6 +104,7 @@ export function CollectionScreen({ navigation }: Props) {
                   product={item.product}
                   columnWidth={colWidth}
                   quantity={item.quantity}
+                  collectionMode
                 />
               </View>
             )}

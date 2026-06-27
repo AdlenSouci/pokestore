@@ -1,7 +1,11 @@
 import { authTokenRef } from '../auth/tokenRef';
 import { buildUrl, fetchWithTimeout, parseApiError } from '../services/fetchHelpers';
 
-export async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
+export async function fetchJson<T>(
+  path: string,
+  init?: RequestInit,
+  timeoutMs?: number,
+): Promise<T> {
   const url = buildUrl(path);
   const headers: Record<string, string> = {
     Accept: 'application/json',
@@ -11,7 +15,7 @@ export async function fetchJson<T>(path: string, init?: RequestInit): Promise<T>
   if (t) {
     headers.Authorization = `Bearer ${t}`;
   }
-  const res = await fetchWithTimeout(url, { ...init, headers });
+  const res = await fetchWithTimeout(url, { ...init, headers }, timeoutMs);
   if (!res.ok) {
     throw new Error(await parseApiError(res));
   }

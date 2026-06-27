@@ -29,7 +29,14 @@
     },
     "plugins": [
       "expo-font",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Autoriser PokéStore à enregistrer ton fond d'écran dans la galerie.",
+          "savePhotosPermission": "Autoriser PokéStore à enregistrer ton fond d'écran dans la galerie."
+        }
+      ]
     ],
     "extra": {
       "eas": {

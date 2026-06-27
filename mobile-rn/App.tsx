@@ -23,6 +23,7 @@ import { LoginScreen } from './src/screens/LoginScreen';
 import { OrdersScreen } from './src/screens/OrdersScreen';
 import { RegisterScreen } from './src/screens/RegisterScreen';
 import { ShopScreen } from './src/screens/ShopScreen';
+import { WallpaperPreviewScreen } from './src/screens/WallpaperPreviewScreen';
 import { colors } from './src/theme/colors';
 import { font } from './src/theme/typography';
 import type { RootStackParamList } from './src/types/navigation';
@@ -75,6 +76,11 @@ export default function App() {
               <Stack.Screen name="Cart" component={CartScreen} options={{ headerShown: false }} />
               <Stack.Screen name="Orders" component={OrdersScreen} options={{ headerShown: false }} />
               <Stack.Screen name="Collection" component={CollectionScreen} options={{ headerShown: false }} />
+              <Stack.Screen
+                name="WallpaperPreview"
+                component={WallpaperPreviewScreen}
+                options={{ headerShown: false }}
+              />
               <Stack.Screen name="Contact" component={ContactScreen} options={{ headerShown: false }} />
             </Stack.Navigator>
           </NavigationContainer>

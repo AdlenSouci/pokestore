@@ -10,4 +10,5 @@ export type RootStackParamList = {
   Orders: undefined;
   Collection: undefined;
   Contact: undefined;
+  WallpaperPreview: { product: Product };
 };

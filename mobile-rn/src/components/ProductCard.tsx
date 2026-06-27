@@ -27,9 +27,10 @@ type Props = {
   product: Product;
   columnWidth?: number;
   quantity?: number;
+  collectionMode?: boolean;
 };
 
-export function ProductCard({ product, columnWidth, quantity }: Props) {
+export function ProductCard({ product, columnWidth, quantity, collectionMode }: Props) {
   const navigation = useNavigation<Nav>();
   const { user, refreshCart } = useAuth();
   const scale = useRef(new Animated.Value(1)).current;
@@ -42,6 +43,10 @@ export function ProductCard({ product, columnWidth, quantity }: Props) {
 
   const onView = () => {
     navigation.navigate('CardDetail', { product });
+  };
+
+  const onWallpaper = () => {
+    navigation.navigate('WallpaperPreview', { product });
   };
 
   const onAddToCart = async () => {
@@ -163,25 +168,31 @@ export function ProductCard({ product, columnWidth, quantity }: Props) {
         </Text>
 
         <Pressable
-          onPress={onAddToCart}
+          onPress={collectionMode ? onWallpaper : onAddToCart}
           style={({ pressed }) => [
             styles.btnOuter,
             pressed && { opacity: 0.92, transform: [{ scale: 0.98 }] },
           ]}
         >
           <LinearGradient
-            colors={['#5a4f99', '#2d3561']}
+            colors={collectionMode ? ['#3d8b7a', '#2d5a4f'] : ['#5a4f99', '#2d3561']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={[styles.btnGrad, isCompact && styles.btnGradCompact]}
           >
             <MaterialCommunityIcons
-              name="cart-plus"
+              name={collectionMode ? 'image-filter-hdr' : 'cart-plus'}
               size={isCompact ? 16 : 20}
               color={colors.text}
             />
             <Text style={[styles.btnText, isCompact && styles.btnTextCompact]}>
-              {isCompact ? 'Ajouter' : 'Ajouter au panier'}
+              {collectionMode
+                ? isCompact
+                  ? 'Fond écran'
+                  : 'Fond d’écran IA'
+                : isCompact
+                  ? 'Ajouter'
+                  : 'Ajouter au panier'}
             </Text>
           </LinearGradient>
         </Pressable>
