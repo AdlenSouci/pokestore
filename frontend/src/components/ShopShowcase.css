@@ -1,0 +1,133 @@
+/* Démo boutique — parallaxe + défilement */
+
+.shop-showcase {
+  background: linear-gradient(180deg, #1a1f3a 0%, #252d52 45%, #1a1f3a 100%);
+}
+
+.shop-showcase__layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.shop-showcase__layer--back {
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 30%, rgba(126, 200, 163, 0.12) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 40% at 80% 70%, rgba(90, 79, 153, 0.2) 0%, transparent 50%);
+}
+
+.shop-showcase__layer--mid {
+  background:
+    radial-gradient(circle at 50% 100%, rgba(45, 53, 97, 0.9) 0%, transparent 60%);
+  opacity: 0.85;
+}
+
+.shop-showcase__strip-mask {
+  overflow: hidden;
+  width: 100%;
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+.shop-showcase__strip {
+  display: flex;
+  gap: 1rem;
+  width: max-content;
+  padding: 0.5rem 0;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.shop-showcase__strip--left {
+  animation-name: showcase-scroll-left;
+}
+
+.shop-showcase__strip--right {
+  animation-name: showcase-scroll-right;
+}
+
+@keyframes showcase-scroll-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes showcase-scroll-right {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.shop-showcase__card {
+  flex-shrink: 0;
+  width: 9rem;
+  padding: 0.65rem;
+  border-radius: 1rem;
+  border: 2px solid rgba(90, 79, 153, 0.55);
+  background: linear-gradient(160deg, rgba(61, 69, 113, 0.65) 0%, rgba(45, 53, 97, 0.85) 100%);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.shop-showcase__card:hover {
+  transform: translateY(-6px) scale(1.03);
+  border-color: rgba(126, 200, 163, 0.6);
+}
+
+.shop-showcase__card img {
+  width: 100%;
+  aspect-ratio: 63 / 88;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  border: 2px solid #2d3561;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.shop-showcase__card-name {
+  display: block;
+  font-family: system-ui, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #e0e7ff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shop-showcase__card-price {
+  display: block;
+  font-family: system-ui, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #7ec8a3;
+  margin-top: 0.15rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shop-showcase__strip {
+    animation: none;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    max-width: 64rem;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  .shop-showcase__strip-mask {
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+
+  .shop-showcase__layer {
+    transform: none !important;
+  }
+}

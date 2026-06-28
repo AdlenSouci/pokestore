@@ -3,6 +3,7 @@ import { SEO } from '../../components/SEO';
 import { PokemonBackground } from '../../components/animations/PokemonBackground';
 import { BattleAnim } from '../../components/animations/BattleAnim';
 import { Logo } from '../../components/Logo';
+import { ShopShowcase } from '../../components/ShopShowcase';
 import './HomePage.css';
 
 interface HomePageProps {
@@ -95,16 +96,16 @@ export function HomePage({
             </button>
             <button
               type="button"
-              onClick={onNavigateToShop}
+              onClick={() => document.getElementById('shop-showcase')?.scrollIntoView({ behavior: 'smooth' })}
               className="px-10 py-4 bg-transparent text-white rounded-xl border-4 border-[#5a4f99] font-bold text-lg hover:bg-white/10 transition hover:border-[#7ec8a3]/60"
             >
-              Découvrir le catalogue
+              Aperçu démo
             </button>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full text-left">
             {[
-              { title: 'Catalogue filtré', desc: 'Prix, année, série et extension', emoji: '🃏' },
+              { title: 'Filtres avancés', desc: 'Prix, année, série et extension', emoji: '🃏' },
               { title: 'Paiement sécurisé', desc: 'Stripe & commandes suivies', emoji: '💳' },
               { title: 'Disponible mobile', desc: 'App Android et site responsive', emoji: '📱' },
             ].map((item, i) => (
@@ -121,6 +122,8 @@ export function HomePage({
           </div>
         </div>
       </section>
+
+      <ShopShowcase onGoToShop={onNavigateToShop} />
     </Layout>
   );
 }

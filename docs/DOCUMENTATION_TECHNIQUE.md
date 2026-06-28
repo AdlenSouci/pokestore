@@ -1,13 +1,13 @@
 ---
 title: "Documentation technique — PokéStore"
-subtitle: "Livrable client"
+subtitle: "Architecture, API, déploiement"
 author: "[Équipe PokéStore]"
 date: "Juin 2026"
 lang: fr-FR
 toc-title: "Table des matières"
 ---
 
-Document destiné au **client** et à l’**équipe technique** qui reprendra le projet.
+Pour **reprendre ou héberger** le projet. Pour les parcours utilisateur, voir **Méthodologie utilisateur**.
 
 # Architecture
 
@@ -15,184 +15,139 @@ Document destiné au **client** et à l’**équipe technique** qui reprendra le
 ┌──────────────┐  ┌──────────────┐  ┌─────────────────┐
 │  Web React   │  │  Mobile Expo │  │ Admin Electron  │
 └──────┬───────┘  └──────┬───────┘  └────────┬────────┘
-       │                   │                    │
-       └───────────────────┼────────────────────┘
-                           │ HTTPS REST
-                           ▼
-              ┌────────────────────────┐
-              │  API NestJS (Render)   │
-              │  /api/*  +  Swagger    │
-              └───────────┬────────────┘
-                          │ Prisma
-                          ▼
-              ┌────────────────────────┐
-              │  PostgreSQL (Neon)   │
-              └────────────────────────┘
+       └─────────────────┼────────────────────┘
+                         │ HTTPS REST
+                         ▼
+            ┌────────────────────────┐
+            │  API NestJS (Render)   │
+            └───────────┬────────────┘
+                        │ Prisma
+                        ▼
+            ┌────────────────────────┐
+            │  PostgreSQL (Neon)     │
+            └────────────────────────┘
 ```
 
-| Service | URL production |
-|---------|----------------|
-| Frontend | https://pokestore-hazel.vercel.app |
+| Service | URL |
+|---------|-----|
+| Site web | https://pokestore-hazel.vercel.app |
 | API | https://pokestore-api-btz1.onrender.com/api |
 | Swagger | https://pokestore-api-btz1.onrender.com/api/docs |
+| Git | https://github.com/AdlenSouci/pokestore |
 
----
+# Stack
 
-## 2. Stack
+| Dossier | Technologies |
+|---------|--------------|
+| `frontend/` | React 19, Vite, TypeScript, Tailwind |
+| `backend/` | NestJS 11, Prisma 6, PostgreSQL |
+| `mobile-rn/` | React Native, Expo 54 |
+| `pokemon-electron/` | Electron Forge, React |
 
-| Couche | Dossier | Technologies |
-|--------|---------|--------------|
-| Web | `frontend/` | React 19, Vite, TypeScript, Tailwind |
-| API | `backend/` | NestJS 11, Prisma 6, PostgreSQL |
-| Mobile | `mobile-rn/` | React Native, Expo 54 |
-| Admin | `pokemon-electron/` | Electron Forge, React, `pg` |
-| BDD | Neon | PostgreSQL managé |
-
----
-
-## 3. Modèle de données (Prisma)
+# Base de données
 
 Fichier : `backend/prisma/schema.prisma`
 
 | Modèle | Rôle |
 |--------|------|
-| `User` | Comptes (`role`: USER \| ADMIN) |
+| `User` | Comptes clients (`USER`) ou administrateurs (`ADMIN`) |
+
+**Rôles :**
+
+| Rôle | Applications accessibles |
+|------|-------------------------|
+| `USER` | Site web + app mobile uniquement |
+| `ADMIN` | Application admin Electron uniquement (login séparé : `/api/auth/admin/login`) |
+
+Un compte **client** ne peut **pas** se connecter à l’admin. Un compte **admin** n’est pas destiné au parcours d’achat client.
 | `PokemonCard` | Catalogue |
 | `Cart` / `CartItem` | Panier |
 | `Order` / `OrderItem` | Commandes (`PENDING`, `PAID`, `CANCELLED`) |
-| `Favorite` | Favoris (prévu, UI non livrée) |
 
-Index sur : `price`, `releaseYear`, `series`, `tcgSetId`.
+# API principale
 
----
+Détail complet : Swagger `/api/docs`
 
-## 4. API — endpoints principaux
+| Route | Auth | Description |
+|-------|------|-------------|
+| `POST /api/auth/register` | — | Inscription |
+| `POST /api/auth/login` | — | Connexion |
+| `GET /api/cards` | — | Catalogue + filtres |
+| `GET/POST/PATCH/DELETE /api/cart/*` | JWT | Panier |
+| `POST /api/orders/checkout-session` | JWT | Paiement Stripe |
+| `GET /api/orders` | JWT | Commandes |
+| `POST /api/stripe/webhook` | Signature | Confirmation paiement |
+| `POST /api/wallpaper/generate` | JWT | Fond d’écran IA (mobile) |
+| `POST /api/contact` | — | Formulaire contact |
 
-| Méthode | Route | Auth | Description |
-|---------|-------|------|-------------|
-| POST | `/api/auth/register` | — | Inscription |
-| POST | `/api/auth/login` | — | Connexion client |
-| POST | `/api/auth/admin/login` | — | Connexion admin |
-| GET | `/api/auth/google` | — | OAuth web |
-| GET | `/api/auth/google/mobile` | — | OAuth mobile |
-| GET | `/api/cards` | — | Catalogue |
-| GET | `/api/cards/meta` | — | Filtres |
-| GET | `/api/cards/import` | JWT + ADMIN | Import cartes |
-| GET | `/api/cards/reprice` | JWT + ADMIN | Recalcul prix |
-| GET/POST/PATCH/DELETE | `/api/cart/*` | JWT | Panier |
-| POST | `/api/orders/checkout-session` | JWT | Stripe |
-| GET | `/api/orders` | JWT | Commandes |
-| GET | `/api/contact/captcha` | — | Captcha |
-| POST | `/api/contact` | — | Contact |
-| POST | `/api/stripe/webhook` | Signature | Webhook Stripe |
+# Paiement Stripe
 
-Liste complète : **Swagger** `/api/docs`
+```
+Client → POST /api/orders/checkout-session → redirection Stripe
+Stripe → webhook /api/stripe/webhook → commande PAID, panier vidé
+Retour → /orders?payment=success
+```
 
----
+Fichiers : `backend/src/stripe/`, `backend/src/orders/`  
+Variables : `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`  
+Test : carte `4242 4242 4242 4242`
 
-## 5. Sécurité
+# Fond d’écran IA (mobile)
 
-| Mesure | Implémentation |
-|--------|----------------|
-| Mots de passe | bcrypt |
-| Sessions API | JWT |
-| Routes protégées | `JwtAuthGuard`, `AdminGuard` |
-| Headers HTTP | Helmet |
-| Rate limiting | `@nestjs/throttler` (POST ; login limité) |
-| Contact | Captcha HMAC + honeypot + rate limit IP |
-| Paiement | Vérification signature webhook Stripe |
-| CORS | Domaines Vercel + localhost |
+- Carte **payée** en collection obligatoire
+- **Gemini en priorité** si `GEMINI_API_KEY` est sur Render (modèle `gemini-2.5-flash-image`, ratio 9:16)
+- Route : `POST /api/wallpaper/generate` (JWT)
+- Fichier : `backend/src/wallpaper/wallpaper.service.ts`
+- **Après modification : redéployer l’API sur Render**
 
----
+# Sécurité
 
-## 6. Déploiement
+JWT, bcrypt, Helmet, rate limiting, captcha contact, signature webhook Stripe, CORS.
 
-| Composant | Hébergeur | Fichier config |
-|-----------|-----------|----------------|
-| Web | Vercel | `frontend/vercel.json` |
-| API | Render | variables d’env dashboard |
-| BDD | Neon | `DATABASE_URL` |
-| APK | EAS (Expo) | `mobile-rn/eas.json` |
-| Admin `.exe` | Build local | `pokemon-electron/` → `npm run make` |
+# Déploiement
 
-Guide : `DEPLOY.md`, `README.md`
+| Composant | Hébergeur |
+|-----------|-----------|
+| Web | Vercel |
+| API | Render |
+| BDD | Neon |
+| APK | EAS (Expo) |
+| Admin | Build local `npm run make` |
 
-**Limitation connue :** Render plan gratuit → cold start ~30–60 s après inactivité.
+Render gratuit : cold start ~30–60 s après inactivité.
 
----
+# Variables d’environnement
 
-## 7. Variables d’environnement
+Modèles : `backend/.env.example`, `frontend/.env.example`, `mobile-rn/.env.example`
 
-Modèles sans secrets : `backend/.env.example`, `frontend/.env.example`, `mobile-rn/.env.example`, `pokemon-electron/.env.example`.
+| Variable | Rôle |
+|----------|------|
+| `DATABASE_URL` | PostgreSQL |
+| `JWT_SECRET` | Tokens |
+| `FRONTEND_URL` | CORS, OAuth, Stripe |
+| `STRIPE_*` | Paiement |
+| `RESEND_API_KEY` | Emails prod |
+| `GEMINI_API_KEY` | Fond d’écran IA |
+| `VITE_API_URL` / `EXPO_PUBLIC_API_URL` | URL API |
 
-| Variable | Service | Rôle |
-|----------|---------|------|
-| `DATABASE_URL` | Backend, Electron | PostgreSQL |
-| `JWT_SECRET` | Backend | Tokens |
-| `FRONTEND_URL` | Backend | CORS, OAuth |
-| `STRIPE_*` | Backend | Paiement |
-| `RESEND_*` | Backend | Emails prod |
-| `GOOGLE_CLIENT_*` | Backend | OAuth |
-| `VITE_API_URL` | Frontend | URL API |
-| `EXPO_PUBLIC_API_URL` | Mobile | URL API |
-| `POKEMON_APP_API_URL` | Electron | URL API |
-
-Les **secrets** sont configurés sur les dashboards hébergeurs, jamais dans Git.
-
----
-
-## 8. Installation locale (développeur)
+# Installation locale
 
 ```bash
-# API
 cd backend && npm install && cp .env.example .env
 npx prisma migrate dev && npm run db:seed && npm run db:seed:admin
 npm run start:dev
 
-# Web
 cd frontend && npm install && cp .env.example .env && npm run dev
-
-# Mobile
-cd mobile-rn && npm install && npm start
-
-# Admin
-cd pokemon-electron && npm install && npm start
 ```
 
----
+# Tests
 
-## 9. Tests
+| Commande | Résultat |
+|----------|----------|
+| `cd backend && npm test` | 7/7 |
+| `cd frontend && npm run test:e2e` | 7/7 |
 
-| Type | Commande | Résultat |
-|------|----------|----------|
-| Unitaires backend | `cd backend && npm test` | 7/7 |
-| E2E web | `cd frontend && npm run test:e2e` | 7/7 |
-| Captures | `docs/tests/` | Playwright + Jest |
-
-![Documentation API Swagger](./tests/e2e-06-swagger.png)
-
-![Tests unitaires Jest](./tests/tests-unitaires-jest.png)
-
-![PageSpeed desktop](./cahier-des-charges/images/pagespeed-desktop-bureau.png)
-
-![Audit responsive desktop](./audit-css/desktop-1366__home.png)
-
----
-
-## 10. Structure du dépôt
-
-```
-pokemon-app/
-├── backend/           # API
-├── frontend/          # Web
-├── mobile-rn/         # Mobile
-├── docs/
-│   ├── PokeStore-Livraison-Client/   # Word client
-│   └── scripts/generate-client-docs.ps1
-└── README.md
-```
-
-**Dépôt Git :** https://github.com/AdlenSouci/pokestore
+![Swagger](./tests/e2e-06-swagger.png)
 
 ---
 

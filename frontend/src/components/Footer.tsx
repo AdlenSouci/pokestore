@@ -55,9 +55,26 @@ export function Footer({ onNavigateHome, onNavigateShop, onNavigateContact }: Fo
             <h3 className="text-sm uppercase font-bold text-[#7ec8a3] mb-3 tracking-wider">Boutique</h3>
             <ul className="space-y-2 text-sm font-sans text-[#c4b5fd]">
               <li><NavLink href="/" onClick={onNavigateHome}>Accueil</NavLink></li>
-              <li><NavLink href="/shop" onClick={onNavigateShop}>Catalogue</NavLink></li>
-              <li><NavLink href="/shop?q=pikachu" onClick={onNavigateShop}>Pikachu</NavLink></li>
-              <li><NavLink href="/shop?q=dracaufeu" onClick={onNavigateShop}>Dracaufeu</NavLink></li>
+              <li><NavLink href="/shop" onClick={onNavigateShop}>Boutique</NavLink></li>
+              <li>
+                <a
+                  href="/#shop-showcase"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (window.location.pathname === '/' || window.location.pathname === '') {
+                      document.getElementById('shop-showcase')?.scrollIntoView({ behavior: 'smooth' });
+                    } else {
+                      onNavigateHome?.();
+                      setTimeout(() => {
+                        document.getElementById('shop-showcase')?.scrollIntoView({ behavior: 'smooth' });
+                      }, 300);
+                    }
+                  }}
+                  className="hover:text-white transition-colors"
+                >
+                  Aperçu démo
+                </a>
+              </li>
             </ul>
           </div>
 

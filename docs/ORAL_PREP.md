@@ -16,7 +16,7 @@ C’est la grille de ton capture d’écran. **Plus la pondération est haute, p
 |---------|-------|----------------------------------|
 | **Git / GitHub** (versioning, branches, commits, PR) | **3** | Repo `github.com/AdlenSouci/pokestore`, historique commits |
 | **Gérer le projet** (Trello, Notion, ClickUp…) | **4** | `task.md`, découpage phases — *si vous avez Notion/Trello, mentionne-le* |
-| **Rédiger des spécifications** | **5** | Livrable v12 + doc fonctionnelle/technique + Swagger |
+| **Rédiger des spécifications** | **5** | Livrable oral + doc fonctionnelle/technique + Swagger |
 | **Présenter à l’oral** | **5** | Démo structurée 20 min — cette fiche |
 | **Posture professionnelle** (autonomie, rigueur, livrables) | **3** | Projet en prod, doc rendue, honnêteté sur limites |
 
@@ -44,7 +44,7 @@ C’est la grille de ton capture d’écran. **Plus la pondération est haute, p
 | Backend structuré et **sécurisé** | `backend/` NestJS | Swagger + mention JWT, Helmet, throttler, ADMIN |
 | Base de données SQL | PostgreSQL Neon + Prisma | Schéma Prisma, relations User / Order / Card |
 | Application mobile | `mobile-rn/` Expo + APK EAS | Téléphone ou captures collection / commandes |
-| Doc fonctionnelle + technique | `docs/LIVRABLE_ORAL_FINAL_v12.docx` | « Le livrable décrit parcours, archi, API, tests » |
+| Doc fonctionnelle + technique | `docs/LIVRABLE_ORAL_FINAL.docx` | « Le livrable décrit parcours, archi, API, tests » |
 
 **Phrase d’ouverture type :**  
 « On a choisi un sujet libre — boutique Pokémon — mais on couvre les mêmes briques que le Smart Café : web, API sécurisée, SQL et mobile, avec la doc livrée. »
@@ -109,7 +109,7 @@ Légende niveaux PDF : Non acquis → En cours → Partiellement → **Acquis** 
 | Versionner son code (Git) | **Acquis** | GitHub `AdlenSouci/pokestore`, commits réguliers | Repo si demandé |
 | Collaborer en équipe | **[À compléter]** | GitHub, qui a fait quoi (front/back/mobile) | Prépare 1 phrase par personne |
 | Gérer le projet (planning) | **Partiellement** | `task.md`, phases dans CDC initial | « On a priorisé API puis web puis mobile » |
-| Documentation fonctionnelle + technique | **Acquis** | Livrable v12 + Swagger + README | Document Word |
+| Documentation fonctionnelle + technique | **Acquis** | Livrable oral + Swagger + README | Document Word |
 | Présenter et valoriser à l’oral | **À toi** | Démo live + structure claire | Ce fichier |
 
 ---
@@ -191,7 +191,7 @@ Moins de démo technique — plus « comment on a découpé le projet, qui fait 
 
 ## 8. Checklist veille de soutenance
 
-- [ ] Livrable Word v12 — prénoms promo sur la garde
+- [ ] Livrable Word oral — prénoms promo sur la garde
 - [ ] Site + API ouverts (réveil Render)
 - [ ] Compte test connecté pour collection
 - [ ] Téléphone chargé (Expo ou APK)
@@ -211,7 +211,7 @@ A11Y (2)      : aria-label, PageSpeed a11y 98
 UX (2)        : toasts, loaders, parcours fluide
 BDD (3)       : Prisma, User/Order/Card, index + pagination
 CONCEPTION (3): modules NestJS, services séparés
-SPECS (5)     : Livrable v12 + Swagger
+SPECS (5)     : Livrable oral + Swagger
 ORAL (5)      : 20 min structurées, démo live
 GIT (3)       : github.com/AdlenSouci/pokestore
 ```

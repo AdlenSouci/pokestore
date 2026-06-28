@@ -15,22 +15,22 @@ Développer une plateforme e-commerce de **cartes Pokémon TCG** comprenant :
 
 | Application | Rôle | Utilisateurs |
 |-------------|------|--------------|
-| **Application web** | Boutique en ligne, compte client, paiement | Collectionneurs / acheteurs |
-| **Application mobile** | Même parcours d’achat sur smartphone | Clients en mobilité |
-| **Application admin (desktop)** | Gestion catalogue, ventes, commandes | Administrateur PokéStore |
+| **Application web** | Boutique en ligne, compte client, paiement | Collectionneurs / acheteurs (rôle `USER`) |
+| **Application mobile** | Même parcours d’achat sur smartphone | Clients en mobilité (rôle `USER`) |
+| **Application admin (desktop)** | Gestion catalogue, ventes, commandes | **Administrateurs uniquement** (rôle `ADMIN`) |
 | **API + base de données** | Logique métier, persistance, sécurité | Support des 3 applications |
 
-Équivalent métier du sujet « Smart Café » : le **web** et l’**admin** gèrent l’activité ; le **mobile** permet au **client** de commander.
+Le **site web** et l’**app mobile** sont réservés aux **clients**. L’**application admin Electron** est réservée aux comptes avec le rôle **`ADMIN`** — un client (`USER`) ne peut pas s’y connecter.
 
 ---
 
-## 2. Contexte et objectifs
+## Contexte et objectifs
 
-### 2.1 Contexte
+### Contexte
 
 Les collectionneurs ont besoin d’un catalogue filtrable, d’un paiement sécurisé et d’un suivi de leurs achats. L’expérience doit être cohérente entre navigateur et téléphone.
 
-### 2.2 Objectifs
+### Objectifs
 
 - Consulter un catalogue riche (filtres, pagination, détail carte).
 - Créer un compte et se connecter (email ou Google).
@@ -41,9 +41,9 @@ Les collectionneurs ont besoin d’un catalogue filtrable, d’un paiement sécu
 
 ---
 
-## 3. Périmètre fonctionnel par application
+## Périmètre fonctionnel par application
 
-### 3.1 Application web (`frontend/`)
+### Application web (`frontend/`)
 
 **URL production :** https://pokestore-hazel.vercel.app
 
@@ -67,7 +67,7 @@ Les collectionneurs ont besoin d’un catalogue filtrable, d’un paiement sécu
 
 ---
 
-### 3.2 Application mobile (`mobile-rn/`)
+### Application mobile (`mobile-rn/`)
 
 **Distribution :** Expo Go (dev) + APK Android (EAS Build)
 
@@ -88,14 +88,16 @@ Les collectionneurs ont besoin d’un catalogue filtrable, d’un paiement sécu
 
 ---
 
-### 3.3 Application admin desktop (`pokemon-electron/`)
+### Application admin desktop (`pokemon-electron/`)
+
+**Accès réservé :** compte avec rôle **`ADMIN`** uniquement. Connexion via `POST /api/auth/admin/login` — les comptes clients (`USER`) sont **refusés**.
 
 **Distribution :** Installateur Windows `.exe` (`npm run make`)  
 **Note :** Projet local (hors dépôt Git principal), connecté à l’API Render et à Neon.
 
 | ID | Fonctionnalité | Description | Livré |
 |----|----------------|-------------|-------|
-| A-01 | Connexion admin | `POST /api/auth/admin/login` — rôle ADMIN | ✅ |
+| A-01 | Connexion admin | `POST /api/auth/admin/login` — **rôle ADMIN obligatoire** (refus si USER) | ✅ |
 | A-02 | Dashboard | CA, ventes payées, graphique 6 mois, top produit | ✅ |
 | A-03 | Pokemon Cards | Liste, import API TCG, édition inline, CSV | ✅ |
 | A-04 | Clients | Liste et création utilisateurs | ✅ |
@@ -105,7 +107,7 @@ Les collectionneurs ont besoin d’un catalogue filtrable, d’un paiement sécu
 
 ---
 
-### 3.4 API et données (`backend/`)
+### API et données (`backend/`)
 
 | ID | Fonctionnalité | Livré |
 |----|----------------|-------|
@@ -120,7 +122,7 @@ Les collectionneurs ont besoin d’un catalogue filtrable, d’un paiement sécu
 
 ---
 
-## 4. Exigences non fonctionnelles
+## Exigences non fonctionnelles
 
 | Domaine | Exigence | Livré |
 |---------|----------|-------|
@@ -132,25 +134,21 @@ Les collectionneurs ont besoin d’un catalogue filtrable, d’un paiement sécu
 
 ---
 
-## 5. Hors périmètre (v1)
+## Hors périmètre (v1)
 
 - Application iOS native (App Store) — Android APK uniquement
 - Favoris utilisateur (modèle BDD prêt, UI non livrée)
-- Fond d’écran IA depuis la collection (évolution prévue)
 - Publication Electron sur un store
 
 ---
 
-## 6. Livrables documentaires attendus par le client
+## Livrables documentaires
 
 | Document | Fichier |
 |----------|---------|
-| Cahier des charges (ce document) | `docs/cahier-des-charges/CAHIER_DES_CHARGES_POKEMON_APP.md` |
-| Documentation fonctionnelle | `docs/DOCUMENTATION_FONCTIONNELLE.md` |
+| Cahier des charges | `docs/cahier-des-charges/CAHIER_DES_CHARGES_POKEMON_APP.md` |
+| Méthodologie utilisateur | `docs/METHODOLOGIE_UTILISATEUR.md` |
 | Documentation technique | `docs/DOCUMENTATION_TECHNIQUE.md` |
-| Guide utilisateur | `docs/GUIDE_UTILISATEUR.md` |
-| Dossier de livraison | `docs/LIVRAISON_CLIENT.md` |
-| Synthèse projet (soutenance) | `docs/LIVRABLE_ORAL_FINAL_v12.docx` |
 
 ---
 
