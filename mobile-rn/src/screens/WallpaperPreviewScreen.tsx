@@ -24,6 +24,8 @@ type Props = NativeStackScreenProps<RootStackParamList, 'WallpaperPreview'>;
 
 function sourceLabel(source: wallpaperService.WallpaperSource | undefined): string | null {
   if (source === 'gemini') return 'Généré par IA (Gemini)';
+  if (source === 'pollinations') return 'Généré par IA (Flux)';
+  if (source === 'artwork') return 'Fond d’écran depuis ton illustration';
   return null;
 }
 

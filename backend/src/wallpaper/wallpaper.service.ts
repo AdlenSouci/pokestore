@@ -4,17 +4,17 @@ import {
   Injectable,
   Logger,
   NotFoundException,
-  ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
+import FormData from 'form-data';
 import sharp from 'sharp';
 import { PrismaService } from '../database/prisma.service';
 
 const WALLPAPER_WIDTH = 1080;
 const WALLPAPER_HEIGHT = 1920;
 
-export type WallpaperSource = 'gemini';
+export type WallpaperSource = 'gemini' | 'pollinations' | 'artwork';
 
 @Injectable()
 export class WallpaperService {
@@ -38,13 +38,6 @@ export class WallpaperService {
     source: WallpaperSource;
     cardName: string;
   }> {
-    const apiKey = this.config.get<string>('GEMINI_API_KEY')?.trim();
-    if (!apiKey) {
-      throw new ServiceUnavailableException(
-        'GEMINI_API_KEY manquante sur le serveur. Ajoute-la dans Render → Environment puis redéploie.',
-      );
-    }
-
     const ownsCard = await this.userOwnsCard(userId, cardId);
     if (!ownsCard) {
       throw new ForbiddenException(
@@ -61,34 +54,56 @@ export class WallpaperService {
 
     const cardImage = await this.fetchCardImage(card.imageUrl);
     const illustration = await this.extractIllustration(cardImage);
-    const seedImage = await this.createCompactSeed(illustration);
+    const outpaintSeed = await this.createOutpaintSeed(illustration);
     const prompt = this.buildWallpaperPrompt(card.name, card.type, card.rarity);
+    const shortPrompt = this.buildShortPrompt(card.name, card.type);
 
-    const { buffer, lastError } = await this.generateWithGemini(
-      apiKey,
-      prompt,
-      card.name,
-      card.type,
-      card.rarity,
-      seedImage,
-    );
+    let buffer: Buffer | null = null;
+    let source: WallpaperSource = 'artwork';
+
+    const geminiKey = this.config.get<string>('GEMINI_API_KEY')?.trim();
+    if (geminiKey) {
+      const gemini = await this.tryGeminiOnce(
+        geminiKey,
+        prompt,
+        await this.createCompactSeed(illustration),
+      );
+      if (gemini.buffer) {
+        buffer = gemini.buffer;
+        source = 'gemini';
+        this.logger.log(`Wallpaper OK — Gemini (${card.name})`);
+      } else if (gemini.lastError) {
+        this.logger.warn(
+          `Gemini indisponible (${card.name}): ${gemini.lastError.slice(0, 120)}`,
+        );
+      }
+    }
 
     if (!buffer) {
-      this.logger.error(
-        `Wallpaper échoué carte ${cardId} (${card.name}): ${lastError ?? 'inconnu'}`,
+      const pollinations = await this.tryPollinations(
+        prompt,
+        shortPrompt,
+        outpaintSeed,
+        cardId,
       );
-      throw new ServiceUnavailableException(
-        lastError
-          ? `Génération IA impossible : ${lastError}`
-          : "La génération IA n'a pas abouti. Réessaie dans une minute.",
-      );
+      if (pollinations) {
+        buffer = pollinations;
+        source = 'pollinations';
+        this.logger.log(`Wallpaper OK — Pollinations (${card.name})`);
+      }
+    }
+
+    if (!buffer) {
+      buffer = await this.createArtisticWallpaper(illustration);
+      source = 'artwork';
+      this.logger.log(`Wallpaper OK — artwork local (${card.name})`);
     }
 
     const normalized = await this.normalizeWallpaper(buffer);
     return {
       imageBase64: normalized.toString('base64'),
       mimeType: 'image/png',
-      source: 'gemini',
+      source,
       cardName: card.name,
     };
   }
@@ -99,25 +114,14 @@ export class WallpaperService {
     rarity: string,
   ): string {
     return [
-      `Create a full vertical 9:16 mobile phone wallpaper from this Pokémon card artwork.`,
-      `The Pokémon ${cardName} must be the hero — same species, recognizable.`,
-      `${type} type atmosphere, ${rarity} cinematic mood.`,
-      `Extend the scenery above and below to fill the frame.`,
-      `Epic environment, dramatic lighting, painterly detail.`,
-      `NO trading card border, NO attack text, NO HP, NO UI, NO watermark.`,
+      `Vertical 9:16 mobile wallpaper from this Pokémon card art.`,
+      `Pokémon ${cardName}, ${type} type, ${rarity} mood.`,
+      `Extend scenery, epic lighting, no card border, no text, no UI.`,
     ].join(' ');
   }
 
-  private buildTextOnlyPrompt(
-    cardName: string,
-    type: string,
-    rarity: string,
-  ): string {
-    return [
-      `Create a vertical 9:16 mobile phone wallpaper featuring the Pokémon ${cardName}.`,
-      `${type} type energy, ${rarity} rarity, epic fantasy landscape,`,
-      `dramatic lighting, full bleed artwork, no text, no card frame, no UI.`,
-    ].join(' ');
+  private buildShortPrompt(cardName: string, type: string): string {
+    return `Epic vertical 9:16 wallpaper, Pokémon ${cardName}, ${type} energy, fantasy landscape, cinematic, no text`;
   }
 
   private async userOwnsCard(userId: number, cardId: number): Promise<boolean> {
@@ -164,11 +168,67 @@ export class WallpaperService {
       .toBuffer();
   }
 
-  /** Seed léger pour l’API Gemini (évite les payloads trop gros). */
   private async createCompactSeed(illustration: Buffer): Promise<Buffer> {
     return sharp(illustration)
-      .resize(768, 768, { fit: 'inside', withoutEnlargement: true })
-      .jpeg({ quality: 88 })
+      .resize(512, 512, { fit: 'inside', withoutEnlargement: true })
+      .jpeg({ quality: 85 })
+      .toBuffer();
+  }
+
+  private async createOutpaintSeed(illustration: Buffer): Promise<Buffer> {
+    const artW = Math.round(WALLPAPER_WIDTH * 0.78);
+    const art = await sharp(illustration)
+      .resize(artW, artW, { fit: 'inside' })
+      .png()
+      .toBuffer();
+    const artMeta = await sharp(art).metadata();
+    const placedW = artMeta.width ?? artW;
+    const placedH = artMeta.height ?? artW;
+    const top = Math.round(WALLPAPER_HEIGHT * 0.14);
+    const left = Math.round((WALLPAPER_WIDTH - placedW) / 2);
+
+    const base = await sharp({
+      create: {
+        width: WALLPAPER_WIDTH,
+        height: WALLPAPER_HEIGHT,
+        channels: 3,
+        background: { r: 18, g: 24, b: 42 },
+      },
+    })
+      .png()
+      .toBuffer();
+
+    return sharp(base)
+      .composite([{ input: art, top, left }])
+      .png()
+      .toBuffer();
+  }
+
+  /** Fond flou depuis l’illustration + Pokémon centré — toujours disponible. */
+  private async createArtisticWallpaper(illustration: Buffer): Promise<Buffer> {
+    const art = await sharp(illustration)
+      .resize(Math.round(WALLPAPER_WIDTH * 0.88), Math.round(WALLPAPER_WIDTH * 0.88), {
+        fit: 'inside',
+      })
+      .png()
+      .toBuffer();
+
+    const artMeta = await sharp(art).metadata();
+    const placedW = artMeta.width ?? WALLPAPER_WIDTH;
+    const placedH = artMeta.height ?? WALLPAPER_HEIGHT;
+    const top = Math.round((WALLPAPER_HEIGHT - placedH) / 2);
+    const left = Math.round((WALLPAPER_WIDTH - placedW) / 2);
+
+    const bg = await sharp(illustration)
+      .resize(WALLPAPER_WIDTH, WALLPAPER_HEIGHT, { fit: 'cover' })
+      .blur(28)
+      .modulate({ brightness: 0.9, saturation: 1.15 })
+      .png()
+      .toBuffer();
+
+    return sharp(bg)
+      .composite([{ input: art, top, left }])
+      .png()
       .toBuffer();
   }
 
@@ -179,139 +239,150 @@ export class WallpaperService {
       .toBuffer();
   }
 
-  private async generateWithGemini(
+  /** Un seul appel Gemini — évite de brûler le quota. */
+  private async tryGeminiOnce(
     apiKey: string,
-    imagePrompt: string,
-    cardName: string,
-    type: string,
-    rarity: string,
-    seedImage: Buffer,
+    prompt: string,
+    seedJpeg: Buffer,
   ): Promise<{ buffer: Buffer | null; lastError?: string }> {
-    const seedB64 = seedImage.toString('base64');
-    const errors: string[] = [];
+    try {
+      const res = await axios.post<{
+        candidates?: Array<{
+          content?: {
+            parts?: Array<{ inlineData?: { data?: string } }>;
+          };
+        }>;
+        error?: { message?: string };
+      }>(
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent',
+        {
+          contents: [
+            {
+              parts: [
+                { text: prompt },
+                {
+                  inlineData: {
+                    mimeType: 'image/jpeg',
+                    data: seedJpeg.toString('base64'),
+                  },
+                },
+              ],
+            },
+          ],
+          generationConfig: {
+            responseModalities: ['TEXT', 'IMAGE'],
+            imageConfig: { aspectRatio: '9:16' },
+          },
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': apiKey,
+          },
+          timeout: 90_000,
+          maxContentLength: 25 * 1024 * 1024,
+        },
+      );
 
-    const attempts: Array<{
-      label: string;
-      parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }>;
-    }> = [
-      {
-        label: 'image+text',
-        parts: [
-          { text: imagePrompt },
-          { inlineData: { mimeType: 'image/jpeg', data: seedB64 } },
-        ],
-      },
-      {
-        label: 'text-only',
-        parts: [{ text: this.buildTextOnlyPrompt(cardName, type, rarity) }],
-      },
-    ];
+      if (res.data?.error?.message) {
+        return { buffer: null, lastError: res.data.error.message };
+      }
 
-    for (const attempt of attempts) {
-      const result = await this.callGeminiImage(apiKey, attempt.parts);
-      if (result.buffer) {
-        this.logger.log(`Wallpaper Gemini OK (${attempt.label})`);
-        return result;
+      for (const part of res.data?.candidates?.[0]?.content?.parts ?? []) {
+        const b64 = part.inlineData?.data;
+        if (b64 && b64.length > 5_000) {
+          return { buffer: Buffer.from(b64, 'base64') };
+        }
       }
-      if (result.lastError && !result.lastError.includes('not found')) {
-        errors.push(result.lastError);
-      }
+
+      return { buffer: null, lastError: 'Gemini sans image' };
+    } catch (error) {
+      return { buffer: null, lastError: this.formatAxiosError(error) };
     }
-
-    return {
-      buffer: null,
-      lastError: errors[0] ?? 'Gemini n’a pas renvoyé d’image',
-    };
   }
 
-  /** Appels Gemini image — modèle officiel gemini-2.5-flash-image uniquement. */
-  private async callGeminiImage(
-    apiKey: string,
-    parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }>,
-  ): Promise<{ buffer: Buffer | null; lastError?: string }> {
-    const model = 'gemini-2.5-flash-image';
-    const attempts: Array<{
-      version: 'v1beta' | 'v1';
-      generationConfig: Record<string, unknown>;
-    }> = [
-      {
-        version: 'v1beta',
-        generationConfig: {
-          responseModalities: ['TEXT', 'IMAGE'],
-          imageConfig: { aspectRatio: '9:16' },
-        },
-      },
-      {
-        version: 'v1',
-        generationConfig: {
-          responseModalities: ['TEXT', 'IMAGE'],
-          imageConfig: { aspectRatio: '9:16' },
-        },
-      },
-      {
-        version: 'v1',
-        generationConfig: {
-          responseFormat: { image: { aspectRatio: '9:16' } },
-        },
-      },
-      {
-        version: 'v1beta',
-        generationConfig: {},
-      },
-    ];
+  private async tryPollinations(
+    prompt: string,
+    shortPrompt: string,
+    seedImage: Buffer,
+    cardId: number,
+  ): Promise<Buffer | null> {
+    const apiKey = this.config.get<string>('POLLINATIONS_API_KEY')?.trim();
 
-    let lastError: string | undefined;
+    const post = await this.pollinationsPost(prompt, seedImage, cardId, apiKey);
+    if (post) return post;
 
-    for (const { version, generationConfig } of attempts) {
-      try {
-        const body: Record<string, unknown> = {
-          contents: [{ parts }],
-          generationConfig,
-        };
+    try {
+      const url =
+        `https://image.pollinations.ai/prompt/${encodeURIComponent(shortPrompt)}` +
+        `?width=${WALLPAPER_WIDTH}&height=${WALLPAPER_HEIGHT}&nologo=true&enhance=true&seed=${cardId}`;
 
-        const res = await axios.post<{
-          candidates?: Array<{
-            content?: {
-              parts?: Array<{
-                inlineData?: { mimeType?: string; data?: string };
-              }>;
-            };
-          }>;
-          error?: { message?: string };
-        }>(
-          `https://generativelanguage.googleapis.com/${version}/models/${model}:generateContent`,
-          body,
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              'x-goog-api-key': apiKey,
-            },
-            timeout: 120_000,
-            maxContentLength: 25 * 1024 * 1024,
-          },
-        );
+      const res = await axios.get<ArrayBuffer>(url, {
+        responseType: 'arraybuffer',
+        timeout: 120_000,
+        maxContentLength: 20 * 1024 * 1024,
+        headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : {},
+      });
 
-        if (res.data?.error?.message) {
-          lastError = res.data.error.message;
-          continue;
-        }
-
-        const responseParts = res.data?.candidates?.[0]?.content?.parts ?? [];
-        for (const part of responseParts) {
-          const b64 = part.inlineData?.data;
-          if (b64 && b64.length > 5_000) {
-            return { buffer: Buffer.from(b64, 'base64') };
-          }
-        }
-
-        lastError = 'Gemini a répondu sans image';
-      } catch (error) {
-        lastError = this.formatAxiosError(error);
-        this.logger.warn(`Gemini ${model} (${version}): ${lastError}`);
+      const buffer = Buffer.from(res.data);
+      if (buffer.length > 20_000) {
+        return buffer;
       }
+    } catch (error) {
+      this.logger.warn(
+        `Pollinations GET: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
 
-    return { buffer: null, lastError };
+    return null;
+  }
+
+  private async pollinationsPost(
+    prompt: string,
+    seedImage: Buffer,
+    seed: number,
+    apiKey?: string,
+  ): Promise<Buffer | null> {
+    try {
+      const form = new FormData();
+      form.append('image', seedImage, {
+        filename: 'seed.png',
+        contentType: 'image/png',
+      });
+      form.append('model', 'flux');
+      form.append('width', String(WALLPAPER_WIDTH));
+      form.append('height', String(WALLPAPER_HEIGHT));
+      form.append('seed', String(seed));
+      form.append('nologo', 'true');
+      form.append('enhance', 'true');
+
+      const headers: Record<string, string> = form.getHeaders();
+      if (apiKey) {
+        headers.Authorization = `Bearer ${apiKey}`;
+      }
+
+      const res = await axios.post<ArrayBuffer>(
+        `https://gen.pollinations.ai/image/${encodeURIComponent(prompt)}`,
+        form,
+        {
+          headers,
+          responseType: 'arraybuffer',
+          timeout: 120_000,
+          maxContentLength: 20 * 1024 * 1024,
+        },
+      );
+
+      const buffer = Buffer.from(res.data);
+      if (buffer.length > 20_000) {
+        return buffer;
+      }
+    } catch (error) {
+      this.logger.warn(
+        `Pollinations POST: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+
+    return null;
   }
 
   private formatAxiosError(error: unknown): string {
