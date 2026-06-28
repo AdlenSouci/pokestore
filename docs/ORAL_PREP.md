@@ -146,7 +146,7 @@ Même API → Collection / Commandes → « Parité fonctionnelle avec le web »
 4. « 7 Jest + 7 Playwright, PageSpeed 99/98 desktop »
 
 ### E — Clôture (1 min)
-« Projet en prod Vercel + Render + Neon. Limite : cold start Render. Suite : fond d’écran IA depuis la collection. »
+« Projet en prod Vercel + Render + Neon. Limite : cold start Render. Pas fait : fond d’écran IA (quota Gemini). »
 
 ---
 

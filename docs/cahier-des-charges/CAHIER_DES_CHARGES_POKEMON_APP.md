@@ -1,13 +1,9 @@
 ---
-title: "Cahier des charges — PokéStore"
-subtitle: "Spécifications des 3 applications"
-author: "[Équipe PokéStore]"
-date: "Juin 2026"
 lang: fr-FR
 toc-title: "Table des matières"
 ---
 
-**Version :** Juin 2026 — alignée sur l’état livré du projet
+**Version :** Juin 2026 — alignée sur l'état livré du projet
 
 # Objet du projet
 
@@ -59,7 +55,7 @@ Les collectionneurs ont besoin d’un catalogue filtrable, d’un paiement sécu
 | W-08 | Mes commandes | Historique et détail | ✅ |
 | W-09 | Ma collection | Cartes des commandes payées, badge quantité | ✅ |
 | W-10 | Profil | Nom, téléphone, mot de passe | ✅ |
-| W-11 | Contact | Formulaire + captcha, envoi email | ✅ |
+| W-11 | Contact | Formulaire + captcha, envoi email (Resend) — réception vérifiée en prod | ✅ |
 | W-12 | Responsive | Desktop, tablette, mobile (Tailwind) | ✅ |
 | W-13 | SEO | Meta, OG, sitemap, robots.txt | ✅ |
 
@@ -83,6 +79,9 @@ Les collectionneurs ont besoin d’un catalogue filtrable, d’un paiement sécu
 | M-08 | Mes commandes | Liste, statuts PENDING / PAID / CANCELLED | ✅ |
 | M-09 | Ma collection | Grille cartes achetées | ✅ |
 | M-10 | Contact | Formulaire + captcha | ✅ |
+| M-11 | Fond d’écran IA | Génération depuis la collection | ❌ **Pas fait** |
+
+Le bouton existe dans l’app mais **ça ne marche pas** (API Google Gemini : quota dépassé).
 
 **Écrans :** Home, Shop, CardDetail, Login, Register, Cart, Orders, Collection, Contact
 
@@ -130,15 +129,17 @@ Les collectionneurs ont besoin d’un catalogue filtrable, d’un paiement sécu
 | Performance | Pagination catalogue, lazy-loading images | ✅ |
 | Accessibilité | aria-label, PageSpeed a11y 98 | ✅ |
 | Disponibilité | Hébergement Vercel + Render + Neon | ✅ |
-| Tests | Jest (7) + Playwright E2E (7) | ✅ |
+| Tests | Jest (7) + Playwright E2E (7) — détail et captures : **doc technique** | ✅ |
+| Performances | Lighthouse / PageSpeed — capture : **cahier des charges** (annexe) + **doc technique** | ✅ |
 
 ---
 
-## Hors périmètre (v1)
+## Pas fait dans cette version
 
-- Application iOS native (App Store) — Android APK uniquement
-- Favoris utilisateur (modèle BDD prêt, UI non livrée)
-- Publication Electron sur un store
+- Application iPhone (App Store) — seulement Android pour l’instant
+- Favoris (prévu en base de données, pas d’écran)
+- **Fond d’écran IA** sur mobile — bouton présent mais **ne fonctionne pas** (quota API Gemini)
+- Publication de l’admin sur un store
 
 ---
 
@@ -149,6 +150,7 @@ Les collectionneurs ont besoin d’un catalogue filtrable, d’un paiement sécu
 | Cahier des charges | `docs/cahier-des-charges/CAHIER_DES_CHARGES_POKEMON_APP.md` |
 | Méthodologie utilisateur | `docs/METHODOLOGIE_UTILISATEUR.md` |
 | Documentation technique | `docs/DOCUMENTATION_TECHNIQUE.md` |
+| Guide reprise développeur | `docs/GUIDE_REPRISE_DEVELOPPEUR.md` |
 
 ---
 
@@ -160,11 +162,15 @@ Les collectionneurs ont besoin d’un catalogue filtrable, d’un paiement sécu
 
 ![Boutique](./images/capture-v2-shop.png)
 
-## Application mobile
+## Application mobile (captures réelles APK)
 
-![Accueil mobile](./images/capture-mobile-home.png)
+![Accueil](./images/capture-mobile-home.jpg)
 
-![Collection](./images/capture-mobile-collection.png)
+![Boutique](./images/capture-mobile-shop.jpg)
+
+![Détail carte](./images/capture-mobile-card.jpg)
+
+![Paiement Stripe](./images/capture-mobile-stripe.jpg)
 
 ## Application admin Electron
 
@@ -177,6 +183,20 @@ Les collectionneurs ont besoin d’un catalogue filtrable, d’un paiement sécu
 ## Qualité et performances
 
 ![PageSpeed](./images/pagespeed-desktop-bureau.png)
+
+## Emails — pourquoi Resend ?
+
+L’API est hébergée sur **Render** (plan gratuit). Render **bloque le port SMTP 587** (Gmail, etc.).  
+**Resend** envoie les emails en **HTTPS** (API REST) : ça fonctionne sur Render sans ouvrir de port.
+
+| Usage | Détail |
+|-------|--------|
+| Formulaire contact | `POST /api/contact` → email à l’équipe |
+| Commande payée | Email de confirmation après Stripe |
+| Variables | `RESEND_API_KEY`, `RESEND_FROM`, `CONTACT_TO` sur Render |
+| En local | SMTP Gmail possible via `.env` (`MAIL_*`) |
+
+![Réception Gmail](./images/gmail.jpg)
 
 ---
 

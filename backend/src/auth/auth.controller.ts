@@ -1,5 +1,6 @@
-import { Controller, Post, Body, Get, Put, Patch, UseGuards, Req, Res, Query } from '@nestjs/common';
-import { SkipThrottle, Throttle } from '@nestjs/throttler';
+import { Controller, Post, Body, Get, Put, Patch, UseGuards, Req, Res, Query, UnauthorizedException } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
+import { ApiExcludeEndpoint } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { RegisterDto, LoginDto } from './dto/auth.dto';
@@ -51,10 +52,19 @@ export class AuthController {
         return this.authService.login(loginDto);
     }
 
-    /** Panel admin Electron uniquement — refuse les comptes USER. */
-    @SkipThrottle()
+    /** Panel admin Electron — non documenté dans Swagger ; rate-limit strict. */
+    @ApiExcludeEndpoint()
+    @Throttle({ default: { limit: 5, ttl: 900_000 } })
     @Post('admin/login')
-    async adminLogin(@Body() loginDto: LoginDto) {
+    async adminLogin(@Body() loginDto: LoginDto, @Req() req: Request) {
+        const clientKey = this.config.get<string>('ADMIN_CLIENT_KEY');
+        if (clientKey) {
+            const provided = req.headers['x-admin-client-key'];
+            const expected = clientKey;
+            if (typeof provided !== 'string' || provided !== expected) {
+                throw new UnauthorizedException('Email ou mot de passe incorrect');
+            }
+        }
         return this.authService.adminLogin(loginDto);
     }
 

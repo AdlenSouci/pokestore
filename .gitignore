@@ -57,7 +57,7 @@ mobile-rn/web-build/
 mobile-rn/ios/
 mobile-rn/android/
 
-# Desktop Electron (hors scope dépôt)
+# Desktop Electron (hors scope dépôt public — retirer cette ligne si dépôt privé + livraison dev)
 pokemon-electron/
 
 # Playwright

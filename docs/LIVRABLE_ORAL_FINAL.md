@@ -88,6 +88,7 @@ Accueil → Boutique → Filtres / recherche → Détail carte → Panier
 | Mes commandes | Liste expandable, statuts PENDING / PAID / CANCELLED | ✅ |
 | Ma collection | Grille cartes achetées (commandes payées), navigation vers détail | ✅ |
 | Contact | Formulaire + captcha, même API que le web | ✅ |
+| Fond d'écran IA | Génération depuis la collection | ❌ Pas fait |
 | APK Android | Build EAS preview (`eas build --profile preview`) | ✅ |
 
 **Écrans :** Home, Shop, CardDetail, Login, Register, Cart, Orders, Collection, Contact.
@@ -353,11 +354,15 @@ Captures : `docs/cahier-des-charges/images/pagespeed-desktop-bureau.png`
 
 ## Mobile
 
-![Accueil mobile](./cahier-des-charges/images/capture-mobile-home.png)
+![Accueil mobile](./cahier-des-charges/images/capture-mobile-home.jpg)
 
-![Collection mobile](./cahier-des-charges/images/capture-mobile-collection.png)
+![Boutique mobile](./cahier-des-charges/images/capture-mobile-shop.jpg)
 
-![Commandes mobile](./cahier-des-charges/images/capture-mobile-orders.png)
+![Detail carte](./cahier-des-charges/images/capture-mobile-card.jpg)
+
+![Paiement Stripe mobile](./cahier-des-charges/images/capture-mobile-stripe.jpg)
+
+![Email confirmation Gmail](./cahier-des-charges/images/gmail.jpg)
 
 ## Admin Electron
 
@@ -416,9 +421,10 @@ Captures : `docs/cahier-des-charges/images/pagespeed-desktop-bureau.png`
 
 # Perspectives d'évolution
 
-| Priorité | Fonctionnalité |
-|----------|----------------|
-| Moyenne | Génération fond d'écran IA depuis une carte de la collection |
+| Priorité | Fonctionnalité | Statut |
+|----------|----------------|--------|
+| — | Fond d'écran IA (mobile) | Pas fait (quota Gemini) |
+| Moyenne | Fond d'écran IA avec API payante | Plus tard |
 | Basse | Favoris utilisateur (modèle Prisma déjà présent) |
 | Basse | Publier `pokemon-electron` dans le dépôt Git |
 

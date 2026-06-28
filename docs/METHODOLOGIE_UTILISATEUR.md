@@ -1,8 +1,4 @@
 ---
-title: "Méthodologie utilisateur — PokéStore"
-subtitle: "Parcours pas à pas — web, mobile, admin"
-author: "[Équipe PokéStore]"
-date: "Juin 2026"
 lang: fr-FR
 toc-title: "Table des matières"
 ---
@@ -43,6 +39,8 @@ Comment **utiliser** PokéStore au quotidien. Pour l’architecture et l’API, 
 
 **Payer avec Stripe** — Redirection vers la page Stripe (sécurisée). En mode test : carte `4242 4242 4242 4242`, date future, CVC `123`. Valider → retour sur **Mes commandes**.
 
+![Paiement Stripe — mobile](./cahier-des-charges/images/capture-mobile-stripe.jpg)
+
 **Vérifier** — Commande en statut **Payée** → cartes visibles dans **Ma collection**.
 
 ## Profil et contact
@@ -50,6 +48,10 @@ Comment **utiliser** PokéStore au quotidien. Pour l’architecture et l’API, 
 **Profil** — Icône profil → modifier nom, téléphone ou mot de passe.
 
 **Contact** — Page Contact → remplir le formulaire → répondre au captcha → **Envoyer**.
+
+Les emails partent via **Resend** (voir doc technique : Render bloque le SMTP classique, Resend passe en HTTPS).
+
+![Réception email — Gmail](./cahier-des-charges/images/gmail.jpg)
 
 ---
 
@@ -59,19 +61,25 @@ Comment **utiliser** PokéStore au quotidien. Pour l’architecture et l’API, 
 
 Installer l’APK, lancer **PokéStore**, accéder à la **Boutique** depuis l’accueil.
 
-![Accueil mobile](./cahier-des-charges/images/capture-mobile-home.png)
+![Accueil mobile](./cahier-des-charges/images/capture-mobile-home.jpg)
 
-## Acheter
+## Boutique et achat
 
-Même logique que le web : **Boutique** → **Ajouter au panier** → **Panier** → **Commander** → paiement Stripe → **Mes commandes** / **Ma collection**.
+**Boutique** → filtres → choisir une carte → **Ajouter au panier** → **Panier** → **Commander**.
 
-![Commandes](./cahier-des-charges/images/capture-mobile-orders.png)
+![Boutique mobile](./cahier-des-charges/images/capture-mobile-shop.jpg)
 
-![Collection](./cahier-des-charges/images/capture-mobile-collection.png)
+![Détail carte](./cahier-des-charges/images/capture-mobile-card.jpg)
 
-## Fond d’écran IA
+**Paiement Stripe** dans le navigateur du téléphone (même carte test `4242…`).
 
-Dans **Ma collection**, choisir une carte payée → **Générer fond d’écran** → attendre (jusqu’à 2 min) → enregistrer sur le téléphone.
+![Stripe mobile](./cahier-des-charges/images/capture-mobile-stripe.jpg)
+
+Puis vérifier **Mes commandes** et **Ma collection**.
+
+## Fond d’écran IA — pas fait
+
+Le bouton est dans l’app mais **la génération ne marche pas** (quota API Google Gemini dépassé). À faire plus tard.
 
 ## Dépannage
 
@@ -80,7 +88,6 @@ Dans **Ma collection**, choisir une carte payée → **Générer fond d’écran
 | Catalogue lent ou vide | Attendre 30–60 s (serveur Render en veille) |
 | Paiement annulé | Relancer depuis le panier |
 | Google ne revient pas | Réinstaller l’APK récent |
-| Fond d’écran en échec | Vérifier que la carte est bien payée |
 
 ---
 

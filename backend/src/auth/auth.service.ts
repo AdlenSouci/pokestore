@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../database/prisma.service';
 import { UserRole } from '@prisma/client';
@@ -87,7 +87,7 @@ export class AuthService {
         }
 
         if (user.role !== UserRole.ADMIN) {
-            throw new ForbiddenException('Accès réservé aux administrateurs.');
+            throw new UnauthorizedException('Email ou mot de passe incorrect');
         }
 
         return this.generateToken(user);
