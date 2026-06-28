@@ -188,113 +188,126 @@ export class WallpaperService {
     seedImage: Buffer,
   ): Promise<{ buffer: Buffer | null; lastError?: string }> {
     const seedB64 = seedImage.toString('base64');
-    const models = [
-      'gemini-2.5-flash-image',
-      'gemini-2.0-flash-preview-image-generation',
+    const errors: string[] = [];
+
+    const attempts: Array<{
+      label: string;
+      parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }>;
+    }> = [
+      {
+        label: 'image+text',
+        parts: [
+          { text: imagePrompt },
+          { inlineData: { mimeType: 'image/jpeg', data: seedB64 } },
+        ],
+      },
+      {
+        label: 'text-only',
+        parts: [{ text: this.buildTextOnlyPrompt(cardName, type, rarity) }],
+      },
     ];
 
-    let lastError: string | undefined;
-
-    for (const model of models) {
-      const withImage = await this.callGemini(apiKey, model, [
-        { text: imagePrompt },
-        {
-          inlineData: {
-            mimeType: 'image/jpeg',
-            data: seedB64,
-          },
-        },
-      ]);
-      if (withImage.buffer) {
-        this.logger.log(`Wallpaper Gemini OK (${model}, image+text)`);
-        return withImage;
+    for (const attempt of attempts) {
+      const result = await this.callGeminiImage(apiKey, attempt.parts);
+      if (result.buffer) {
+        this.logger.log(`Wallpaper Gemini OK (${attempt.label})`);
+        return result;
       }
-      lastError = withImage.lastError ?? lastError;
-
-      const textOnly = await this.callGemini(apiKey, model, [
-        { text: this.buildTextOnlyPrompt(cardName, type, rarity) },
-      ]);
-      if (textOnly.buffer) {
-        this.logger.log(`Wallpaper Gemini OK (${model}, text-only)`);
-        return textOnly;
+      if (result.lastError && !result.lastError.includes('not found')) {
+        errors.push(result.lastError);
       }
-      lastError = textOnly.lastError ?? lastError;
     }
 
-    return { buffer: null, lastError };
+    return {
+      buffer: null,
+      lastError: errors[0] ?? 'Gemini n’a pas renvoyé d’image',
+    };
   }
 
-  private async callGemini(
+  /** Appels Gemini image — modèle officiel gemini-2.5-flash-image uniquement. */
+  private async callGeminiImage(
     apiKey: string,
-    model: string,
     parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }>,
   ): Promise<{ buffer: Buffer | null; lastError?: string }> {
-    const configs: Array<Record<string, unknown>> = [
+    const model = 'gemini-2.5-flash-image';
+    const attempts: Array<{
+      version: 'v1beta' | 'v1';
+      generationConfig: Record<string, unknown>;
+    }> = [
       {
-        responseModalities: ['TEXT', 'IMAGE'],
-        imageConfig: { aspectRatio: '9:16' },
-      },
-      {
-        responseFormat: {
-          image: { aspectRatio: '9:16' },
+        version: 'v1beta',
+        generationConfig: {
+          responseModalities: ['TEXT', 'IMAGE'],
+          imageConfig: { aspectRatio: '9:16' },
         },
       },
-      {},
+      {
+        version: 'v1',
+        generationConfig: {
+          responseModalities: ['TEXT', 'IMAGE'],
+          imageConfig: { aspectRatio: '9:16' },
+        },
+      },
+      {
+        version: 'v1',
+        generationConfig: {
+          responseFormat: { image: { aspectRatio: '9:16' } },
+        },
+      },
+      {
+        version: 'v1beta',
+        generationConfig: {},
+      },
     ];
 
-    const versions = ['v1beta', 'v1'] as const;
     let lastError: string | undefined;
 
-    for (const version of versions) {
-      for (const generationConfig of configs) {
-        try {
-          const body: Record<string, unknown> = {
-            contents: [{ parts }],
-          };
-          if (Object.keys(generationConfig).length > 0) {
-            body.generationConfig = generationConfig;
-          }
+    for (const { version, generationConfig } of attempts) {
+      try {
+        const body: Record<string, unknown> = {
+          contents: [{ parts }],
+          generationConfig,
+        };
 
-          const res = await axios.post<{
-            candidates?: Array<{
-              content?: {
-                parts?: Array<{
-                  inlineData?: { mimeType?: string; data?: string };
-                }>;
-              };
-            }>;
-            error?: { message?: string };
-          }>(
-            `https://generativelanguage.googleapis.com/${version}/models/${model}:generateContent`,
-            body,
-            {
-              headers: {
-                'Content-Type': 'application/json',
-                'x-goog-api-key': apiKey,
-              },
-              timeout: 120_000,
-              maxContentLength: 25 * 1024 * 1024,
+        const res = await axios.post<{
+          candidates?: Array<{
+            content?: {
+              parts?: Array<{
+                inlineData?: { mimeType?: string; data?: string };
+              }>;
+            };
+          }>;
+          error?: { message?: string };
+        }>(
+          `https://generativelanguage.googleapis.com/${version}/models/${model}:generateContent`,
+          body,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'x-goog-api-key': apiKey,
             },
-          );
+            timeout: 120_000,
+            maxContentLength: 25 * 1024 * 1024,
+          },
+        );
 
-          if (res.data?.error?.message) {
-            lastError = res.data.error.message;
-            continue;
-          }
-
-          const responseParts = res.data?.candidates?.[0]?.content?.parts ?? [];
-          for (const part of responseParts) {
-            const b64 = part.inlineData?.data;
-            if (b64 && b64.length > 10_000) {
-              return { buffer: Buffer.from(b64, 'base64') };
-            }
-          }
-
-          lastError = 'Gemini a répondu sans image';
-        } catch (error) {
-          lastError = this.formatAxiosError(error);
-          this.logger.warn(`Gemini ${model} (${version}): ${lastError}`);
+        if (res.data?.error?.message) {
+          lastError = res.data.error.message;
+          continue;
         }
+
+        const responseParts = res.data?.candidates?.[0]?.content?.parts ?? [];
+        for (const part of responseParts) {
+          const b64 = part.inlineData?.data;
+          if (b64 && b64.length > 5_000) {
+            return { buffer: Buffer.from(b64, 'base64') };
+          }
+        }
+
+        lastError = 'Gemini a répondu sans image';
+      } catch (error) {
+        lastError = this.formatAxiosError(error);
+        this.logger.warn(`Gemini ${model} (${version}): ${lastError}`);
       }
     }
 
