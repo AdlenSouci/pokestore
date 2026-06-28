@@ -57,11 +57,11 @@ export class AuthController {
     @Throttle({ default: { limit: 5, ttl: 900_000 } })
     @Post('admin/login')
     async adminLogin(@Body() loginDto: LoginDto, @Req() req: Request) {
-        const clientKey = this.config.get<string>('ADMIN_CLIENT_KEY');
+        const clientKey = this.config.get<string>('ADMIN_CLIENT_KEY')?.trim();
         if (clientKey) {
             const provided = req.headers['x-admin-client-key'];
             const expected = clientKey;
-            if (typeof provided !== 'string' || provided !== expected) {
+            if (typeof provided !== 'string' || provided.trim() !== expected) {
                 throw new UnauthorizedException('Email ou mot de passe incorrect');
             }
         }

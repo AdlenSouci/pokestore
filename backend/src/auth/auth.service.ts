@@ -71,7 +71,8 @@ export class AuthService {
 
     /** Connexion réservée au panel Electron — rôle ADMIN obligatoire. */
     async adminLogin(loginDto: LoginDto) {
-        const { email, password } = loginDto;
+        const email = loginDto.email.trim().toLowerCase();
+        const { password } = loginDto;
 
         const user = await this.prisma.user.findUnique({
             where: { email },
