@@ -11,7 +11,10 @@ export class AppController {
   }
 
   @Get('health')
-  health(): { ok: boolean } {
-    return { ok: true };
+  health(): { ok: boolean; geminiWallpaper: boolean } {
+    return {
+      ok: true,
+      geminiWallpaper: Boolean(process.env.GEMINI_API_KEY?.trim()),
+    };
   }
 }
