@@ -1,9 +1,9 @@
 import { ExternalLink, Smartphone } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
-import { EXPO_APP_LABEL, getExpoAppUrl } from '../lib/appLinks';
+import { EXPO_APP_LABEL, EXPO_APP_URL } from '../lib/appLinks';
 
 export function MobileAppPromo() {
-  const expoUrl = getExpoAppUrl();
+  const expoUrl = EXPO_APP_URL;
 
   return (
     <section
