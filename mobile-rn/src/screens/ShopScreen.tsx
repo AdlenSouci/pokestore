@@ -200,7 +200,7 @@ export function ShopScreen({}: Props) {
           <Text style={styles.errorTitle}>Boutique indisponible</Text>
           <Text style={styles.errorHint}>{error}</Text>
           <Text style={styles.errorHint}>
-            L&apos;API Render peut mettre ~30 s à démarrer (plan gratuit). Réessaie.
+            Le service peut mettre un moment à répondre. Réessayez dans quelques instants.
           </Text>
           <Pressable style={styles.retryBtn} onPress={() => void loadCards()}>
             <Text style={styles.retryBtnText}>Réessayer</Text>
@@ -220,7 +220,7 @@ export function ShopScreen({}: Props) {
         <View style={styles.headerBlock}>
           <Text style={styles.h2}>Boutique PokéStore</Text>
           <Text style={styles.subtitle}>
-            Filtre par prix, année, série ou extension.
+            Parcourez le catalogue, filtrez par prix, série ou extension, puis ajoutez au panier.
           </Text>
         </View>
 

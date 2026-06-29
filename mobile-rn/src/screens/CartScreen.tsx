@@ -217,7 +217,7 @@ export function CartScreen({ navigation }: Props) {
             ) : (
               <>
                 <MaterialCommunityIcons name="credit-card" size={22} color={colors.text} />
-                <Text style={styles.checkoutText}>Payer avec Stripe</Text>
+                <Text style={styles.checkoutText}>Passer la commande</Text>
               </>
             )}
           </Pressable>

@@ -79,8 +79,8 @@ export function HomePage({
           </p>
 
           <p className="text-[#c4b5fd] text-base md:text-lg font-sans mb-8 max-w-xl leading-relaxed">
-            Parcours notre catalogue, filtre par prix, série ou extension, et complète ta collection en
-            quelques clics.
+            Catalogue Pokémon TCG en ligne : filtres par prix, série et extension, paiement sécurisé
+            et suivi de vos commandes.
           </p>
 
           <div className="w-full max-w-md mb-10">
@@ -97,18 +97,18 @@ export function HomePage({
             </button>
             <button
               type="button"
-              onClick={() => document.getElementById('shop-showcase')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() => document.getElementById('app-mobile')?.scrollIntoView({ behavior: 'smooth' })}
               className="px-10 py-4 bg-transparent text-white rounded-xl border-4 border-[#5a4f99] font-bold text-lg hover:bg-white/10 transition hover:border-[#7ec8a3]/60"
             >
-              Aperçu démo
+              Application mobile
             </button>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full text-left">
             {[
               { title: 'Filtres avancés', desc: 'Prix, année, série et extension', emoji: '🃏' },
-              { title: 'Paiement sécurisé', desc: 'Stripe & commandes suivies', emoji: '💳' },
-              { title: 'Disponible mobile', desc: 'QR code Expo — installe sur Android', emoji: '📱', action: 'app' },
+              { title: 'Paiement sécurisé', desc: 'Commande et suivi en ligne', emoji: '💳' },
+              { title: 'Application mobile', desc: 'Boutique sur Android', emoji: '📱', action: 'app' },
             ].map((item, i) => (
               <div
                 key={item.title}
@@ -143,9 +143,9 @@ export function HomePage({
         </div>
       </section>
 
-      <MobileAppPromo />
-
       <ShopShowcase onGoToShop={onNavigateToShop} />
+
+      <MobileAppPromo />
     </Layout>
   );
 }

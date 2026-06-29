@@ -58,21 +58,21 @@ export function Footer({ onNavigateHome, onNavigateShop, onNavigateContact }: Fo
               <li><NavLink href="/shop" onClick={onNavigateShop}>Boutique</NavLink></li>
               <li>
                 <a
-                  href="/#shop-showcase"
+                  href="/#app-mobile"
                   onClick={(e) => {
                     e.preventDefault();
                     if (window.location.pathname === '/' || window.location.pathname === '') {
-                      document.getElementById('shop-showcase')?.scrollIntoView({ behavior: 'smooth' });
+                      document.getElementById('app-mobile')?.scrollIntoView({ behavior: 'smooth' });
                     } else {
                       onNavigateHome?.();
                       setTimeout(() => {
-                        document.getElementById('shop-showcase')?.scrollIntoView({ behavior: 'smooth' });
+                        document.getElementById('app-mobile')?.scrollIntoView({ behavior: 'smooth' });
                       }, 300);
                     }
                   }}
                   className="hover:text-white transition-colors"
                 >
-                  Aperçu démo
+                  Application mobile
                 </a>
               </li>
             </ul>
@@ -125,7 +125,7 @@ export function Footer({ onNavigateHome, onNavigateShop, onNavigateContact }: Fo
           </div>
           <div className="flex items-center gap-3 text-sm font-sans text-[#a5b4fc]">
             <Shield className="w-5 h-5 text-[#7ec8a3] flex-shrink-0" aria-hidden="true" />
-            <span>Paiement sécurisé Stripe</span>
+            <span>Paiement sécurisé en ligne</span>
           </div>
           <div className="flex items-center gap-3 text-sm font-sans text-[#a5b4fc]">
             <CreditCard className="w-5 h-5 text-[#7ec8a3] flex-shrink-0" aria-hidden="true" />

@@ -162,7 +162,7 @@ export function WallpaperPreviewScreen({ route, navigation }: Props) {
               </Pressable>
 
               <Text style={styles.shareHint}>
-                Sur Expo Go : choisis « Enregistrer dans Galerie » ou « Photos » dans le menu de partage.
+                Choisis « Enregistrer dans Galerie » ou « Photos » dans le menu de partage.
               </Text>
 
               <Pressable style={styles.secondaryBtn} onPress={() => void generate()}>

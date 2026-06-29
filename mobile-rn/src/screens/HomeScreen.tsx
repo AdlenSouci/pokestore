@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
   Animated,
@@ -29,7 +29,6 @@ export function HomeScreen({ navigation }: Props) {
   const { width, height } = useWindowDimensions();
   const scale = Math.min(Math.max(width / 390, 0.85), 1.25);
   const twinkle = useRef(new Animated.Value(0)).current;
-  const [showPress, setShowPress] = useState(true);
 
   const subSize = Math.round(12 * scale);
   const btnSize = Math.round(13 * scale);
@@ -44,11 +43,6 @@ export function HomeScreen({ navigation }: Props) {
     tw.start();
     return () => tw.stop();
   }, [twinkle]);
-
-  useEffect(() => {
-    const id = setInterval(() => setShowPress((p) => !p), 800);
-    return () => clearInterval(id);
-  }, []);
 
   const starOpacity = twinkle.interpolate({
     inputRange: [0, 1],
@@ -81,7 +75,8 @@ export function HomeScreen({ navigation }: Props) {
           <Logo size="hero" style={styles.logoHero} />
 
           <Text style={[styles.subtitle, { fontSize: subSize + 1 }]}>
-            Catalogue, filtres et paiement sécurisé
+            Catalogue Pokémon TCG : filtres par prix, série et extension, paiement sécurisé et suivi
+            de vos commandes.
           </Text>
 
           <View style={styles.battleWrap}>
@@ -95,17 +90,11 @@ export function HomeScreen({ navigation }: Props) {
             <Text style={[styles.startText, { fontSize: btnSize }]}>Voir la boutique</Text>
           </Pressable>
 
-          {showPress ? (
-            <Text style={[styles.pressHint, { fontSize: subSize - 1 }]}>Touche pour commencer</Text>
-          ) : (
-            <Text style={styles.pressHidden}> </Text>
-          )}
-
           <View style={styles.features}>
             {[
-              { emoji: '🃏', label: 'Catalogue filtré' },
-              { emoji: '💳', label: 'Paiement Stripe' },
-              { emoji: '📦', label: 'Ma collection' },
+              { emoji: '🃏', label: 'Filtres avancés' },
+              { emoji: '💳', label: 'Paiement sécurisé' },
+              { emoji: '📦', label: 'Suivi des commandes' },
             ].map((f) => (
               <View key={f.label} style={styles.featureChip}>
                 <Text style={styles.featureEmoji}>{f.emoji}</Text>
@@ -169,7 +158,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     borderWidth: 4,
     borderColor: colors.border,
-    marginBottom: 12,
+    marginBottom: 24,
     shadowColor: '#000',
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -179,17 +168,6 @@ const styles = StyleSheet.create({
   startText: {
     fontFamily: font.pixel,
     color: colors.inputText,
-  },
-  pressHint: {
-    fontFamily: font.pixel,
-    color: colors.text,
-    opacity: 0.8,
-    marginBottom: 24,
-  },
-  pressHidden: {
-    fontSize: 11,
-    opacity: 0,
-    marginBottom: 24,
   },
   features: {
     flexDirection: 'row',

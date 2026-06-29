@@ -122,13 +122,13 @@ export function ShopShowcase({ onGoToShop }: ShopShowcaseProps) {
 
       <div className="relative z-10 container mx-auto px-4 mb-10 text-center">
         <p className="text-[#7ec8a3] text-xs font-sans font-bold uppercase tracking-[0.2em] mb-2">
-          Aperçu
+          Boutique
         </p>
         <h2 id="shop-showcase-title" className="text-white text-xl md:text-2xl font-bold pixel-font mb-3">
-          La boutique en mouvement
+          Nos cartes Pokémon
         </h2>
         <p className="text-[#c4b5fd] font-sans text-sm md:text-base max-w-lg mx-auto mb-6">
-          Défilement automatique des cartes — filtres, panier et paiement dans la vraie boutique.
+          Parcourez une sélection du catalogue. Filtrez, ajoutez au panier et payez en ligne.
         </p>
         <button
           type="button"
