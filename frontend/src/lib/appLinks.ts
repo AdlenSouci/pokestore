@@ -1,10 +1,13 @@
+/** URL publique du site — le QR doit être une adresse complète pour le scan mobile. */
+const SITE_URL = 'https://pokestore-hazel.vercel.app';
+
 /**
- * Lien direct du fichier APK Android (pas la page expo.dev).
- * Après `eas build --platform android --profile preview` :
- *   eas build:view <build-id> --json  →  artifacts.buildUrl
- * Puis redéploie le frontend. Le lien EAS expire ~14 jours après le build.
+ * APK hébergée sur le site (frontend/public/downloads/pokestore.apk).
+ * Le client ne voit jamais expo.dev : scan → téléchargement → installation.
+ *
+ * Après un nouveau build Android : télécharge l’artifact EAS et remplace
+ * frontend/public/downloads/pokestore.apk, puis redéploie le frontend.
  */
-export const ANDROID_APK_URL =
-  'https://expo.dev/artifacts/eas/N0gEspkRmGX7L8i3sabkI5DbaD1-2VgFuQsqODzhEw4.apk';
+export const ANDROID_APK_URL = `${SITE_URL}/downloads/pokestore.apk`;
 
 export const ANDROID_APK_LABEL = 'Télécharger l’application';

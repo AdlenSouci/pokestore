@@ -4,10 +4,10 @@ import { ANDROID_APK_LABEL, ANDROID_APK_URL } from '../lib/appLinks';
 
 const STEPS = [
   'Sur votre téléphone Android, scannez le QR code ou appuyez sur le bouton ci-dessous.',
-  'Le fichier PokéStore (.apk) se télécharge — attendez la fin du téléchargement.',
+  'L’application se télécharge — attendez la fin du téléchargement.',
   'Ouvrez le fichier depuis les notifications ou dans « Téléchargements ».',
-  'Si Android demande une autorisation (« source inconnue »), acceptez pour votre navigateur, puis relancez l’installation.',
-  'Une fois installée, ouvrez PokéStore et connectez-vous avec le même email et mot de passe que sur le site.',
+  'Si Android demande une autorisation, acceptez l’installation, puis relancez si besoin.',
+  'Ouvrez PokéStore et connectez-vous avec le même email et mot de passe que sur le site.',
 ];
 
 export function MobileAppPromo() {
@@ -31,7 +31,7 @@ export function MobileAppPromo() {
               />
             </div>
             <p className="text-[#a5b4fc] text-xs font-sans text-center max-w-[220px] leading-relaxed">
-              Scan Android → téléchargement direct du fichier .apk
+              Scannez avec votre téléphone Android
             </p>
           </div>
 
@@ -53,7 +53,8 @@ export function MobileAppPromo() {
                 PokéStore sur Android
               </h2>
               <p className="text-[#c4b5fd] text-sm md:text-base font-sans leading-relaxed mb-4">
-                Téléchargez l’application Android (fichier .apk). Même compte que sur le site.
+                Installez PokéStore sur votre téléphone. Aucune autre application à installer
+                au préalable. Même compte que sur le site.
               </p>
 
               <div className="rounded-xl border-2 border-[#5a4f99]/60 bg-white/5 p-4 mb-5">
