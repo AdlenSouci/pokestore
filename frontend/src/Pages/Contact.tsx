@@ -52,7 +52,7 @@ export function Contact() {
         captchaToken: captcha.token,
         website: form.website,
       });
-      toast.success('Message envoyé ! Nous te répondrons rapidement.');
+      toast.success('Message envoyé !');
       setForm({ name: '', email: '', subject: '', message: '', captchaAnswer: '', website: '' });
       await loadCaptcha();
     } catch (err: unknown) {

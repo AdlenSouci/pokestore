@@ -75,8 +75,8 @@ export function HomeScreen({ navigation }: Props) {
           <Logo size="hero" style={styles.logoHero} />
 
           <Text style={[styles.subtitle, { fontSize: subSize + 1 }]}>
-            Catalogue Pokémon TCG : filtres par prix, série et extension, paiement sécurisé et suivi
-            de vos commandes.
+            Parcourez le catalogue Pokémon TCG, filtrez par prix, série et extension, puis ajoutez
+            vos cartes au panier.
           </Text>
 
           <View style={styles.battleWrap}>
@@ -92,9 +92,9 @@ export function HomeScreen({ navigation }: Props) {
 
           <View style={styles.features}>
             {[
-              { emoji: '🃏', label: 'Filtres avancés' },
-              { emoji: '💳', label: 'Paiement sécurisé' },
-              { emoji: '📦', label: 'Suivi des commandes' },
+              { emoji: '🃏', label: 'Filtres' },
+              { emoji: '🛒', label: 'Panier' },
+              { emoji: '📦', label: 'Mes commandes' },
             ].map((f) => (
               <View key={f.label} style={styles.featureChip}>
                 <Text style={styles.featureEmoji}>{f.emoji}</Text>

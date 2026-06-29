@@ -75,7 +75,7 @@ export function ContactScreen({ navigation }: Props) {
         captchaToken: captcha.token,
         website: form.website,
       });
-      showSuccess('Message envoyé ! Nous te répondrons rapidement.');
+      showSuccess('Message envoyé !');
       setForm({ name: '', email: '', subject: '', message: '', captchaAnswer: '', website: '' });
       await loadCaptcha();
     } catch (e) {

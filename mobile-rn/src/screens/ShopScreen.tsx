@@ -220,7 +220,7 @@ export function ShopScreen({}: Props) {
         <View style={styles.headerBlock}>
           <Text style={styles.h2}>Boutique PokéStore</Text>
           <Text style={styles.subtitle}>
-            Parcourez le catalogue, filtrez par prix, série ou extension, puis ajoutez au panier.
+            Parcourez le catalogue et filtrez par prix, série ou extension.
           </Text>
         </View>
 

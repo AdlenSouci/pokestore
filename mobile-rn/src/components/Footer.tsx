@@ -18,6 +18,7 @@ export function Footer() {
       <View style={styles.divider} />
       <View style={styles.brandRow}>
         <Logo size="sm" />
+        <Text style={styles.tagline}>Boutique de cartes Pokémon TCG.</Text>
       </View>
 
       <View style={styles.iconRow}>
@@ -73,6 +74,15 @@ const styles = StyleSheet.create({
   brandRow: {
     alignItems: 'center',
     marginBottom: 6,
+    gap: 8,
+  },
+  tagline: {
+    fontFamily: font.sans,
+    fontSize: 11,
+    color: colors.indigoText,
+    textAlign: 'center',
+    lineHeight: 16,
+    maxWidth: 260,
   },
   iconRow: {
     flexDirection: 'row',

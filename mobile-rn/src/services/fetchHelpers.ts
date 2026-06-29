@@ -21,7 +21,7 @@ export async function fetchWithTimeout(
   } catch (err) {
     if (err instanceof Error && err.name === 'AbortError') {
       throw new Error(
-        'Le serveur met trop de temps à répondre. Réessaie dans quelques secondes (Render peut être en train de démarrer).',
+        'Le serveur met trop de temps à répondre. Réessayez dans quelques instants.',
       );
     }
     throw err;

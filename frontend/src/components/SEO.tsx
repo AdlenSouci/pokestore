@@ -11,7 +11,7 @@ interface SEOProps {
 
 const SITE_NAME = 'PokéStore';
 const DEFAULT_DESCRIPTION =
-  'Achetez et collectionnez les meilleures cartes Pokémon rares en ligne. Livraison rapide, paiement sécurisé.';
+  'Achetez et collectionnez des cartes Pokémon en ligne. Catalogue, panier et commandes.';
 const DEFAULT_IMAGE = 'https://pokestore-hazel.vercel.app/og-image.jpg';
 const SITE_URL = 'https://pokestore-hazel.vercel.app';
 

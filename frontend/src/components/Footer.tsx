@@ -1,4 +1,4 @@
-import { Github, Twitter, Instagram, Mail, MapPin, Shield, Truck, CreditCard } from 'lucide-react';
+import { Github, Twitter, Instagram, Mail, MapPin } from 'lucide-react';
 import { Logo } from './Logo';
 
 interface FooterProps {
@@ -47,7 +47,7 @@ export function Footer({ onNavigateHome, onNavigateShop, onNavigateContact }: Fo
           <div className="col-span-2 md:col-span-1">
             <Logo size="sm" onClick={onNavigateHome} className="mb-3" />
             <p className="text-sm text-[#a5b4fc] leading-relaxed font-sans">
-              Boutique en ligne dédiée aux cartes Pokémon TCG. Trouve, collectionne et achète tes cartes préférées.
+              Boutique de cartes Pokémon TCG.
             </p>
           </div>
 
@@ -82,8 +82,6 @@ export function Footer({ onNavigateHome, onNavigateShop, onNavigateContact }: Fo
             <h3 className="text-sm uppercase font-bold text-[#7ec8a3] mb-3 tracking-wider">Aide</h3>
             <ul className="space-y-2 text-sm font-sans text-[#c4b5fd]">
               <li><NavLink href="/contact" onClick={onNavigateContact}>Contact</NavLink></li>
-              <li><a href="/faq" className="hover:text-white transition-colors">FAQ</a></li>
-              <li><a href="/livraison" className="hover:text-white transition-colors">Livraison</a></li>
               <li><a href="/mentions-legales" className="hover:text-white transition-colors">Mentions légales</a></li>
             </ul>
           </div>
@@ -118,22 +116,7 @@ export function Footer({ onNavigateHome, onNavigateShop, onNavigateContact }: Fo
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 py-6 border-y border-[#5a4f99]/30">
-          <div className="flex items-center gap-3 text-sm font-sans text-[#a5b4fc]">
-            <Truck className="w-5 h-5 text-[#7ec8a3] flex-shrink-0" aria-hidden="true" />
-            <span>Livraison rapide en France</span>
-          </div>
-          <div className="flex items-center gap-3 text-sm font-sans text-[#a5b4fc]">
-            <Shield className="w-5 h-5 text-[#7ec8a3] flex-shrink-0" aria-hidden="true" />
-            <span>Paiement sécurisé en ligne</span>
-          </div>
-          <div className="flex items-center gap-3 text-sm font-sans text-[#a5b4fc]">
-            <CreditCard className="w-5 h-5 text-[#7ec8a3] flex-shrink-0" aria-hidden="true" />
-            <span>CB, Apple Pay, Google Pay</span>
-          </div>
-        </div>
-
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-3 text-xs font-sans text-[#c4b5fd]">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-3 text-xs font-sans text-[#c4b5fd] pt-6 border-t border-[#5a4f99]/30">
           <p className="flex items-center gap-2">
             <MapPin className="w-3 h-3" aria-hidden="true" />
             <span>Projet étudiant — Ynov B3 DEV — Paris, France</span>

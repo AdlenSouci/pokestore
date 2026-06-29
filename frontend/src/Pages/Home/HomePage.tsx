@@ -55,7 +55,7 @@ export function HomePage({
     >
       <SEO
         title="Accueil"
-        description="PokéStore – Achetez et collectionnez des cartes Pokémon rares. Filtres par série, extension et prix."
+        description="PokéStore – Boutique de cartes Pokémon TCG. Filtres par série, extension et prix."
         url="https://pokestore-hazel.vercel.app"
         jsonLd={{
           '@context': 'https://schema.org',
@@ -79,8 +79,8 @@ export function HomePage({
           </p>
 
           <p className="text-[#c4b5fd] text-base md:text-lg font-sans mb-8 max-w-xl leading-relaxed">
-            Catalogue Pokémon TCG en ligne : filtres par prix, série et extension, paiement sécurisé
-            et suivi de vos commandes.
+            Parcourez le catalogue Pokémon TCG, filtrez par prix, série et extension, puis ajoutez
+            vos cartes au panier.
           </p>
 
           <div className="w-full max-w-md mb-10">
@@ -106,9 +106,9 @@ export function HomePage({
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full text-left">
             {[
-              { title: 'Filtres avancés', desc: 'Prix, année, série et extension', emoji: '🃏' },
-              { title: 'Paiement sécurisé', desc: 'Commande et suivi en ligne', emoji: '💳' },
-              { title: 'Application mobile', desc: 'Boutique sur Android', emoji: '📱', action: 'app' },
+              { title: 'Filtres', desc: 'Prix, série et extension', emoji: '🃏' },
+              { title: 'Panier', desc: 'Ajoutez les cartes que vous voulez', emoji: '🛒' },
+              { title: 'Application mobile', desc: 'Disponible sur Android', emoji: '📱', action: 'app' },
             ].map((item, i) => (
               <div
                 key={item.title}

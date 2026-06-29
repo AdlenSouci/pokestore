@@ -128,7 +128,7 @@ export function ShopShowcase({ onGoToShop }: ShopShowcaseProps) {
           Nos cartes Pokémon
         </h2>
         <p className="text-[#c4b5fd] font-sans text-sm md:text-base max-w-lg mx-auto mb-6">
-          Parcourez une sélection du catalogue. Filtrez, ajoutez au panier et payez en ligne.
+          Parcourez une sélection du catalogue et ajoutez vos cartes au panier.
         </p>
         <button
           type="button"
