@@ -46,6 +46,7 @@ mobile/android/capacitor-cordova-android-plugins/
 mobile/android/app/src/main/assets/public/
 mobile/android/.idea/
 *.apk
+!frontend/public/downloads/pokestore.apk
 *.aab
 *.dex
 *.class
