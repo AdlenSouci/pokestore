@@ -1,8 +1,10 @@
 /**
- * Page Expo du dernier build Android — QR + lien sur l’accueil.
- * Après `eas build`, remplace l’URL ci-dessous puis redéploie le frontend.
+ * Lien direct du fichier APK Android (pas la page expo.dev).
+ * Après `eas build --platform android --profile preview` :
+ *   eas build:view <build-id> --json  →  artifacts.buildUrl
+ * Puis redéploie le frontend. Le lien EAS expire ~14 jours après le build.
  */
-export const EXPO_APP_URL =
-  'https://expo.dev/accounts/adlens/projects/mobile-rn/builds/4729bd87-aa8c-4708-a45b-1cf82fa7b6a1';
+export const ANDROID_APK_URL =
+  'https://expo.dev/artifacts/eas/N0gEspkRmGX7L8i3sabkI5DbaD1-2VgFuQsqODzhEw4.apk';
 
-export const EXPO_APP_LABEL = 'Installer sur mon téléphone';
+export const ANDROID_APK_LABEL = 'Télécharger l’application';

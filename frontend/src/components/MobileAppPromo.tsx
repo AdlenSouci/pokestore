@@ -1,13 +1,13 @@
-import { ExternalLink, Smartphone } from 'lucide-react';
+import { Download, Smartphone } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
-import { EXPO_APP_LABEL, EXPO_APP_URL } from '../lib/appLinks';
+import { ANDROID_APK_LABEL, ANDROID_APK_URL } from '../lib/appLinks';
 
 const STEPS = [
-  'Sur votre téléphone Android, scannez le QR code ou appuyez sur le bouton ci-dessous (le lien ne sert pas sur ordinateur).',
-  'Une page d’installation s’ouvre dans Chrome ou votre navigateur.',
-  'Appuyez sur le bouton de téléchargement / installation proposé sur cette page.',
-  'Si Android affiche « application non autorisée » ou « source inconnue », allez dans Paramètres → autorisez l’installation pour Chrome, puis recommencez.',
-  'Une fois le fichier installé, ouvrez PokéStore et connectez-vous avec le même email et mot de passe que sur le site.',
+  'Sur votre téléphone Android, scannez le QR code ou appuyez sur le bouton ci-dessous.',
+  'Le fichier PokéStore (.apk) se télécharge — attendez la fin du téléchargement.',
+  'Ouvrez le fichier depuis les notifications ou dans « Téléchargements ».',
+  'Si Android demande une autorisation (« source inconnue »), acceptez pour votre navigateur, puis relancez l’installation.',
+  'Une fois installée, ouvrez PokéStore et connectez-vous avec le même email et mot de passe que sur le site.',
 ];
 
 export function MobileAppPromo() {
@@ -22,16 +22,16 @@ export function MobileAppPromo() {
           <div className="flex flex-col items-center gap-4 shrink-0">
             <div className="p-4 rounded-2xl bg-white shadow-lg border-4 border-[#2d3561]">
               <QRCodeSVG
-                value={EXPO_APP_URL}
+                value={ANDROID_APK_URL}
                 size={168}
                 level="M"
                 bgColor="#ffffff"
                 fgColor="#1a1f3a"
-                aria-label="QR code pour installer PokéStore sur Android"
+                aria-label="QR code pour télécharger PokéStore sur Android"
               />
             </div>
             <p className="text-[#a5b4fc] text-xs font-sans text-center max-w-[220px] leading-relaxed">
-              À scanner avec l’appareil photo ou Chrome, sur votre téléphone Android
+              Scan Android → téléchargement direct du fichier .apk
             </p>
           </div>
 
@@ -53,8 +53,7 @@ export function MobileAppPromo() {
                 PokéStore sur Android
               </h2>
               <p className="text-[#c4b5fd] text-sm md:text-base font-sans leading-relaxed mb-4">
-                Achetez et suivez votre collection depuis votre téléphone, avec le même compte que
-                sur le site.
+                Téléchargez l’application Android (fichier .apk). Même compte que sur le site.
               </p>
 
               <div className="rounded-xl border-2 border-[#5a4f99]/60 bg-white/5 p-4 mb-5">
@@ -77,16 +76,15 @@ export function MobileAppPromo() {
               </div>
 
               <a
-                href={EXPO_APP_URL}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={ANDROID_APK_URL}
+                download
                 className="inline-flex items-center gap-2 px-6 py-3 bg-[#7ec8a3] text-[#1a1f3a] rounded-xl border-4 border-[#2d3561] font-bold text-sm hover:bg-[#6eb893] transition"
               >
-                <ExternalLink className="w-4 h-4" aria-hidden="true" />
-                {EXPO_APP_LABEL}
+                <Download className="w-4 h-4" aria-hidden="true" />
+                {ANDROID_APK_LABEL}
               </a>
               <p className="text-[#a5b4fc] text-xs font-sans mt-3">
-                Ouvrez ce bouton depuis votre téléphone Android uniquement.
+                À utiliser sur téléphone Android uniquement (pas sur ordinateur).
               </p>
             </div>
           </div>
