@@ -19,15 +19,11 @@ Comment **utiliser** PokéStore au quotidien. Pour l’architecture et l’API, 
 3. Remplir email et mot de passe, ou **Continuer avec Google**.
 4. Un message vert confirme la connexion.
 
-![Inscription](./cahier-des-charges/images/capture-v2-auth-signup.png)
-
 ## Parcourir la boutique
 
 1. Cliquer **Boutique** dans le menu.
 2. Utiliser les **filtres** (prix, type, série…) ou la recherche.
 3. Cliquer sur une carte pour voir le détail.
-
-![Boutique](./cahier-des-charges/images/capture-v2-shop.png)
 
 ## Acheter une carte
 
@@ -39,8 +35,6 @@ Comment **utiliser** PokéStore au quotidien. Pour l’architecture et l’API, 
 
 **Payer avec Stripe** — Redirection vers la page Stripe (sécurisée). En mode test : carte `4242 4242 4242 4242`, date future, CVC `123`. Valider → retour sur **Mes commandes**.
 
-![Paiement Stripe — mobile](./cahier-des-charges/images/capture-mobile-stripe.jpg)
-
 **Vérifier** — Commande en statut **Payée** → cartes visibles dans **Ma collection**.
 
 ## Profil et contact
@@ -51,8 +45,6 @@ Comment **utiliser** PokéStore au quotidien. Pour l’architecture et l’API, 
 
 Les emails partent via **Resend** (voir doc technique : Render bloque le SMTP classique, Resend passe en HTTPS).
 
-![Réception email — Gmail](./cahier-des-charges/images/gmail.jpg)
-
 ---
 
 # Application mobile — parcours client
@@ -61,19 +53,11 @@ Les emails partent via **Resend** (voir doc technique : Render bloque le SMTP cl
 
 Installer l’APK, lancer **PokéStore**, accéder à la **Boutique** depuis l’accueil.
 
-![Accueil mobile](./cahier-des-charges/images/capture-mobile-home.jpg)
-
 ## Boutique et achat
 
 **Boutique** → filtres → choisir une carte → **Ajouter au panier** → **Panier** → **Commander**.
 
-![Boutique mobile](./cahier-des-charges/images/capture-mobile-shop.jpg)
-
-![Détail carte](./cahier-des-charges/images/capture-mobile-card.jpg)
-
 **Paiement Stripe** dans le navigateur du téléphone (même carte test `4242…`).
-
-![Stripe mobile](./cahier-des-charges/images/capture-mobile-stripe.jpg)
 
 Puis vérifier **Mes commandes** et **Ma collection**.
 
@@ -106,8 +90,6 @@ Le bouton est dans l’app mais **la génération ne marche pas** (quota API Goo
 | Suivre les commandes | Module Orders |
 | Gérer les clients | Module Clients |
 
-![Dashboard admin](./cahier-des-charges/images/capture-electron-dashboard.png)
-
 ---
 
 # Recette de validation (livraison)
@@ -123,6 +105,34 @@ Le bouton est dans l’app mais **la génération ne marche pas** (quota API Goo
 | Admin : dashboard + commandes | ☐ |
 
 Signature client : _________________ Date : _________
+
+---
+
+# Annexes visuelles
+
+## Site web
+
+![Inscription](./cahier-des-charges/images/capture-v2-auth-signup.png)
+
+![Boutique](./cahier-des-charges/images/capture-v2-shop.png)
+
+![Paiement Stripe](./cahier-des-charges/images/capture-mobile-stripe.jpg)
+
+![Réception email Gmail](./cahier-des-charges/images/gmail.jpg)
+
+## Application mobile
+
+![Accueil mobile](./cahier-des-charges/images/capture-mobile-home.jpg)
+
+![Boutique mobile](./cahier-des-charges/images/capture-mobile-shop.jpg)
+
+![Détail carte](./cahier-des-charges/images/capture-mobile-card.jpg)
+
+![Stripe mobile](./cahier-des-charges/images/capture-mobile-stripe.jpg)
+
+## Application admin
+
+![Dashboard admin](./cahier-des-charges/images/capture-electron-dashboard.png)
 
 ---
 

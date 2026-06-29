@@ -1,4 +1,4 @@
-import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
@@ -13,9 +13,10 @@ type Props = {
   loading?: boolean;
   onLoadingChange?: (loading: boolean) => void;
   onSuccess?: () => void;
+  onError?: (message: string) => void;
 };
 
-export function GoogleSignInButton({ disabled, loading, onLoadingChange, onSuccess }: Props) {
+export function GoogleSignInButton({ disabled, loading, onLoadingChange, onSuccess, onError }: Props) {
   const { loginWithGoogleToken } = useAuth();
 
   const onPress = async () => {
@@ -36,7 +37,7 @@ export function GoogleSignInButton({ disabled, loading, onLoadingChange, onSucce
         }
       }
     } catch (e) {
-      Alert.alert('Google', e instanceof Error ? e.message : 'Connexion Google impossible');
+      onError?.(e instanceof Error ? e.message : 'Connexion Google impossible');
     } finally {
       onLoadingChange?.(false);
     }

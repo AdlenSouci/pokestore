@@ -1,6 +1,3 @@
-```{=openxml}
-<w:p><w:pPr><w:spacing w:before="2880"/></w:pPr></w:p>
-```
 ::: {align=center}
 ![](cahier-des-charges/images/logo.png){width=4.5cm}
 
@@ -11,9 +8,8 @@
 *Juin 2026 — Projet Ynov B3 DEV*
 :::
 
-```{=openxml}
-<w:p><w:r><w:br w:type="page"/></w:r></w:p>
-```
+\\newpage
+
 
 ---
 lang: fr-FR
@@ -24,7 +20,8 @@ toc-title: "Table des matières"
 Ce document décrit **comment c’est hébergé**, **comment ça fonctionne techniquement**, et **comment les tests ont été validés**.
 
 Pour utiliser les applications → **Méthodologie utilisateur**.  
-Pour la liste des fonctionnalités livrées → **Cahier des charges**.
+Pour la liste des fonctionnalités livrées → **Cahier des charges**.  
+Pour reprendre le code (nouveau dev, dépôt privé) → **`docs/GUIDE_REPRISE_DEVELOPPEUR.md`**
 
 # Environnement de production (déjà déployé)
 
@@ -161,7 +158,17 @@ Test : carte `4242 4242 4242 4242`
 
 # Sécurité
 
-JWT, bcrypt, Helmet, rate limiting, captcha contact, signature webhook Stripe, CORS.
+| Mesure | Détail |
+|--------|--------|
+| Mots de passe | bcrypt (10 rounds) |
+| Sessions | JWT (`JWT_SECRET`) |
+| Routes admin | `JwtAuthGuard` + `AdminGuard` (rôle `ADMIN` en base) |
+| Login admin | **5 tentatives / 15 min / IP** ; même message d’erreur que login client (pas de fuite « compte USER ») |
+| Clé client admin | `ADMIN_CLIENT_KEY` sur Render + header `X-Admin-Client-Key` depuis Electron (optionnel mais **recommandé en prod**) |
+| Swagger | Routes admin **masquées** (`/auth/admin/login`, import/reprice cartes) |
+| API | Helmet, rate limiting POST, captcha contact, signature webhook Stripe |
+
+**Important :** la route `POST /api/auth/admin/login` est publique sur Internet (comme tout login). La protection repose sur : mot de passe fort, peu de comptes `ADMIN`, rate-limit, et clé `ADMIN_CLIENT_KEY` si activée — **pas** sur le fait de cacher le code Electron.
 
 # Déploiement et secrets
 

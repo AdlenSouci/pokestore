@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from 'react';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -15,6 +14,8 @@ import {
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppShell } from '../components/AppShell';
+import { InlineErrorBanner } from '../components/InlineErrorBanner';
+import { useToast } from '../context/ToastContext';
 import { fetchCaptcha, sendContactMessage } from '../services/contact';
 import type { RootStackParamList } from '../types/navigation';
 import { colors } from '../theme/colors';
@@ -23,6 +24,7 @@ import { font } from '../theme/typography';
 type Props = NativeStackScreenProps<RootStackParamList, 'Contact'>;
 
 export function ContactScreen({ navigation }: Props) {
+  const { showSuccess } = useToast();
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -34,6 +36,7 @@ export function ContactScreen({ navigation }: Props) {
   const [captcha, setCaptcha] = useState<{ question: string; token: string } | null>(null);
   const [captchaLoading, setCaptchaLoading] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const loadCaptcha = useCallback(async () => {
     try {
@@ -41,8 +44,9 @@ export function ContactScreen({ navigation }: Props) {
       const data = await fetchCaptcha();
       setCaptcha(data);
       setForm((f) => ({ ...f, captchaAnswer: '' }));
+      setError(null);
     } catch {
-      Alert.alert('Contact', 'Impossible de charger le captcha.');
+      setError('Impossible de charger le captcha.');
     } finally {
       setCaptchaLoading(false);
     }
@@ -55,10 +59,11 @@ export function ContactScreen({ navigation }: Props) {
   const onSubmit = async () => {
     if (!captcha) return;
     if (!form.name.trim() || !form.email.trim() || !form.subject.trim() || !form.message.trim()) {
-      Alert.alert('Contact', 'Remplis tous les champs.');
+      setError('Remplis tous les champs.');
       return;
     }
 
+    setError(null);
     setLoading(true);
     try {
       await sendContactMessage({
@@ -70,11 +75,11 @@ export function ContactScreen({ navigation }: Props) {
         captchaToken: captcha.token,
         website: form.website,
       });
-      Alert.alert('Contact', 'Message envoyé ! Nous te répondrons rapidement.');
+      showSuccess('Message envoyé ! Nous te répondrons rapidement.');
       setForm({ name: '', email: '', subject: '', message: '', captchaAnswer: '', website: '' });
       await loadCaptcha();
     } catch (e) {
-      Alert.alert('Contact', e instanceof Error ? e.message : "Erreur d'envoi");
+      setError(e instanceof Error ? e.message : "Erreur d'envoi");
       await loadCaptcha();
     } finally {
       setLoading(false);
@@ -85,7 +90,7 @@ export function ContactScreen({ navigation }: Props) {
     <AppShell>
       <KeyboardAvoidingView
         style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView
           contentContainerStyle={styles.scroll}
@@ -97,6 +102,8 @@ export function ContactScreen({ navigation }: Props) {
             <Text style={styles.title}>CONTACT</Text>
             <Text style={styles.subtitle}>Une question ? Écris-nous.</Text>
           </View>
+
+          <InlineErrorBanner message={error ?? ''} />
 
           <View style={styles.form}>
             <Text style={styles.label}>Nom</Text>

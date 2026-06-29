@@ -6,7 +6,6 @@ import * as MediaLibrary from 'expo-media-library';
 import * as Sharing from 'expo-sharing';
 import {
   ActivityIndicator,
-  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -15,6 +14,7 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { AppShell } from '../components/AppShell';
+import { useToast } from '../context/ToastContext';
 import * as wallpaperService from '../services/wallpaper';
 import type { RootStackParamList } from '../types/navigation';
 import { colors } from '../theme/colors';
@@ -32,6 +32,7 @@ function sourceLabel(source: wallpaperService.WallpaperSource | undefined): stri
 export function WallpaperPreviewScreen({ route, navigation }: Props) {
   const { product } = route.params;
   const cardId = parseInt(product.id, 10);
+  const { showSuccess, showError, showInfo } = useToast();
 
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -86,23 +87,14 @@ export function WallpaperPreviewScreen({ route, navigation }: Props) {
 
       const permission = await MediaLibrary.requestPermissionsAsync(true);
       if (!permission.granted) {
-        Alert.alert(
-          'Permission requise',
-          'Autorise l’accès aux photos pour enregistrer le fond d’écran.',
-        );
+        showInfo('Autorise l’accès aux photos pour enregistrer le fond d’écran.');
         return;
       }
 
       await MediaLibrary.saveToLibraryAsync(file.uri);
-      Alert.alert(
-        'Enregistré',
-        'Le fond d’écran est dans ta galerie. Définis-le depuis Paramètres → Fond d’écran.',
-      );
+      showSuccess('Fond d’écran enregistré dans ta galerie');
     } catch (e) {
-      Alert.alert(
-        'Erreur',
-        e instanceof Error ? e.message : 'Enregistrement impossible. Réessaie via Partager.',
-      );
+      showError(e instanceof Error ? e.message : 'Enregistrement impossible. Réessaie via Partager.');
     } finally {
       setSaving(false);
     }

@@ -1,9 +1,10 @@
-# Genere les 3 documents client : Markdown -> Word via Pandoc uniquement (pas de Word COM).
+# Genere les 3 documents client : page de garde -> table des matieres -> contenu -> annexes.
 
 $ErrorActionPreference = "Stop"
 $e = [char]0x00E9
 $em = [char]0x2014
 $docsDir = Split-Path -Parent $PSScriptRoot
+$luaFilter = Join-Path $PSScriptRoot "docx-livrable.lua"
 $ref = Join-Path $docsDir "reference-livrable.docx"
 $logoPath = Join-Path $docsDir "cahier-des-charges\images\logo.png"
 $assetsSrc = Join-Path (Split-Path -Parent $docsDir) "frontend\src\assets"
@@ -43,27 +44,38 @@ $buildDir = Join-Path $packDir "_build"
 $mdBuildDir = Join-Path $buildDir "_md"
 New-Item -ItemType Directory -Force -Path $buildDir, $mdBuildDir | Out-Null
 
-function Get-CoverPage {
+function Get-CoverBlock {
     param([string]$Title, [string]$Subtitle)
-    $spacer = @'
-```{=openxml}
-<w:p><w:pPr><w:spacing w:before="2880"/></w:pPr></w:p>
-```
-'@
-    $line1 = "::: {align=center}"
-    $line2 = "![](cahier-des-charges/images/logo.png){width=4.5cm}"
-    $line3 = ""
-    $line4 = "**$Title**"
-    $line5 = ""
-    $line6 = "*$Subtitle*"
-    $line7 = ""
-    $line8 = "*Juin 2026 $em Projet Ynov B3 DEV*"
-    $line9 = ":::"
-    $line10 = ""
-    $line11 = '```{=openxml}'
-    $line12 = '<w:p><w:r><w:br w:type="page"/></w:r></w:p>'
-    $line13 = '```'
-    ($spacer, $line1, $line2, $line3, $line4, $line5, $line6, $line7, $line8, $line9, $line10, $line11, $line12, $line13) -join "`n"
+    @"
+::: {align=center}
+
+![](cahier-des-charges/images/logo.png){width=5.5cm}
+
+&nbsp;
+
+**$Title**
+
+*$Subtitle*
+
+*Juin 2026 $em Projet Ynov B3 DEV*
+
+:::
+
+\pagebreak
+
+\toc
+
+\pagebreak
+
+"@
+}
+
+function Strip-YamlFrontMatter {
+    param([string]$Body)
+    if ($Body -match '(?s)^---\r?\n.*?\r?\n---\r?\n') {
+        return ($Body -replace '(?s)^---\r?\n.*?\r?\n---\r?\n', '').TrimStart()
+    }
+    $Body
 }
 
 function Convert-CenteredImages {
@@ -83,23 +95,29 @@ function Convert-CenteredImages {
     $out -join "`n"
 }
 
+function Prepare-FullDocument {
+    param([string]$Raw, [string]$Title, [string]$Subtitle)
+    $body = Strip-YamlFrontMatter $Raw
+    $body = Convert-CenteredImages $body
+    (Get-CoverBlock -Title $Title -Subtitle $Subtitle) + $body
+}
+
 Push-Location $docsDir
 try {
     foreach ($f in $files) {
         $mdPath = Join-Path $docsDir $f.Md
         $outPath = Join-Path $buildDir $f.Out
-        $combinedMd = Join-Path $mdBuildDir $f.Out.Replace(".docx", ".md")
+        $fullMd = Join-Path $mdBuildDir ("full-" + $f.Out.Replace(".docx", ".md"))
 
         if (-not (Test-Path $mdPath)) {
             Write-Warning "Skip: $mdPath introuvable"
             continue
         }
 
-        $body = Get-Content $mdPath -Raw -Encoding UTF8
-        $body = Convert-CenteredImages $body
-        $cover = Get-CoverPage -Title $f.Title -Subtitle $f.Sub
-        $full = $cover + "`n`n" + $body
-        [System.IO.File]::WriteAllText($combinedMd, $full, [System.Text.UTF8Encoding]::new($false))
+        $raw = Get-Content $mdPath -Raw -Encoding UTF8
+        $full = Prepare-FullDocument -Raw $raw -Title $f.Title -Subtitle $f.Sub
+
+        [System.IO.File]::WriteAllText($fullMd, $full, [System.Text.UTF8Encoding]::new($false))
 
         $resourcePath = switch -Wildcard ($f.Md) {
             "cahier-des-charges*" { "cahier-des-charges;." }
@@ -107,13 +125,22 @@ try {
             default { ".;cahier-des-charges" }
         }
 
-        pandoc $combinedMd `
+        pandoc $fullMd `
             -o $outPath `
             --from markdown `
-            --toc `
-            --toc-depth=2 `
+            --lua-filter=$luaFilter `
+            -M lang=fr-FR `
             --reference-doc=$ref `
             --resource-path=$resourcePath
+
+        if ($LASTEXITCODE -ne 0) {
+            throw "Pandoc a echoue pour $($f.Out)"
+        }
+
+        $null = pandoc $outPath -t plain -o "$env:TEMP\docx-check-$($f.Out).txt" 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            throw "Docx invalide ($($f.Out))"
+        }
 
         Write-Host "OK: $($f.Out)"
     }

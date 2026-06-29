@@ -4,11 +4,12 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { TypeEffectWebView } from '../components/effects/TypeEffectWebView';
 import { TiltableCard } from '../components/TiltableCard';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { categoryToEffectType } from '../lib/cardTypeToEffect';
 import * as cartService from '../services/cart';
 import type { RootStackParamList } from '../types/navigation';
@@ -21,6 +22,7 @@ export function CardDetailScreen({ route }: Props) {
   const { product } = route.params;
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { user, refreshCart } = useAuth();
+  const { showSuccess, showError } = useToast();
   const effectType = categoryToEffectType(product.category);
   const [fxBox, setFxBox] = useState({ w: 0, h: 0 });
 
@@ -33,9 +35,9 @@ export function CardDetailScreen({ route }: Props) {
       const cardId = parseInt(product.id, 10);
       await cartService.addToCart(cardId, 1);
       await refreshCart();
-      Alert.alert('Panier', `${product.name} a été ajouté au panier.`);
+      showSuccess(`${product.name} ajouté au panier`);
     } catch (e) {
-      Alert.alert('Erreur', e instanceof Error ? e.message : 'Impossible d’ajouter au panier');
+      showError(e instanceof Error ? e.message : 'Impossible d’ajouter au panier');
     }
   };
 

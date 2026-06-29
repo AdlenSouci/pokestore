@@ -3,7 +3,6 @@ import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
   ActivityIndicator,
-  Alert,
   Image,
   Pressable,
   ScrollView,
@@ -13,8 +12,10 @@ import {
 } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { AppDialog } from '../components/AppDialog';
 import { AppShell } from '../components/AppShell';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import * as cartService from '../services/cart';
 import * as orderService from '../services/order';
 import { getWebReturnUrl } from '../config/api';
@@ -28,9 +29,11 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Cart'>;
 
 export function CartScreen({ navigation }: Props) {
   const { user, refreshCart } = useAuth();
+  const { showError, showInfo } = useToast();
   const [cart, setCart] = useState<CartType | null>(null);
   const [loading, setLoading] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [paymentDialog, setPaymentDialog] = useState(false);
 
   const load = useCallback(async () => {
     if (!user) {
@@ -61,7 +64,7 @@ export function CartScreen({ navigation }: Props) {
       setCart(c);
       await refreshCart();
     } catch (e) {
-      Alert.alert('Panier', e instanceof Error ? e.message : 'Erreur');
+      showError(e instanceof Error ? e.message : 'Erreur panier');
     }
   };
 
@@ -75,7 +78,7 @@ export function CartScreen({ navigation }: Props) {
       setCart(c);
       await refreshCart();
     } catch (e) {
-      Alert.alert('Panier', e instanceof Error ? e.message : 'Erreur');
+      showError(e instanceof Error ? e.message : 'Erreur panier');
     }
   };
 
@@ -91,19 +94,15 @@ export function CartScreen({ navigation }: Props) {
 
         if (payment === 'success' && sessionId) {
           await orderService.confirmPayment(sessionId);
-          Alert.alert('Paiement', 'Commande validée ! Un email de confirmation t’a été envoyé.', [
-            { text: 'Ma collection', onPress: () => navigation.navigate('Collection') },
-            { text: 'Mes commandes', onPress: () => navigation.navigate('Orders') },
-            { text: 'OK' },
-          ]);
           setCart(null);
           await refreshCart();
+          setPaymentDialog(true);
         } else if (payment === 'cancelled') {
-          Alert.alert('Paiement', 'Paiement annulé.');
+          showInfo('Paiement annulé');
         }
       }
     } catch (e) {
-      Alert.alert('Paiement', e instanceof Error ? e.message : 'Erreur');
+      showError(e instanceof Error ? e.message : 'Erreur de paiement');
     } finally {
       setCheckoutLoading(false);
     }
@@ -137,6 +136,36 @@ export function CartScreen({ navigation }: Props) {
 
   return (
     <AppShell>
+    <AppDialog
+      visible={paymentDialog}
+      title="Paiement validé"
+      message="Commande confirmée ! Un email de confirmation t’a été envoyé."
+      icon="check-circle"
+      onRequestClose={() => setPaymentDialog(false)}
+      buttons={[
+        {
+          label: 'Ma collection',
+          variant: 'primary',
+          onPress: () => {
+            setPaymentDialog(false);
+            navigation.navigate('Collection');
+          },
+        },
+        {
+          label: 'Mes commandes',
+          variant: 'secondary',
+          onPress: () => {
+            setPaymentDialog(false);
+            navigation.navigate('Orders');
+          },
+        },
+        {
+          label: 'Fermer',
+          variant: 'ghost',
+          onPress: () => setPaymentDialog(false),
+        },
+      ]}
+    />
     <ScrollView style={styles.root} contentContainerStyle={styles.content}>
       <View style={styles.header}>
         <MaterialCommunityIcons name="cart" size={28} color={colors.text} />
@@ -243,7 +272,7 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontFamily: font.sansBold,
     fontSize: 20,
-    color: colors.border,
+    color: colors.text,
     marginTop: 12,
   },
   emptySub: {
@@ -253,14 +282,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   primaryBtn: {
-    backgroundColor: colors.border,
+    backgroundColor: colors.mint,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 12,
+    borderWidth: 2,
+    borderColor: colors.border,
   },
   primaryBtnText: {
     fontFamily: font.sansBold,
-    color: colors.text,
+    color: colors.inputText,
   },
   line: {
     flexDirection: 'row',

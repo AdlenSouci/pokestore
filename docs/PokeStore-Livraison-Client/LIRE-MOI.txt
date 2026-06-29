@@ -1,0 +1,36 @@
+POKESTORE - DOCUMENTS CLIENT
+============================
+
+A REMETTRE AU CLIENT : ces 3 fichiers Word uniquement
+
+  01-Cahier-des-charges.docx
+  02-Methodologie-utilisateur.docx
+  03-Documentation-technique.docx
+
+Structure de chaque document :
+  Page 1  -> page de garde (logo + titre)
+  Page 2  -> table des matieres (Word peut demander "Mettre a jour les champs" -> Oui)
+  Suite   -> contenu
+  Fin     -> annexes visuelles
+
+Comment ouvrir :
+  1. Clic droit sur le fichier .docx
+  2. Ouvrir avec -> Microsoft Word
+  3. Si Word demande "reparer", accepte
+
+Pour regenerer les Word apres modification :
+  powershell -File docs\scripts\generate-client-docs.ps1
+
+
+POURQUOI AUTANT DE DOSSIERS ? (cuisine interne, pas pour le client)
+====================================================================
+
+docs/PokeStore-Livraison-Client/     <- CE DOSSIER = livrable client (3 Word)
+docs/PokeStore-Livraison-Client/_build/  <- technique, a ignorer
+docs/cahier-des-charges/             <- sources du cahier + images (pas un 2e livrable)
+docs/*.md                            <- textes sources avant conversion Word
+docs/scripts/                        <- script de generation
+docs/tests/                          <- captures pour la doc technique
+
+En resume : tu ne donnes QUE le dossier PokeStore-Livraison-Client avec les 3 .docx.
+Le reste sert a produire et maintenir ces fichiers.

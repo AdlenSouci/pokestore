@@ -1,6 +1,3 @@
-```{=openxml}
-<w:p><w:pPr><w:spacing w:before="2880"/></w:pPr></w:p>
-```
 ::: {align=center}
 ![](cahier-des-charges/images/logo.png){width=4.5cm}
 
@@ -11,9 +8,8 @@
 *Juin 2026 — Projet Ynov B3 DEV*
 :::
 
-```{=openxml}
-<w:p><w:r><w:br w:type="page"/></w:r></w:p>
-```
+\\newpage
+
 
 ---
 lang: fr-FR
@@ -167,6 +163,7 @@ Le bouton existe dans l’app mais **ça ne marche pas** (API Google Gemini : qu
 | Cahier des charges | `docs/cahier-des-charges/CAHIER_DES_CHARGES_POKEMON_APP.md` |
 | Méthodologie utilisateur | `docs/METHODOLOGIE_UTILISATEUR.md` |
 | Documentation technique | `docs/DOCUMENTATION_TECHNIQUE.md` |
+| Guide reprise développeur | `docs/GUIDE_REPRISE_DEVELOPPEUR.md` |
 
 ---
 

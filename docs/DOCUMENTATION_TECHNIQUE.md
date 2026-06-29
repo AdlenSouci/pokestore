@@ -125,9 +125,6 @@ Test : carte `4242 4242 4242 4242`
 | **Config prod** | `RESEND_API_KEY`, `RESEND_FROM`, `CONTACT_TO` dans le dashboard Render |
 | **En local** | SMTP classique possible (`MAIL_HOST`, `MAIL_USER`, `MAIL_PASS` dans `.env`) |
 
-![Réception email Gmail](./cahier-des-charges/images/gmail.jpg)
-
-![Paiement Stripe mobile](./cahier-des-charges/images/capture-mobile-stripe.jpg)
 
 # Fond d’écran IA (mobile) — pas fait
 
@@ -144,12 +141,24 @@ Test : carte `4242 4242 4242 4242`
 | Mots de passe | bcrypt (10 rounds) |
 | Sessions | JWT (`JWT_SECRET`) |
 | Routes admin | `JwtAuthGuard` + `AdminGuard` (rôle `ADMIN` en base) |
-| Login admin | **5 tentatives / 15 min / IP** ; même message d’erreur que login client (pas de fuite « compte USER ») |
-| Clé client admin | `ADMIN_CLIENT_KEY` sur Render + header `X-Admin-Client-Key` depuis Electron (optionnel mais **recommandé en prod**) |
+| Login admin | **5 tentatives / 15 min / IP** ; même message d’erreur (clé ou mot de passe incorrect → pas de fuite) |
+| Clé client admin | `ADMIN_CLIENT_KEY` sur Render + header `X-Admin-Client-Key` depuis Electron — **couche supplémentaire en prod** |
 | Swagger | Routes admin **masquées** (`/auth/admin/login`, import/reprice cartes) |
 | API | Helmet, rate limiting POST, captcha contact, signature webhook Stripe |
 
-**Important :** la route `POST /api/auth/admin/login` est publique sur Internet (comme tout login). La protection repose sur : mot de passe fort, peu de comptes `ADMIN`, rate-limit, et clé `ADMIN_CLIENT_KEY` si activée — **pas** sur le fait de cacher le code Electron.
+### Sécurisation du login admin (`ADMIN_CLIENT_KEY`)
+
+L’app Electron appelle l’API sur Internet : la route `POST /api/auth/admin/login` est joignable publiquement, comme le login client (`/api/auth/login`). C’est le fonctionnement normal d’une API distante.
+
+| Sans `ADMIN_CLIENT_KEY` | Avec `ADMIN_CLIENT_KEY` (configuration prod) |
+|-------------------------|---------------------------------------------|
+| Tentatives possibles : email + mot de passe admin | Il faut **en plus** le header `X-Admin-Client-Key` correct |
+| Protection : mot de passe fort + rate-limit (5 / 15 min / IP) | **Couche supplémentaire** : secret partagé Render ↔ app Electron officielle |
+| Route accessible aux scanners automatiques | Sans la bonne clé → **401 immédiat** (même message qu’un mauvais mot de passe) |
+
+`ADMIN_CLIENT_KEY` **renforce** la sécurité : elle bloque le trafic anonyme avant même la vérification du mot de passe. Elle complète le rate-limit ; elle ne le remplace pas.
+
+**Note :** la clé est configurée dans le `.env` de l’app Electron (poste admin). C’est un secret d’application (même principe qu’une clé API). Les opérations sensibles après connexion restent protégées par **JWT** + rôle `ADMIN` (`AdminGuard`).
 
 # Déploiement et secrets
 
@@ -200,8 +209,6 @@ Accessible **en ligne**, sans installation : https://pokestore-api-btz1.onrender
 
 Permet de voir toutes les routes, les paramètres et de tester l’API depuis le navigateur.
 
-![Capture Swagger](./tests/e2e-06-swagger.png)
-
 ## Tests unitaires backend (Jest)
 
 | | |
@@ -209,8 +216,6 @@ Permet de voir toutes les routes, les paramètres et de tester l’API depuis le
 | **Objectif** | Vérifier la logique métier (services auth, panier, etc.) |
 | **Commande** | `cd backend && npm test` |
 | **Résultat** | **7 tests — 100 % passés** |
-
-![Tests unitaires Jest](./tests/tests-unitaires-jest.png)
 
 ## Tests E2E frontend (Playwright)
 
@@ -229,10 +234,6 @@ Permet de voir toutes les routes, les paramètres et de tester l’API depuis le
 | 05 | Inscription | `docs/tests/e2e-05-signup-modal.png` |
 | 06 | Swagger API | `docs/tests/e2e-06-swagger.png` |
 
-![E2E boutique](./tests/e2e-02-shop.png)
-
-![E2E filtres](./tests/e2e-03-filters.png)
-
 ## Lighthouse / PageSpeed (performances)
 
 Mesures sur **https://pokestore-hazel.vercel.app** — documentées dans le **cahier des charges** (annexe « Qualité et performances »).
@@ -244,8 +245,6 @@ Mesures sur **https://pokestore-hazel.vercel.app** — documentées dans le **ca
 | Accessibilité | 98 |
 | Bonnes pratiques | 100 |
 | SEO | 100 |
-
-![PageSpeed desktop](./cahier-des-charges/images/pagespeed-desktop-bureau.png)
 
 # Reprise par un développeur (nouvel environnement)
 
@@ -417,6 +416,30 @@ cd frontend && npm run test:e2e     # 7 scénarios (adapter l’URL cible si bes
 ```
 
 Swagger (sa API) : `https://SON-API.onrender.com/api/docs`
+
+---
+
+# Annexes visuelles
+
+## Emails et paiement
+
+![Réception email Gmail](./cahier-des-charges/images/gmail.jpg)
+
+![Paiement Stripe mobile](./cahier-des-charges/images/capture-mobile-stripe.jpg)
+
+## Swagger et tests
+
+![Capture Swagger](./tests/e2e-06-swagger.png)
+
+![Tests unitaires Jest](./tests/tests-unitaires-jest.png)
+
+![E2E boutique](./tests/e2e-02-shop.png)
+
+![E2E filtres](./tests/e2e-03-filters.png)
+
+## Performances
+
+![PageSpeed desktop](./cahier-des-charges/images/pagespeed-desktop-bureau.png)
 
 ---
 

@@ -8,6 +8,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
 import { font } from '../theme/typography';
@@ -22,6 +23,7 @@ type Props = {
 };
 
 export function FilterDropdown({ label, value, options, onChange }: Props) {
+  const insets = useSafeAreaInsets();
   const [open, setOpen] = useState(false);
   const slide = useRef(new Animated.Value(0)).current;
 
@@ -66,10 +68,16 @@ export function FilterDropdown({ label, value, options, onChange }: Props) {
       </Pressable>
 
       <Modal visible={open} transparent animationType="fade" onRequestClose={close}>
-        <Pressable style={styles.backdrop} onPress={close}>
+        <View style={styles.backdrop}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={close} accessibilityLabel="Fermer" />
           <Animated.View
-            style={[styles.sheet, { transform: [{ translateY }] }]}
-            onStartShouldSetResponder={() => true}
+            style={[
+              styles.sheet,
+              {
+                transform: [{ translateY }],
+                paddingBottom: Math.max(insets.bottom, 16) + 12,
+              },
+            ]}
           >
             <View style={styles.sheetHandle} />
             <Text style={styles.sheetTitle}>{label}</Text>
@@ -93,7 +101,7 @@ export function FilterDropdown({ label, value, options, onChange }: Props) {
               })}
             </ScrollView>
           </Animated.View>
-        </Pressable>
+        </View>
       </Modal>
     </View>
   );
@@ -138,7 +146,6 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     borderWidth: 3,
     borderColor: colors.borderAccent,
-    paddingBottom: 24,
     maxHeight: '70%',
   },
   sheetHandle: {

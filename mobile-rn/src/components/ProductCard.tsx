@@ -3,9 +3,10 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Alert, Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import * as cartService from '../services/cart';
 import type { RootStackParamList } from '../types/navigation';
 import type { Product } from '../types/product';
@@ -33,6 +34,7 @@ type Props = {
 export function ProductCard({ product, columnWidth, quantity, collectionMode }: Props) {
   const navigation = useNavigation<Nav>();
   const { user, refreshCart } = useAuth();
+  const { showSuccess, showError } = useToast();
   const scale = useRef(new Animated.Value(1)).current;
   const sweep = useRef(new Animated.Value(0)).current;
 
@@ -58,9 +60,9 @@ export function ProductCard({ product, columnWidth, quantity, collectionMode }: 
       const cardId = parseInt(product.id, 10);
       await cartService.addToCart(cardId, 1);
       await refreshCart();
-      Alert.alert('Panier', `${product.name} a été ajouté au panier.`);
+      showSuccess(`${product.name} ajouté au panier`);
     } catch (e) {
-      Alert.alert('Erreur', e instanceof Error ? e.message : 'Impossible d’ajouter au panier');
+      showError(e instanceof Error ? e.message : 'Impossible d’ajouter au panier');
     }
   };
 

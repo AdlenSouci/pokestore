@@ -2,7 +2,6 @@ import { useState } from 'react';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -13,6 +12,7 @@ import {
   View,
 } from 'react-native';
 import { GoogleSignInButton } from '../components/GoogleSignInButton';
+import { InlineErrorBanner } from '../components/InlineErrorBanner';
 import { useAuth } from '../context/AuthContext';
 import type { RootStackParamList } from '../types/navigation';
 import { colors } from '../theme/colors';
@@ -25,18 +25,20 @@ export function LoginScreen({ navigation }: Props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const onSubmit = async () => {
     if (!email.trim() || !password) {
-      Alert.alert('Connexion', 'Renseigne ton email et ton mot de passe.');
+      setError('Renseigne ton email et ton mot de passe.');
       return;
     }
+    setError(null);
     setLoading(true);
     try {
       await login(email.trim(), password);
       navigation.goBack();
     } catch (e) {
-      Alert.alert('Connexion', e instanceof Error ? e.message : 'Erreur');
+      setError(e instanceof Error ? e.message : 'Connexion impossible');
     } finally {
       setLoading(false);
     }
@@ -45,7 +47,7 @@ export function LoginScreen({ navigation }: Props) {
   return (
     <KeyboardAvoidingView
       style={styles.root}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView
         contentContainerStyle={styles.scroll}
@@ -53,11 +55,13 @@ export function LoginScreen({ navigation }: Props) {
         showsVerticalScrollIndicator={false}
       >
         <Text style={styles.title}>Connexion</Text>
+        <InlineErrorBanner message={error ?? ''} />
 
         <GoogleSignInButton
           loading={loading}
           onLoadingChange={setLoading}
           onSuccess={() => navigation.goBack()}
+          onError={setError}
         />
 
         <View style={styles.dividerRow}>

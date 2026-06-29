@@ -4,6 +4,7 @@ import { PokemonBackground } from '../../components/animations/PokemonBackground
 import { BattleAnim } from '../../components/animations/BattleAnim';
 import { Logo } from '../../components/Logo';
 import { ShopShowcase } from '../../components/ShopShowcase';
+import { MobileAppPromo } from '../../components/MobileAppPromo';
 import './HomePage.css';
 
 interface HomePageProps {
@@ -107,11 +108,30 @@ export function HomePage({
             {[
               { title: 'Filtres avancés', desc: 'Prix, année, série et extension', emoji: '🃏' },
               { title: 'Paiement sécurisé', desc: 'Stripe & commandes suivies', emoji: '💳' },
-              { title: 'Disponible mobile', desc: 'App Android et site responsive', emoji: '📱' },
+              { title: 'Disponible mobile', desc: 'QR code Expo — installe sur Android', emoji: '📱', action: 'app' },
             ].map((item, i) => (
               <div
                 key={item.title}
-                className="rounded-2xl border-2 border-[#5a4f99]/50 bg-white/5 backdrop-blur-sm p-5 transition hover:border-[#7ec8a3]/50 hover:bg-white/10 hover:-translate-y-1"
+                role={item.action === 'app' ? 'button' : undefined}
+                tabIndex={item.action === 'app' ? 0 : undefined}
+                onClick={
+                  item.action === 'app'
+                    ? () => document.getElementById('app-mobile')?.scrollIntoView({ behavior: 'smooth' })
+                    : undefined
+                }
+                onKeyDown={
+                  item.action === 'app'
+                    ? (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          document.getElementById('app-mobile')?.scrollIntoView({ behavior: 'smooth' });
+                        }
+                      }
+                    : undefined
+                }
+                className={`rounded-2xl border-2 border-[#5a4f99]/50 bg-white/5 backdrop-blur-sm p-5 transition hover:border-[#7ec8a3]/50 hover:bg-white/10 hover:-translate-y-1${
+                  item.action === 'app' ? ' cursor-pointer' : ''
+                }`}
                 style={{ animationDelay: `${i * 0.15}s` }}
               >
                 <span className="text-2xl mb-2 block" aria-hidden="true">{item.emoji}</span>
@@ -122,6 +142,8 @@ export function HomePage({
           </div>
         </div>
       </section>
+
+      <MobileAppPromo />
 
       <ShopShowcase onGoToShop={onNavigateToShop} />
     </Layout>

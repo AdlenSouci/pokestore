@@ -14,6 +14,7 @@ import { ActivityIndicator, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
 import { AuthProvider } from './src/context/AuthContext';
+import { ToastProvider } from './src/context/ToastContext';
 import { CardDetailScreen } from './src/screens/CardDetailScreen';
 import { CartScreen } from './src/screens/CartScreen';
 import { CollectionScreen } from './src/screens/CollectionScreen';
@@ -64,8 +65,9 @@ export default function App() {
   return (
     <ErrorBoundary>
       <SafeAreaProvider>
-        <AuthProvider>
-          <NavigationContainer>
+        <ToastProvider>
+          <AuthProvider>
+            <NavigationContainer>
             <StatusBar style="light" />
             <Stack.Navigator initialRouteName="Home" screenOptions={screenOptions}>
               <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
@@ -85,6 +87,7 @@ export default function App() {
             </Stack.Navigator>
           </NavigationContainer>
         </AuthProvider>
+        </ToastProvider>
       </SafeAreaProvider>
     </ErrorBoundary>
   );
