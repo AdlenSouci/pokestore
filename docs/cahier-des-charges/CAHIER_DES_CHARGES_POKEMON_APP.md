@@ -3,201 +3,143 @@ lang: fr-FR
 toc-title: "Table des matières"
 ---
 
-**Version :** Juin 2026 — alignée sur l'état livré du projet
+**Projet :** PokéStore — boutique en ligne de cartes Pokémon TCG  
+**Version :** Juin 2026 — Version corrigée  
+**Type :** Projet UF DEV B3 — sujet libre (équivalent Smart Café)
 
-# Objet du projet
+Ce document décrit **le besoin**, **le périmètre** et **les fonctionnalités attendues**.  
+Il ne détaille pas l'implémentation technique (voir **Documentation technique**) ni le mode d'emploi (voir **Guide utilisateur**).
 
-Développer une plateforme e-commerce de **cartes Pokémon TCG** comprenant :
+# Présentation
 
-| Application | Rôle | Utilisateurs |
-|-------------|------|--------------|
-| **Application web** | Boutique en ligne, compte client, paiement | Collectionneurs / acheteurs (rôle `USER`) |
-| **Application mobile** | Même parcours d’achat sur smartphone | Clients en mobilité (rôle `USER`) |
-| **Application admin (desktop)** | Gestion catalogue, ventes, commandes | **Administrateurs uniquement** (rôle `ADMIN`) |
-| **API + base de données** | Logique métier, persistance, sécurité | Support des 3 applications |
+## Contexte
 
-Le **site web** et l’**app mobile** sont réservés aux **clients**. L’**application admin Electron** est réservée aux comptes avec le rôle **`ADMIN`** — un client (`USER`) ne peut pas s’y connecter.
+Les collectionneurs de cartes Pokémon TCG cherchent un moyen simple de **parcourir un catalogue**, **comparer des cartes**, **acheter en ligne** et **retrouver leurs achats** dans une collection personnelle — depuis un ordinateur ou un téléphone.
 
----
+## Problématique
 
-## Contexte et objectifs
+Comment proposer une expérience d'achat claire et cohérente sur **plusieurs supports**, tout en permettant à l'équipe boutique de **gérer le catalogue et les commandes** ?
 
-### Contexte
+## Catalogue de cartes
 
-Les collectionneurs ont besoin d’un catalogue filtrable, d’un paiement sécurisé et d’un suivi de leurs achats. L’expérience doit être cohérente entre navigateur et téléphone.
+Le catalogue de PokéStore est alimenté depuis l'**API officielle Pokémon TCG** (`pokemontcg.io`). Les cartes sont importées et stockées dans la base de données locale de la boutique. La boutique affiche ce catalogue local — les clients naviguent sur les données en base, pas en temps réel sur l'API externe.
 
-### Objectifs
+## Objectifs du projet
 
-- Consulter un catalogue riche (filtres, pagination, détail carte).
-- Créer un compte et se connecter (email ou Google).
-- Ajouter des cartes au panier et payer via **Stripe**.
-- Consulter **commandes** et **collection** (cartes achetées).
-- Contacter la boutique via un **formulaire** sécurisé.
-- Permettre à l’**admin** d’importer des cartes, ajuster les prix et suivre les ventes.
+| Objectif | Description |
+|----------|-------------|
+| Vendre en ligne | Parcours catalogue → panier → paiement → confirmation |
+| Fidéliser | Compte client, historique des commandes, collection des cartes achetées |
+| Élargir l'accès | Site web + application Android |
+| Piloter la boutique | Outil admin pour le catalogue, les clients et les ventes |
 
----
+# Acteurs et applications
 
-## Périmètre fonctionnel par application
+| Acteur | Application | Rôle |
+|--------|-------------|------|
+| **Client / collectionneur** | Site web | Acheter, suivre commandes et collection |
+| **Client / collectionneur** | Application Android | Même usage sur mobile |
+| **Administrateur boutique** | Application bureau (admin) | Gérer catalogue, commandes, indicateurs |
+| *(support)* | API + base de données | Sert les trois interfaces ci-dessus |
 
-### Application web (`frontend/`)
+**Règle importante :** un compte **client** ne peut pas accéder à l'admin. Un compte **admin** sert uniquement à la gestion interne et ne peut pas être créé depuis l'application — les comptes administrateurs sont créés manuellement par l'équipe projet.
 
-**URL production :** https://pokestore-hazel.vercel.app
+# Périmètre fonctionnel — site web
 
-| ID | Fonctionnalité | Description | Livré |
-|----|----------------|-------------|-------|
-| W-01 | Accueil | Hero, animation, CTA vers la boutique | ✅ |
-| W-02 | Boutique | Catalogue paginé, filtres (prix, année, série, set, rareté, recherche) | ✅ |
-| W-03 | Détail carte | Modal plein écran, effets visuels par type | ✅ |
-| W-04 | Inscription / connexion | Email + mot de passe, modales | ✅ |
-| W-05 | Connexion Google | OAuth | ✅ |
-| W-06 | Panier | Ajout, quantités, suppression | ✅ |
-| W-07 | Paiement Stripe | Checkout redirect + confirmation | ✅ |
-| W-08 | Mes commandes | Historique et détail | ✅ |
-| W-09 | Ma collection | Cartes des commandes payées, badge quantité | ✅ |
-| W-10 | Profil | Nom, téléphone, mot de passe | ✅ |
-| W-11 | Contact | Formulaire + captcha, envoi email (Resend) — réception vérifiée en prod | ✅ |
-| W-12 | Responsive | Desktop, tablette, mobile (Tailwind) | ✅ |
-| W-13 | SEO | Meta, OG, sitemap, robots.txt | ✅ |
+**Adresse :** https://pokestore-hazel.vercel.app
 
-**Routes :** `/`, `/shop`, `/collection`, `/contact`
+| Réf. | Fonctionnalité | Besoin utilisateur | Livré |
+|------|----------------|-------------------|-------|
+| W-01 | Page d'accueil | Découvrir la boutique et accéder rapidement au catalogue | ✅ |
+| W-02 | Boutique | Consulter les cartes avec filtres (prix, série, extension, recherche textuelle) | ✅ |
+| W-03 | Fiche carte | Voir le détail d'une carte avant achat | ✅ |
+| W-04 | Compte client | S'inscrire et se connecter (email ou Google) | ✅ |
+| W-05 | Panier | Ajouter, modifier ou retirer des cartes | ✅ |
+| W-06 | Paiement | Régler la commande en ligne de façon sécurisée | ✅ |
+| W-07 | Mes commandes | Consulter l'historique et le statut | ✅ |
+| W-08 | Ma collection | Retrouver les cartes issues des commandes payées | ✅ |
+| W-09 | Profil | Modifier ses informations personnelles | ✅ |
+| W-10 | Contact | Envoyer un message à la boutique | ✅ |
+| W-11 | Application mobile | Lien et QR code pour installer l'app Android | ✅ |
 
----
+# Périmètre fonctionnel — application mobile Android
 
-### Application mobile (`mobile-rn/`)
+L'application est distribuée sous forme d'APK téléchargeable directement depuis le site PokéStore (QR code ou lien sur la page d'accueil).
 
-**Distribution :** Expo Go (dev) + APK Android (EAS Build)
+| Réf. | Fonctionnalité | Besoin utilisateur | Livré |
+|------|----------------|-------------------|-------|
+| M-01 | Installation | Télécharger et installer l'app depuis le site (QR code) | ✅ |
+| M-02 | Compte | Même compte que sur le site web | ✅ |
+| M-03 | Boutique | Parcourir et filtrer le catalogue | ✅ |
+| M-04 | Achat | Panier et paiement sécurisé | ✅ |
+| M-05 | Commandes | Suivre ses achats | ✅ |
+| M-06 | Collection | Voir ses cartes achetées | ✅ |
+| M-07 | Contact | Contacter la boutique | ✅ |
+| M-08 | Fond d'écran personnalisé | Générer un fond d'écran depuis une carte de sa collection | ✅ |
 
-| ID | Fonctionnalité | Description | Livré |
-|----|----------------|-------------|-------|
-| M-01 | Accueil | Branding, animation, CTA boutique | ✅ |
-| M-02 | Boutique | Grille, filtres, pagination (même API) | ✅ |
-| M-03 | Détail carte | Effets canvas + tilt 3D | ✅ |
-| M-04 | Inscription / connexion | JWT persisté (AsyncStorage) | ✅ |
-| M-05 | Connexion Google | OAuth mobile (`pokestore://`) | ✅ |
-| M-06 | Panier | Gestion articles | ✅ |
-| M-07 | Paiement Stripe | Checkout in-app browser | ✅ |
-| M-08 | Mes commandes | Liste, statuts PENDING / PAID / CANCELLED | ✅ |
-| M-09 | Ma collection | Grille cartes achetées | ✅ |
-| M-10 | Contact | Formulaire + captcha | ✅ |
-| M-11 | Fond d’écran IA | Génération depuis la collection | ❌ **Pas fait** |
+# Périmètre fonctionnel — application admin
 
-Le bouton existe dans l’app mais **ça ne marche pas** (API Google Gemini : quota dépassé).
+Réservée aux **administrateurs** de la boutique. Application bureau Windows, installée en local.
 
-**Écrans :** Home, Shop, CardDetail, Login, Register, Cart, Orders, Collection, Contact
+| Réf. | Fonctionnalité | Besoin métier | Livré |
+|------|----------------|---------------|-------|
+| A-01 | Connexion sécurisée | Accès réservé à l'équipe | ✅ |
+| A-02 | Tableau de bord | Vue d'ensemble des ventes, chiffre d'affaires, top produit et top client | ✅ |
+| A-03 | Catalogue | Importer, modifier et supprimer des cartes | ✅ |
+| A-04 | Clients | Consulter la liste et enregistrer une fiche client (email, nom, téléphone) — sans mot de passe, pas un compte connectable | ✅ |
+| A-05 | Commandes | Consulter les commandes (lecture seule) | ✅ |
+| A-06 | Pipeline commercial | Suivre les prospects et clients actifs par statut (prospect, actif, à relancer) | ✅ |
+| A-07 | Relances | Voir les commandes en attente, archiver celles qui ne seront pas honorées | ✅ |
 
----
+# Exigences non fonctionnelles
 
-### Application admin desktop (`pokemon-electron/`)
+Le site et l'application Android ont été conçus pour être agréables à utiliser sur tout type d'écran (ordinateur, tablette, mobile), avec des messages clairs en cas d'erreur ou de succès. La navigation au clavier est fonctionnelle et les boutons sont correctement identifiés pour les lecteurs d'écran. Le catalogue se charge de manière progressive pour ne pas bloquer l'affichage. Les comptes sont protégés et le paiement est traité par un prestataire reconnu (aucune donnée bancaire ne transite par le site). L'ensemble de l'infrastructure (site, API, base de données) est hébergé sur des services cloud disponibles en permanence.
 
-**Accès réservé :** compte avec rôle **`ADMIN`** uniquement. Connexion via `POST /api/auth/admin/login` — les comptes clients (`USER`) sont **refusés**.
+Les mesures détaillées (scores PageSpeed, tests automatisés, scores d'accessibilité) sont disponibles dans la **Documentation technique**.
 
-**Distribution :** Installateur Windows `.exe` (`npm run make`)  
-**Note :** Projet local (hors dépôt Git principal), connecté à l’API Render et à Neon.
+# Hors périmètre (cette version)
 
-| ID | Fonctionnalité | Description | Livré |
-|----|----------------|-------------|-------|
-| A-01 | Connexion admin | `POST /api/auth/admin/login` — **rôle ADMIN obligatoire** (refus si USER) | ✅ |
-| A-02 | Dashboard | CA, ventes payées, graphique 6 mois, top produit | ✅ |
-| A-03 | Pokemon Cards | Liste, import API TCG, édition inline, CSV | ✅ |
-| A-04 | Clients | Liste et création utilisateurs | ✅ |
-| A-05 | Orders | Liste commandes, changement statut | ✅ |
-| A-06 | Pipeline | Suivi clients par étape (kanban) | ✅ |
-| A-07 | Relances | Commandes / clients à relancer | ✅ |
+- Application iPhone / App Store
+- Livraison physique des cartes (projet numérique)
+- Favoris utilisateur (modèle prévu, aucune interface ni fonctionnalité exposée)
+- Mentions légales (lien présent dans le pied de page, page non réalisée)
+- Création de comptes administrateur depuis l'application (seed manuel uniquement)
+- Publication de l'application admin sur un store
 
----
+# Livrables attendus
 
-### API et données (`backend/`)
-
-| ID | Fonctionnalité | Livré |
-|----|----------------|-------|
-| B-01 | API REST NestJS préfixe `/api` | ✅ |
-| B-02 | Documentation Swagger `/api/docs` | ✅ |
-| B-03 | Auth JWT + Google OAuth | ✅ |
-| B-04 | Rôle ADMIN + guards | ✅ |
-| B-05 | Catalogue, panier, commandes, Stripe webhook | ✅ |
-| B-06 | Contact + emails (Resend en prod) | ✅ |
-| B-07 | PostgreSQL Neon + Prisma | ✅ |
-| B-08 | Helmet, throttler, CORS | ✅ |
-
----
-
-## Exigences non fonctionnelles
-
-| Domaine | Exigence | Livré |
-|---------|----------|-------|
-| Sécurité | JWT, bcrypt, validation DTO, routes admin protégées | ✅ |
-| Performance | Pagination catalogue, lazy-loading images | ✅ |
-| Accessibilité | aria-label, PageSpeed a11y 98 | ✅ |
-| Disponibilité | Hébergement Vercel + Render + Neon | ✅ |
-| Tests | Jest (7) + Playwright E2E (7) — détail et captures : **doc technique** | ✅ |
-| Performances | Lighthouse / PageSpeed — capture : **cahier des charges** (annexe) + **doc technique** | ✅ |
-
----
-
-## Pas fait dans cette version
-
-- Application iPhone (App Store) — seulement Android pour l’instant
-- Favoris (prévu en base de données, pas d’écran)
-- **Fond d’écran IA** sur mobile — bouton présent mais **ne fonctionne pas** (quota API Gemini)
-- Publication de l’admin sur un store
-
----
-
-## Livrables documentaires
-
-| Document | Fichier |
+| Livrable | Contenu |
 |----------|---------|
-| Cahier des charges | `docs/cahier-des-charges/CAHIER_DES_CHARGES_POKEMON_APP.md` |
-| Méthodologie utilisateur | `docs/METHODOLOGIE_UTILISATEUR.md` |
-| Documentation technique | `docs/DOCUMENTATION_TECHNIQUE.md` |
-| Guide reprise développeur | `docs/GUIDE_REPRISE_DEVELOPPEUR.md` |
+| Site web | Boutique en ligne en production |
+| Application mobile | APK Android |
+| API + base de données | Backend et persistance |
+| Application admin | Outil bureau Windows |
+| **Cahier des charges** | Ce document |
+| **Guide utilisateur** | Mode d'emploi client et admin |
+| **Documentation technique** | Architecture, API, déploiement, tests |
+
+\pagebreak
+
+# Annexes — aperçu visuel
+
+*Captures d'illustration du rendu final. Format réduit pour la lecture.*
+
+## Site web
+
+![Accueil du site](./images/capture-v2-home-hero.png)
+
+![Page boutique](./images/capture-v2-shop.png)
+
+## Application mobile
+
+![Accueil mobile](./images/capture-mobile-home.jpg)
+
+![Boutique mobile](./images/capture-mobile-shop.jpg)
+
+## Application admin
+
+![Tableau de bord admin](./images/capture-electron-dashboard.png)
 
 ---
 
-# Annexes visuelles
-
-## Application web
-
-![Accueil](./images/capture-v2-home-hero.png)
-
-![Boutique](./images/capture-v2-shop.png)
-
-## Application mobile (captures réelles APK)
-
-![Accueil](./images/capture-mobile-home.jpg)
-
-![Boutique](./images/capture-mobile-shop.jpg)
-
-![Détail carte](./images/capture-mobile-card.jpg)
-
-![Paiement Stripe](./images/capture-mobile-stripe.jpg)
-
-## Application admin Electron
-
-![Dashboard](./images/capture-electron-dashboard.png)
-
-![Catalogue](./images/capture-electron-cartes.png)
-
-![Commandes](./images/capture-electron-commandes.png)
-
-## Qualité et performances
-
-![PageSpeed](./images/pagespeed-desktop-bureau.png)
-
-## Emails — pourquoi Resend ?
-
-L’API est hébergée sur **Render** (plan gratuit). Render **bloque le port SMTP 587** (Gmail, etc.).  
-**Resend** envoie les emails en **HTTPS** (API REST) : ça fonctionne sur Render sans ouvrir de port.
-
-| Usage | Détail |
-|-------|--------|
-| Formulaire contact | `POST /api/contact` → email à l’équipe |
-| Commande payée | Email de confirmation après Stripe |
-| Variables | `RESEND_API_KEY`, `RESEND_FROM`, `CONTACT_TO` sur Render |
-| En local | SMTP Gmail possible via `.env` (`MAIL_*`) |
-
-![Réception Gmail](./images/gmail.jpg)
-
----
-
-*PokéStore — Cahier des charges — Juin 2026*
+*PokéStore — Cahier des charges — Juin 2026 — Projet Ynov B3 DEV*

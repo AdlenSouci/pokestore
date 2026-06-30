@@ -1,57 +1,64 @@
--- Page de garde -> TOC -> contenu (docx uniquement)
+-- Page de garde -> table des matieres (vrai champ Word, calcule par Word) -> contenu
 
-local function pagebreak()
+local function marker_text(el)
+  if el.t == "RawBlock" and el.format == "tex" then
+    return el.text
+  end
+  if el.t == "Para" then
+    return pandoc.utils.stringify(el)
+  end
+  return nil
+end
+
+local function is_pagebreak(el)
+  local text = marker_text(el)
+  return text == "\\pagebreak" or text == "\\newpage"
+end
+
+local function is_toc_marker(el)
+  return marker_text(el) == "\\toc"
+end
+
+local function hard_pagebreak()
   return pandoc.RawBlock(
     "openxml",
-    '<w:p><w:r><w:br w:type="page"/></w:r></w:p>'
+    "<w:p><w:r><w:br w:type=\"page\"/></w:r></w:p>"
   )
 end
 
-local function toc_block()
-  local title = "Table des matières"
-  local xml = table.concat({
-    "<w:sdt>",
-    "<w:sdtPr><w:docPartObj><w:docPartGallery w:val=\"Table of Contents\" />",
-    "<w:docPartUnique /></w:docPartObj></w:sdtPr>",
-    "<w:sdtContent>",
-    "<w:p><w:pPr><w:pStyle w:val=\"TOCHeading\" /></w:pPr>",
-    "<w:r><w:t xml:space=\"preserve\">" .. title .. "</w:t></w:r></w:p>",
-    "<w:p><w:r>",
-    "<w:fldChar w:fldCharType=\"begin\" w:dirty=\"true\" />",
-    "<w:instrText xml:space=\"preserve\">TOC \\o &quot;1-2&quot; \\h \\z \\u</w:instrText>",
-    "<w:fldChar w:fldCharType=\"separate\" />",
-    "<w:fldChar w:fldCharType=\"end\" />",
-    "</w:r></w:p>",
-    "</w:sdtContent></w:sdt>",
-  })
-  return pandoc.RawBlock("openxml", xml)
+-- Vrai champ Word TOC : calcule par Word a l'ouverture / a la mise a jour des
+-- champs (voir update-docx-toc.vbs, appele automatiquement par le script de
+-- generation). Plus fiable qu'un calcul de pages approximatif a la main.
+local function real_toc_field()
+  local parts = {
+    '<w:p><w:pPr><w:pStyle w:val="TOCHeading"/></w:pPr>',
+    '<w:r><w:t xml:space="preserve">Table des matières</w:t></w:r></w:p>',
+    '<w:p><w:pPr><w:pStyle w:val="Normal"/></w:pPr>',
+    '<w:r><w:fldChar w:fldCharType="begin" w:dirty="true"/></w:r>',
+    '<w:r><w:instrText xml:space="preserve"> TOC \\o "1-3" \\h \\z \\u </w:instrText></w:r>',
+    '<w:r><w:fldChar w:fldCharType="separate"/></w:r>',
+    '<w:r><w:t xml:space="preserve">Mettre à jour les champs pour afficher la table des matières (clic droit → Mettre à jour les champs).</w:t></w:r>',
+    '<w:r><w:fldChar w:fldCharType="end"/></w:r></w:p>',
+  }
+  return pandoc.RawBlock("openxml", table.concat(parts))
 end
 
-function RawBlock(el)
+function Pandoc(doc)
   if FORMAT ~= "docx" then
-    return nil
+    return doc
   end
-  if el.format == "tex" then
-    if el.text == "\\pagebreak" or el.text == "\\newpage" then
-      return pagebreak()
-    end
-    if el.text == "\\toc" then
-      return toc_block()
-    end
-  end
-  return nil
-end
 
-function Para(el)
-  if FORMAT ~= "docx" then
-    return nil
+  local out = {}
+
+  for _, block in ipairs(doc.blocks) do
+    if is_toc_marker(block) then
+      table.insert(out, real_toc_field())
+    elseif is_pagebreak(block) then
+      table.insert(out, hard_pagebreak())
+    else
+      table.insert(out, block)
+    end
   end
-  local text = pandoc.utils.stringify(el)
-  if text == "\\pagebreak" or text == "\\newpage" then
-    return pagebreak()
-  end
-  if text == "\\toc" then
-    return toc_block()
-  end
-  return nil
+
+  return pandoc.Pandoc(out, doc.meta)
 end
